@@ -1,0 +1,17 @@
+{
+  "name": "ts-loader",
+  "version": "1.0.0",
+  "private": true,
+  "repository": "https://github.com/kkvesper/ts-loader",
+  "dependencies": {
+    "json-loader": "^0.5.4",
+    "q-io": "^1.13.2",
+    "semver": "^5.1.0",
+    "throat": "^2.0.2",
+    "webpack": "^1.12.14"
+  },
+  "supportedTSEmberVersion": ">=3.17.0",
+  "supportedManifestVersion": "^2.0.0",
+  "manifestFile": "app-manifest.json",
+  "server": "http://192.168.0.38:4200"
+}
