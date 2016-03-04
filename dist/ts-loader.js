@@ -45,7 +45,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var loader = __webpack_require__(1);
-	var customSplash = __webpack_require__(11);
+	var customSplash = __webpack_require__(12);
 
 	function offlineDetected() {
 	  document.getElementById('_cordova_disconnect').classList.add('fadeInDown');
@@ -153,7 +153,8 @@
 	  loader.on('error', showErrorMessage);
 
 	  loader.on('progress', function (loaded, total) {
-	    customSplash.setProgress(Math.round(loaded * 100 / total) + '%');
+	    var progress = Math.max(Math.min(Math.round(100 * loaded / total), 100), 0) + '%';
+	    customSplash.setProgress(progress);
 	  });
 
 	  if (navigator.connection && window.Connection && navigator.connection.type === Connection.NONE) {
@@ -176,12 +177,13 @@
 	var EventEmitter = __webpack_require__(2).EventEmitter;
 	var all = __webpack_require__(3).all;
 	var Promise = window.Promise = __webpack_require__(3).Promise;
+	var semver = __webpack_require__(9);
 	var throat = __webpack_require__(6)(Promise);
 	var SparkMD5 = __webpack_require__(7);
 
 	var config = __webpack_require__(8);
-	var semver = __webpack_require__(9);
 	var fs = __webpack_require__(10);
+	var xhrPromise = __webpack_require__(11);
 
 	var localDirectory = ''; // 'dist/';
 	var totalBytes, loadedBytes;
@@ -228,21 +230,17 @@
 	  return fs.dir().then(function (directoryEntry) { return directoryEntry.nativeURL; });
 	}
 
-	function areManifestFilesEqual(file1, file2) {
-	  return file1.path === file2.path;
-	}
-
-	function checkForFileUpdate() {
+	function checkForFileUpdate(manifest) {
 	  console.log('check for files update');
 
-	  return new Promise(function (resolve, reject) {
-	    resolve(manifest.domNodes.map(function (file) { return manifest.files[file.path]; }).filter(function (file) { return !!file; }))
-	  });
+	  // return new Promise(function (resolve, reject) {
+	  //   resolve(manifest.domNodes.map(function (nodeInfo) { return manifest.files[nodeInfo.path]; }).filter(function (file) { return !!file; }))
+	  // });
 
 	  return fs.exists(localDirectory + config.manifestFile).then(function(localManifestEntry) {
 	    if (!localManifestEntry) {
 	      console.log('no local manifest found.');
-	      return Object.keys(manifest.files).map(function (filePath) {return manifest.files[filePath]});
+	      return manifest.domNodes.map(function (nodeInfo) {return manifest.files[nodeInfo.path]; }).filter(function (file) { return !!file; });
 	    }
 
 	    return fs.readJSON(localDirectory + config.manifestFile).then(function (localManifest) {
@@ -276,42 +274,11 @@
 	  });
 	}
 
-	function xhrPromise(url, responseType) {
-	  responseType = responseType || 'arraybuffer';
+	function writeFile(file) {
+	  var path = file.manifestEntry.path;
+	  var contentType = file.contentType;
+	  var blob = file.blob || new Blob([file.fileBuffer], { type: contentType });
 
-	  return new Promise(function (resolve, reject, progress) {
-	    var xhr = new window.XMLHttpRequest();
-
-	    xhr.onload = function (e) {
-	      if (this.status !== 200) {
-	        return reject('xhr status: ' + this.status + ', url: ' + url);
-	      }
-
-	      resolve({ response: this.response, mimeType: this.getResponseHeader('Content-Type')});
-	    };
-
-	    xhr.onerror = function (e) {
-	      reject('xhr failed: ' + url);
-	    }
-	    xhr.ontimeout = function () {
-	      reject('xhr timeout: ' + url)
-	    };
-	    xhr.onabort = function () {
-	      reject('xhr abort: ' + url)
-	    };
-	    xhr.addEventListener('progress', function (event) {
-	      progress(event.loaded);
-	    });
-
-	    xhr.open('GET', url, true);
-
-	    xhr.responseType = responseType;
-
-	    xhr.send();
-	  });
-	}
-
-	function writeFile(path, content, mimeType) {
 	  return fs.ensure(fs.dirname(path)).then(function () {
 	    return fs.file(path, { create: true });
 	  }).then(function (fileEntry) {
@@ -321,13 +288,15 @@
 	          resolve(fileEntry);
 	        };
 	        writer.onerror = reject;
-	        writer.write(content, { type: mimeType });
+	        writer.write(blob);
 	      }, reject);
 	    });
+	  }).then(function () {
+	    return file;
 	  });
 	}
 
-	function computeMD5(fileEntry) {
+	function compareMD5(fileEntry, hash) {
 	  return new Promise(function (resolve, reject) {
 	    if (window.md5chksum) {
 	      md5chksum.file(fileEntry, resolve, reject);
@@ -338,34 +307,44 @@
 	  });
 	}
 
-	function downloadFile(serverAddress, file) {
-	  var url = serverAddress + '/' + file.path + '?' + file.hash;
+	function downloadFile(serverAddress, manifestEntry) {
+	  var url = serverAddress + '/' + manifestEntry.path + '?' + manifestEntry.hash;
 
 	  var previousBytes = 0;
 
-	  var fileContents = null;
+	  var fileBuffer = null;
+	  var contentType = null;
 
-	  return xhrPromise(url).progress(function (loaded) {
-	    var bytes = loaded - previousBytes;
-	    previousBytes = loaded;
+	  return xhrPromise(url).progress(function (event) {
+	    var bytes = event.loaded - previousBytes;
+	    previousBytes = event.loaded;
 
-	    loadedBytes += bytes;
+	    // Firefox likes to report compressed bytes loaded, so we have to estimate how many uncompressed
+	    // bytes have been loaded.
+	    var estimatedBytes = 0;
+
+	    if (event.total && event.total !== manifestEntry.size) {
+	      estimatedBytes = Math.floor(manifestEntry.size *  event.loaded / event.total);
+	    }
+
+	    loadedBytes += estimatedBytes || bytes;
+
 	    loader.emit('progress', loadedBytes, totalBytes);
 	  }).then(function (xhr) {
-	    fileContents = xhr.response;
-	    return writeFile(localDirectory + file.path, xhr.response, xhr.mimeType);
-	  }).then(computeMD5).then(function (md5) {
-	    if (md5 !== file.hash) {
-	      console.error('wrong hash file:', file, 'computed hash:', md5);
-	      throw new Error('Incorrect hash for the file: ' + file.name);
+	    fileBuffer = xhr.response;
+	    contentType = xhr.contentType;
+
+	    return compareMD5(fileBuffer, manifestEntry.hash);
+	  }).then(function (md5) {
+	    if (md5 !== manifestEntry.hash) {
+	      throw new Error('md5 mismatch: ' + hash + ' computed: ' + md5);
 	    }
-	    return { file: file, contents: fileContents };
+
+	    return { manifestEntry: manifestEntry, fileBuffer: fileBuffer, contentType: contentType, md5: md5 };
 	  });
 	}
 
 	function downloadFiles(serverAddress, files) {
-	  if (!files.length) { return; }
-
 	  totalBytes = files.reduce(function (total, file) { return total + file.size }, 0);
 	  loadedBytes = 0;
 
@@ -386,156 +365,204 @@
 	  }
 	}
 
-	function createScriptNode(fileCache, nodeInfo, nativeDirectoryPath) {
-	  var isCached = fileCache.hasOwnProperty(nodeInfo.path);
-
-	  var node = document.createElement('script');
-	  node.setAttribute('type', 'text/javascript');
-
-	  updateNodeAttributes(node, nodeInfo);
-
+	function createLocalScriptNode(fileCache, nodeInfo) {
 	  return new Promise(function (resolve, reject) {
-	    if (isCached) {
-	      var contents = fileCache[nodeInfo.path].contents;
-	      var blob = new Blob([contents]);
+	    var node = document.createElement('script');
+	    node.setAttribute('type', 'text/javascript');
 
-	      var fileReader= new FileReader();
+	    updateNodeAttributes(node, nodeInfo);
 
-	      fileReader.onload = function(e) {
-	        node.text = e.target.result;
-	        node.id = nodeInfo.path;
-	        resolve()
-	      };
+	    document.body.appendChild(node);
 
-	      fileReader.onerror = function (e) {
-	        if (nodeInfo.optional) {
-	          return resolve();
-	        }
-	        console.error('error reading: ', nodeInfo, error);
-	        reject(e);
-	      };
-
-	      fileReader.readAsText(blob);
-
-	      document.body.appendChild(node);
-	    } else {
-	      node.onload = resolve;
-
-	      node.onerror = function (error) {
-	        if (nodeInfo.optional) {
-	          return resolve();
-	        }
-	        console.error('error loading: ', nodeInfo, error);
-	        reject(error);
-	      };
-
-	      node.setAttribute('src', nodeInfo.path);
-
-	      document.body.appendChild(node);
+	    if (fileCache[nodeInfo.path].content) {
+	      node.text = fileCache[nodeInfo.path].content;
+	      node.id = nodeInfo.path;
+	      return resolve(node);
 	    }
+
+	    var fileBuffer = fileCache[nodeInfo.path].fileBuffer;
+	    var blob = new Blob([fileBuffer], {type: 'text/javscript'});
+
+	    var fileReader= new FileReader();
+
+	    fileReader.onload = function(e) {
+	      node.text = e.target.result;
+	      node.id = nodeInfo.path;
+	      resolve(node);
+	    };
+
+	    fileReader.onerror = function (e) {
+	      if (nodeInfo.optional) {
+	        return resolve(node);
+	      }
+	      console.error('error reading: ', nodeInfo, error);
+	      reject(e);
+	    };
+
+	    fileReader.readAsText(blob);
 	  });
 	}
 
-	function createStyleSheetNode(fileCache, nodeInfo, nativeDirectoryPath) {
-	  var isCached = fileCache.hasOwnProperty(nodeInfo.path);
-
+	function createRemoteScriptNode(nodeInfo) {
 	  return new Promise(function (resolve, reject) {
-	    if (isCached) {
-	      var node = document.createElement('style');
-	      node.setAttribute('type', 'text/css');
+	    var node = document.createElement('script');
+	    node.setAttribute('type', 'text/javascript');
 
-	      updateNodeAttributes(node, nodeInfo);
+	    updateNodeAttributes(node, nodeInfo);
 
-	      var contents = fileCache[nodeInfo.path].contents;
-	      var blob = new Blob([contents], {type: 'text/css'});
+	    node.onload = function () {
+	      resolve(node);
+	    };
 
-	      var fileReader= new FileReader();
+	    node.onerror = function (error) {
+	      if (nodeInfo.optional) {
+	        return resolve(node);
+	      }
+	      console.error('error loading: ', nodeInfo, error);
+	      reject(error);
+	    };
 
-	      fileReader.onload = function(e) {
-	        try {
-	          node.innerHTML = e.target.result
-	        } catch (e) {
-	          console.error(e);
-	          return reject(e);
-	        }
-	        node.id = nodeInfo.path;
-	        resolve()
-	      };
+	    node.setAttribute('src', nodeInfo.path);
 
-	      fileReader.onerror = function (e) {
-	        if (nodeInfo.optional) {
-	          return resolve();
-	        }
-	        console.error('error reading: ', nodeInfo, error);
-	        reject(e);
-	      };
-
-	      fileReader.readAsText(blob);
-
-	      document.body.appendChild(node);
-	    } else {
-	      var node = document.createElement('link');
-
-	      node.setAttribute('type', 'text/css');
-	      node.setAttribute('rel', 'stylesheet');
-
-	      updateNodeAttributes(node, nodeInfo);
-
-	      node.onload = resolve;
-
-	      node.onerror = function (error) {
-	        if (nodeInfo.optional) {
-	          return resolve();
-	        }
-	        console.error('error loading: ', nodeInfo, error);
-	        reject(error);
-	      };
-
-	      node.setAttribute('href', nodeInfo.path);
-
-	      document.body.appendChild(node);
-	    }
+	    document.body.appendChild(node);
 	  });
 	}
 
-	function loadNodePromise(fileCache, nodeInfo, nativeDirectoryPath) {
+	function createLocalStyleSheetNode(fileCache, nodeInfo) {
+	  return new Promise(function (resolve, reject) {
+	    var node = document.createElement('style');
+	    node.setAttribute('type', 'text/css');
+
+	    updateNodeAttributes(node, nodeInfo);
+
+	    document.body.appendChild(node);
+
+	    if (fileCache[nodeInfo.path].content) {
+	      node.innerHTML = fileCache[nodeInfo.path].content;
+	      node.id = nodeInfo.path;
+	      return resolve(node);
+	    }
+
+	    var fileBuffer = fileCache[nodeInfo.path].fileBuffer;
+	    var blob = new Blob([fileBuffer], {type: 'text/css'});
+
+	    var fileReader= new FileReader();
+
+	    fileReader.onload = function(e) {
+	      try {
+	        node.innerHTML = e.target.result
+	      } catch (e) {
+	        console.error(e);
+	        return reject(e);
+	      }
+	      node.id = nodeInfo.path;
+	      resolve(node)
+	    };
+
+	    fileReader.onerror = function (e) {
+	      if (nodeInfo.optional) {
+	        return resolve(node);
+	      }
+	      console.error('error reading: ', nodeInfo, error);
+	      reject(e);
+	    };
+
+	    fileReader.readAsText(blob);
+	  });
+	}
+
+	function createRemoteStyleSheetNode(nodeInfo) {
+	  return new Promise(function (resolve, reject) {
+	    var node = document.createElement('link');
+
+	    node.setAttribute('type', 'text/css');
+	    node.setAttribute('rel', 'stylesheet');
+
+	    updateNodeAttributes(node, nodeInfo);
+
+	    node.onload = resolve;
+
+	    node.onerror = function (error) {
+	      if (nodeInfo.optional) {
+	        return resolve();
+	      }
+	      console.error('error loading: ', nodeInfo, error);
+	      reject(error);
+	    };
+
+	    node.setAttribute('href', nodeInfo.path);
+
+	    document.body.appendChild(node);
+	  });
+	}
+
+	function loadNodePromise(fileCache, nodeInfo) {
 	  var isCached = fileCache.hasOwnProperty(nodeInfo.path);
 
-	  var type = isCached ? fileCache[nodeInfo.path].file.type : nodeInfo.type;
+	  var type = isCached ? fileCache[nodeInfo.path].manifestEntry.type : nodeInfo.type;
 
 	  if (type === 'js') {
-	    return createScriptNode(fileCache, nodeInfo, nativeDirectoryPath)
+	    if (isCached) {
+	      return createLocalScriptNode(fileCache, nodeInfo);
+	    }
+	    return createRemoteScriptNode(nodeInfo);
 	  }
 
 	  if (type === 'css') {
-	    return createStyleSheetNode(fileCache, nodeInfo, nativeDirectoryPath);
+	    if (isCached) {
+	      return createLocalStyleSheetNode(fileCache, nodeInfo);
+	    }
+	    return createRemoteStyleSheetNode(nodeInfo);
 	  }
 
 	  throw new Error('Unknown node type: ' + type);
 	}
 
-	function loadNodes(manifest, fileCache, nativeDirectoryPath) {
+	function loadNodes(manifest, fileCache) {
 	  console.log('load dom nodes.');
 
 	  return all(manifest.domNodes.map(throat(1, function (nodeInfo) {
-	    return loadNodePromise(fileCache, nodeInfo, nativeDirectoryPath);
+	    return loadNodePromise(fileCache, nodeInfo);
 	  })));
 	}
 
 	function saveManifest(manifest) {
 	  console.log('save manifest.');
-	  return writeFile(localDirectory + config.manifestFile, JSON.stringify(manifest, null, 2), 'application/json');
+	  var manifestEntry = { path: config.manifestFile };
+	  var blob = new Blob([JSON.stringify(manifest, null, 2)], { type: 'application/json' });
+
+	  var file = { manifestEntry: manifestEntry, blob: blob };
+
+	  return writeFile(file);
+	}
+
+	function loadFilesFromCache(manifest, fileCache, files) {
+	  files.forEach(function (file) {
+	    fileCache[file.manifestEntry.path] = file;
+	  });
+
+	  var filesToLoad = [];
+
+	  manifest.domNodes.forEach(function (nodeInfo) {
+	    if (!fileCache[nodeInfo.path] && manifest.files[nodeInfo.path]) {
+	      filesToLoad.push(manifest.files[nodeInfo.path]);
+	    }
+	  });
+
+	  return filesToLoad.map(function (file) {
+	    fs.read(file.path).then(function (content) {
+	      fileCache[file.path] = { manifestEntry: file, content: content };
+	    });
+	  });
 	}
 
 	var loader = new EventEmitter();
 
-	loader.initialize = function () {
-	}
+	loader.initialize = function () {};
 
 	loader.load = function () {
 	  var serverAddress = config.server;
 	  var manifest = {};
-	  var nativeDirectoryPath = '';
 	  var fileCache = {};
 
 	  retrieveServerAddress().then(function (address) {
@@ -545,17 +572,17 @@
 	    manifest = remoteManifest || manifest;
 	    return setupDirectories();
 	  }).then(function (path) {
-	    nativeDirectoryPath = path || nativeDirectoryPath;
-	    return checkForFileUpdate();
+	    return checkForFileUpdate(manifest);
 	  }).then(function (files) {
 	    return downloadFiles(serverAddress, files);
-	  }).then(function (filesWithContent) {
-	    filesWithContent.forEach(function (fileWithContent) {
-	      fileCache[fileWithContent.file.path] = fileWithContent;
-	    });
+	  }).then(function (files) {
+	    return all(files.map(writeFile));
+	  }).then(function (files) {
+	    return loadFilesFromCache(manifest, fileCache, files);
+	  }).then(function () {
 	    return saveManifest(manifest);
 	  }).then(function () {
-	    return loadNodes(manifest, fileCache, nativeDirectoryPath);
+	    return loadNodes(manifest, fileCache);
 	  }).then(function () {
 	    loader.emit('loaded');
 	  }).catch(function (e) {
@@ -3907,6 +3934,7 @@
 		"repository": "https://github.com/kkvesper/ts-loader",
 		"dependencies": {
 			"json-loader": "^0.5.4",
+			"lz-string": "^1.4.4",
 			"q-io": "^1.13.2",
 			"semver": "^5.1.0",
 			"spark-md5": "^2.0.2",
@@ -5119,22 +5147,39 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var Promise = window.Promise = __webpack_require__(3).Promise;
+	var LZString = __webpack_require__(13);
 
 	var ls = window.localStorage;
 	var prefix = 'lspfs:';
 
-	function Writer(path) {
+	function Writer(path, onerror) {
 	  this.onwriteend = function () {};
-	  this.onerror = function () {};
-	  this.write = function (content) {
-	    ls.setItem(path, content);
-	    this.onwriteend();
+	  this.onerror = onerror;
+	  this.write = function (blob) {
+	    var that = this;
+	    var fileReader= new FileReader();
+
+	    fileReader.onload = function(e) {
+	      console.log(e.target.result.length);
+	      compressed = LZString.compressToUTF16(e.target.result);
+	      console.log(compressed.length);
+	      try {
+	        ls.setItem(prefix + path, compressed);
+	      } catch (e) {
+	        that.onerror(e);
+	      }
+	      that.onwriteend();
+	    };
+
+	    fileReader.onerror = this.onerror
+
+	    fileReader.readAsText(blob);
 	  };
 	}
 
 	function File(path) {
-	  this.createWriter = function (cb) {
-	    cb(new Writer(path))
+	  this.createWriter = function (cb, onerror) {
+	    cb(new Writer(path, onerror))
 	  };
 	}
 
@@ -5168,9 +5213,18 @@
 	  });
 	}
 
-	function readJSON(path) {
+	function read(path) {
 	  return new Promise(function (resolve, reject) {
-	    resolve(JSON.parse(ls.getItem(prefix + path)));
+	    var compressed = ls.getItem(prefix + path);
+	    var decompressed = LZString.decompressFromUTF16(compressed);
+
+	    resolve(decompressed);
+	  });
+	}
+
+	function readJSON(path) {
+	  return read(path).then(function (content) {
+	    return JSON.parse(content);
 	  });
 	}
 
@@ -5180,12 +5234,53 @@
 	  ensure: ensure,
 	  exists: exists,
 	  file: file,
+	  read: read,
 	  readJSON: readJSON
 	};
 
 
 /***/ },
 /* 11 */
+/***/ function(module, exports) {
+
+	function xhrPromise(url, responseType) {
+	  responseType = responseType || 'arraybuffer';
+
+	  return new Promise(function (resolve, reject, progress) {
+	    var xhr = new window.XMLHttpRequest();
+
+	    xhr.onload = function (e) {
+	      if (this.status !== 200) {
+	        return reject('xhr status: ' + this.status + ', url: ' + url);
+	      }
+
+	      resolve({ response: this.response, contentType: this.getResponseHeader('Content-Type')});
+	    };
+
+	    xhr.onerror = function (e) {
+	      reject('xhr failed: ' + url);
+	    }
+	    xhr.ontimeout = function () {
+	      reject('xhr timeout: ' + url)
+	    };
+	    xhr.onabort = function () {
+	      reject('xhr abort: ' + url)
+	    };
+	    xhr.addEventListener('progress', progress);
+
+	    xhr.open('GET', url, true);
+
+	    xhr.responseType = responseType;
+
+	    xhr.send();
+	  });
+	}
+
+	module.exports = xhrPromise;
+
+
+/***/ },
+/* 12 */
 /***/ function(module, exports) {
 
 	var splash, loaderBox, icon, progress; // dom elements
@@ -5285,6 +5380,513 @@
 	  hideLoader: hideLoader,
 	  setStatusBarHeight: setStatusBarHeight
 	};
+
+
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_RESULT__;// Copyright (c) 2013 Pieroxy <pieroxy@pieroxy.net>
+	// This work is free. You can redistribute it and/or modify it
+	// under the terms of the WTFPL, Version 2
+	// For more information see LICENSE.txt or http://www.wtfpl.net/
+	//
+	// For more information, the home page:
+	// http://pieroxy.net/blog/pages/lz-string/testing.html
+	//
+	// LZ-based compression algorithm, version 1.4.4
+	var LZString = (function() {
+
+	// private property
+	var f = String.fromCharCode;
+	var keyStrBase64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+	var keyStrUriSafe = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-$";
+	var baseReverseDic = {};
+
+	function getBaseValue(alphabet, character) {
+	  if (!baseReverseDic[alphabet]) {
+	    baseReverseDic[alphabet] = {};
+	    for (var i=0 ; i<alphabet.length ; i++) {
+	      baseReverseDic[alphabet][alphabet.charAt(i)] = i;
+	    }
+	  }
+	  return baseReverseDic[alphabet][character];
+	}
+
+	var LZString = {
+	  compressToBase64 : function (input) {
+	    if (input == null) return "";
+	    var res = LZString._compress(input, 6, function(a){return keyStrBase64.charAt(a);});
+	    switch (res.length % 4) { // To produce valid Base64
+	    default: // When could this happen ?
+	    case 0 : return res;
+	    case 1 : return res+"===";
+	    case 2 : return res+"==";
+	    case 3 : return res+"=";
+	    }
+	  },
+
+	  decompressFromBase64 : function (input) {
+	    if (input == null) return "";
+	    if (input == "") return null;
+	    return LZString._decompress(input.length, 32, function(index) { return getBaseValue(keyStrBase64, input.charAt(index)); });
+	  },
+
+	  compressToUTF16 : function (input) {
+	    if (input == null) return "";
+	    return LZString._compress(input, 15, function(a){return f(a+32);}) + " ";
+	  },
+
+	  decompressFromUTF16: function (compressed) {
+	    if (compressed == null) return "";
+	    if (compressed == "") return null;
+	    return LZString._decompress(compressed.length, 16384, function(index) { return compressed.charCodeAt(index) - 32; });
+	  },
+
+	  //compress into uint8array (UCS-2 big endian format)
+	  compressToUint8Array: function (uncompressed) {
+	    var compressed = LZString.compress(uncompressed);
+	    var buf=new Uint8Array(compressed.length*2); // 2 bytes per character
+
+	    for (var i=0, TotalLen=compressed.length; i<TotalLen; i++) {
+	      var current_value = compressed.charCodeAt(i);
+	      buf[i*2] = current_value >>> 8;
+	      buf[i*2+1] = current_value % 256;
+	    }
+	    return buf;
+	  },
+
+	  //decompress from uint8array (UCS-2 big endian format)
+	  decompressFromUint8Array:function (compressed) {
+	    if (compressed===null || compressed===undefined){
+	        return LZString.decompress(compressed);
+	    } else {
+	        var buf=new Array(compressed.length/2); // 2 bytes per character
+	        for (var i=0, TotalLen=buf.length; i<TotalLen; i++) {
+	          buf[i]=compressed[i*2]*256+compressed[i*2+1];
+	        }
+
+	        var result = [];
+	        buf.forEach(function (c) {
+	          result.push(f(c));
+	        });
+	        return LZString.decompress(result.join(''));
+
+	    }
+
+	  },
+
+
+	  //compress into a string that is already URI encoded
+	  compressToEncodedURIComponent: function (input) {
+	    if (input == null) return "";
+	    return LZString._compress(input, 6, function(a){return keyStrUriSafe.charAt(a);});
+	  },
+
+	  //decompress from an output of compressToEncodedURIComponent
+	  decompressFromEncodedURIComponent:function (input) {
+	    if (input == null) return "";
+	    if (input == "") return null;
+	    input = input.replace(/ /g, "+");
+	    return LZString._decompress(input.length, 32, function(index) { return getBaseValue(keyStrUriSafe, input.charAt(index)); });
+	  },
+
+	  compress: function (uncompressed) {
+	    return LZString._compress(uncompressed, 16, function(a){return f(a);});
+	  },
+	  _compress: function (uncompressed, bitsPerChar, getCharFromInt) {
+	    if (uncompressed == null) return "";
+	    var i, value,
+	        context_dictionary= {},
+	        context_dictionaryToCreate= {},
+	        context_c="",
+	        context_wc="",
+	        context_w="",
+	        context_enlargeIn= 2, // Compensate for the first entry which should not count
+	        context_dictSize= 3,
+	        context_numBits= 2,
+	        context_data=[],
+	        context_data_val=0,
+	        context_data_position=0,
+	        ii;
+
+	    for (ii = 0; ii < uncompressed.length; ii += 1) {
+	      context_c = uncompressed.charAt(ii);
+	      if (!Object.prototype.hasOwnProperty.call(context_dictionary,context_c)) {
+	        context_dictionary[context_c] = context_dictSize++;
+	        context_dictionaryToCreate[context_c] = true;
+	      }
+
+	      context_wc = context_w + context_c;
+	      if (Object.prototype.hasOwnProperty.call(context_dictionary,context_wc)) {
+	        context_w = context_wc;
+	      } else {
+	        if (Object.prototype.hasOwnProperty.call(context_dictionaryToCreate,context_w)) {
+	          if (context_w.charCodeAt(0)<256) {
+	            for (i=0 ; i<context_numBits ; i++) {
+	              context_data_val = (context_data_val << 1);
+	              if (context_data_position == bitsPerChar-1) {
+	                context_data_position = 0;
+	                context_data.push(getCharFromInt(context_data_val));
+	                context_data_val = 0;
+	              } else {
+	                context_data_position++;
+	              }
+	            }
+	            value = context_w.charCodeAt(0);
+	            for (i=0 ; i<8 ; i++) {
+	              context_data_val = (context_data_val << 1) | (value&1);
+	              if (context_data_position == bitsPerChar-1) {
+	                context_data_position = 0;
+	                context_data.push(getCharFromInt(context_data_val));
+	                context_data_val = 0;
+	              } else {
+	                context_data_position++;
+	              }
+	              value = value >> 1;
+	            }
+	          } else {
+	            value = 1;
+	            for (i=0 ; i<context_numBits ; i++) {
+	              context_data_val = (context_data_val << 1) | value;
+	              if (context_data_position ==bitsPerChar-1) {
+	                context_data_position = 0;
+	                context_data.push(getCharFromInt(context_data_val));
+	                context_data_val = 0;
+	              } else {
+	                context_data_position++;
+	              }
+	              value = 0;
+	            }
+	            value = context_w.charCodeAt(0);
+	            for (i=0 ; i<16 ; i++) {
+	              context_data_val = (context_data_val << 1) | (value&1);
+	              if (context_data_position == bitsPerChar-1) {
+	                context_data_position = 0;
+	                context_data.push(getCharFromInt(context_data_val));
+	                context_data_val = 0;
+	              } else {
+	                context_data_position++;
+	              }
+	              value = value >> 1;
+	            }
+	          }
+	          context_enlargeIn--;
+	          if (context_enlargeIn == 0) {
+	            context_enlargeIn = Math.pow(2, context_numBits);
+	            context_numBits++;
+	          }
+	          delete context_dictionaryToCreate[context_w];
+	        } else {
+	          value = context_dictionary[context_w];
+	          for (i=0 ; i<context_numBits ; i++) {
+	            context_data_val = (context_data_val << 1) | (value&1);
+	            if (context_data_position == bitsPerChar-1) {
+	              context_data_position = 0;
+	              context_data.push(getCharFromInt(context_data_val));
+	              context_data_val = 0;
+	            } else {
+	              context_data_position++;
+	            }
+	            value = value >> 1;
+	          }
+
+
+	        }
+	        context_enlargeIn--;
+	        if (context_enlargeIn == 0) {
+	          context_enlargeIn = Math.pow(2, context_numBits);
+	          context_numBits++;
+	        }
+	        // Add wc to the dictionary.
+	        context_dictionary[context_wc] = context_dictSize++;
+	        context_w = String(context_c);
+	      }
+	    }
+
+	    // Output the code for w.
+	    if (context_w !== "") {
+	      if (Object.prototype.hasOwnProperty.call(context_dictionaryToCreate,context_w)) {
+	        if (context_w.charCodeAt(0)<256) {
+	          for (i=0 ; i<context_numBits ; i++) {
+	            context_data_val = (context_data_val << 1);
+	            if (context_data_position == bitsPerChar-1) {
+	              context_data_position = 0;
+	              context_data.push(getCharFromInt(context_data_val));
+	              context_data_val = 0;
+	            } else {
+	              context_data_position++;
+	            }
+	          }
+	          value = context_w.charCodeAt(0);
+	          for (i=0 ; i<8 ; i++) {
+	            context_data_val = (context_data_val << 1) | (value&1);
+	            if (context_data_position == bitsPerChar-1) {
+	              context_data_position = 0;
+	              context_data.push(getCharFromInt(context_data_val));
+	              context_data_val = 0;
+	            } else {
+	              context_data_position++;
+	            }
+	            value = value >> 1;
+	          }
+	        } else {
+	          value = 1;
+	          for (i=0 ; i<context_numBits ; i++) {
+	            context_data_val = (context_data_val << 1) | value;
+	            if (context_data_position == bitsPerChar-1) {
+	              context_data_position = 0;
+	              context_data.push(getCharFromInt(context_data_val));
+	              context_data_val = 0;
+	            } else {
+	              context_data_position++;
+	            }
+	            value = 0;
+	          }
+	          value = context_w.charCodeAt(0);
+	          for (i=0 ; i<16 ; i++) {
+	            context_data_val = (context_data_val << 1) | (value&1);
+	            if (context_data_position == bitsPerChar-1) {
+	              context_data_position = 0;
+	              context_data.push(getCharFromInt(context_data_val));
+	              context_data_val = 0;
+	            } else {
+	              context_data_position++;
+	            }
+	            value = value >> 1;
+	          }
+	        }
+	        context_enlargeIn--;
+	        if (context_enlargeIn == 0) {
+	          context_enlargeIn = Math.pow(2, context_numBits);
+	          context_numBits++;
+	        }
+	        delete context_dictionaryToCreate[context_w];
+	      } else {
+	        value = context_dictionary[context_w];
+	        for (i=0 ; i<context_numBits ; i++) {
+	          context_data_val = (context_data_val << 1) | (value&1);
+	          if (context_data_position == bitsPerChar-1) {
+	            context_data_position = 0;
+	            context_data.push(getCharFromInt(context_data_val));
+	            context_data_val = 0;
+	          } else {
+	            context_data_position++;
+	          }
+	          value = value >> 1;
+	        }
+
+
+	      }
+	      context_enlargeIn--;
+	      if (context_enlargeIn == 0) {
+	        context_enlargeIn = Math.pow(2, context_numBits);
+	        context_numBits++;
+	      }
+	    }
+
+	    // Mark the end of the stream
+	    value = 2;
+	    for (i=0 ; i<context_numBits ; i++) {
+	      context_data_val = (context_data_val << 1) | (value&1);
+	      if (context_data_position == bitsPerChar-1) {
+	        context_data_position = 0;
+	        context_data.push(getCharFromInt(context_data_val));
+	        context_data_val = 0;
+	      } else {
+	        context_data_position++;
+	      }
+	      value = value >> 1;
+	    }
+
+	    // Flush the last char
+	    while (true) {
+	      context_data_val = (context_data_val << 1);
+	      if (context_data_position == bitsPerChar-1) {
+	        context_data.push(getCharFromInt(context_data_val));
+	        break;
+	      }
+	      else context_data_position++;
+	    }
+	    return context_data.join('');
+	  },
+
+	  decompress: function (compressed) {
+	    if (compressed == null) return "";
+	    if (compressed == "") return null;
+	    return LZString._decompress(compressed.length, 32768, function(index) { return compressed.charCodeAt(index); });
+	  },
+
+	  _decompress: function (length, resetValue, getNextValue) {
+	    var dictionary = [],
+	        next,
+	        enlargeIn = 4,
+	        dictSize = 4,
+	        numBits = 3,
+	        entry = "",
+	        result = [],
+	        i,
+	        w,
+	        bits, resb, maxpower, power,
+	        c,
+	        data = {val:getNextValue(0), position:resetValue, index:1};
+
+	    for (i = 0; i < 3; i += 1) {
+	      dictionary[i] = i;
+	    }
+
+	    bits = 0;
+	    maxpower = Math.pow(2,2);
+	    power=1;
+	    while (power!=maxpower) {
+	      resb = data.val & data.position;
+	      data.position >>= 1;
+	      if (data.position == 0) {
+	        data.position = resetValue;
+	        data.val = getNextValue(data.index++);
+	      }
+	      bits |= (resb>0 ? 1 : 0) * power;
+	      power <<= 1;
+	    }
+
+	    switch (next = bits) {
+	      case 0:
+	          bits = 0;
+	          maxpower = Math.pow(2,8);
+	          power=1;
+	          while (power!=maxpower) {
+	            resb = data.val & data.position;
+	            data.position >>= 1;
+	            if (data.position == 0) {
+	              data.position = resetValue;
+	              data.val = getNextValue(data.index++);
+	            }
+	            bits |= (resb>0 ? 1 : 0) * power;
+	            power <<= 1;
+	          }
+	        c = f(bits);
+	        break;
+	      case 1:
+	          bits = 0;
+	          maxpower = Math.pow(2,16);
+	          power=1;
+	          while (power!=maxpower) {
+	            resb = data.val & data.position;
+	            data.position >>= 1;
+	            if (data.position == 0) {
+	              data.position = resetValue;
+	              data.val = getNextValue(data.index++);
+	            }
+	            bits |= (resb>0 ? 1 : 0) * power;
+	            power <<= 1;
+	          }
+	        c = f(bits);
+	        break;
+	      case 2:
+	        return "";
+	    }
+	    dictionary[3] = c;
+	    w = c;
+	    result.push(c);
+	    while (true) {
+	      if (data.index > length) {
+	        return "";
+	      }
+
+	      bits = 0;
+	      maxpower = Math.pow(2,numBits);
+	      power=1;
+	      while (power!=maxpower) {
+	        resb = data.val & data.position;
+	        data.position >>= 1;
+	        if (data.position == 0) {
+	          data.position = resetValue;
+	          data.val = getNextValue(data.index++);
+	        }
+	        bits |= (resb>0 ? 1 : 0) * power;
+	        power <<= 1;
+	      }
+
+	      switch (c = bits) {
+	        case 0:
+	          bits = 0;
+	          maxpower = Math.pow(2,8);
+	          power=1;
+	          while (power!=maxpower) {
+	            resb = data.val & data.position;
+	            data.position >>= 1;
+	            if (data.position == 0) {
+	              data.position = resetValue;
+	              data.val = getNextValue(data.index++);
+	            }
+	            bits |= (resb>0 ? 1 : 0) * power;
+	            power <<= 1;
+	          }
+
+	          dictionary[dictSize++] = f(bits);
+	          c = dictSize-1;
+	          enlargeIn--;
+	          break;
+	        case 1:
+	          bits = 0;
+	          maxpower = Math.pow(2,16);
+	          power=1;
+	          while (power!=maxpower) {
+	            resb = data.val & data.position;
+	            data.position >>= 1;
+	            if (data.position == 0) {
+	              data.position = resetValue;
+	              data.val = getNextValue(data.index++);
+	            }
+	            bits |= (resb>0 ? 1 : 0) * power;
+	            power <<= 1;
+	          }
+	          dictionary[dictSize++] = f(bits);
+	          c = dictSize-1;
+	          enlargeIn--;
+	          break;
+	        case 2:
+	          return result.join('');
+	      }
+
+	      if (enlargeIn == 0) {
+	        enlargeIn = Math.pow(2, numBits);
+	        numBits++;
+	      }
+
+	      if (dictionary[c]) {
+	        entry = dictionary[c];
+	      } else {
+	        if (c === dictSize) {
+	          entry = w + w.charAt(0);
+	        } else {
+	          return null;
+	        }
+	      }
+	      result.push(entry);
+
+	      // Add w+entry[0] to the dictionary.
+	      dictionary[dictSize++] = w + entry.charAt(0);
+	      enlargeIn--;
+
+	      w = entry;
+
+	      if (enlargeIn == 0) {
+	        enlargeIn = Math.pow(2, numBits);
+	        numBits++;
+	      }
+
+	    }
+	  }
+	};
+	  return LZString;
+	})();
+
+	if (true) {
+	  !(__WEBPACK_AMD_DEFINE_RESULT__ = function () { return LZString; }.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	} else if( typeof module !== 'undefined' && module != null ) {
+	  module.exports = LZString
+	}
 
 
 /***/ }
