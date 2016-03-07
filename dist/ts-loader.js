@@ -229,7 +229,7 @@
 	  });
 	}
 
-	function retrieveRemoteManifest(config) {
+	function getAppManifest(config) {
 	  var path = config.manifestFile;
 
 	  var file = { manifestEntry: { path: path } };
@@ -241,9 +241,11 @@
 	    manifestEntry.hash = localHashes[path];
 	    file.content = content;
 	  }, function (error) {
-	    console.warn('Error reading local manifest, probably doesn\'t exist.', error);
+	    if (error && error.code !== 'ENOENT') {
+	      throw error;
+	    }
 	  }).then(function () {
-	    var url = config.appHost + '/' + manifestEntry.path + '?_=' + Date.now();
+	    var url = config.appHost + '/' + manifestEntry.path;
 
 	    return xhrPromise(url);
 	  }).then(function (xhr) {
@@ -255,31 +257,42 @@
 	    file.md5 = md5;
 
 	    if (manifestEntry.hash === md5) {
-	      return file.content;
+	      return file;
 	    }
 
-	    console.warn('md5 mismatch', path, manifestEntry.md5, md5);
 	    manifestEntry.hash = md5;
-
 
 	    file.blob = new Blob([file.fileBuffer], { type: file.contentType });
 
-	    return writeFile(file);
+	    return writeFile(file).then(function () {
+	      return new Promise(function (resolve, reject) {
+	        var blob = file.blob;
+	        var fileReader= new FileReader();
+
+	        fileReader.onload = function(e) {
+	          file.content = JSON.parse(e.target.result);
+	          resolve(file);
+	        };
+
+	        fileReader.onerror = function (e) {
+	          reject(e);
+	        };
+
+	        fileReader.readAsText(blob);
+	      });
+	    });
+	  }).then(function () {
+	    var manifest = file.content;
+	    if (!semver.satisfies(manifest.appVersion, config.supportedTSEmberVersion)) {
+	      throw new Error('Invalid TableSolution app version: expected \'' + config.supportedTSEmberVersion + '\' and got \'' + manifest.version + '\'.');
+	    }
+
+	    if (!semver.satisfies(manifest.manifestVersion, config.supportedManifestVersion)) {
+	      throw new Error('Your application version is too low. Please visit the App Store and update your application.');
+	    }
+
+	    return file;
 	  });
-
-	  //   manifest = xhr.response;
-	  //   debugger
-
-	  //   if (!semver.satisfies(manifest.appVersion, config.supportedTSEmberVersion)) {
-	  //     throw new Error('Invalid TableSolution app version: expected \'' + config.supportedTSEmberVersion + '\' and got \'' + manifest.version + '\'.');
-	  //   }
-
-	  //   if (!semver.satisfies(manifest.manifestVersion, config.supportedManifestVersion)) {
-	  //     throw new Error('Your application version is too low. Please visit the App Store and update your application.');
-	  //   }
-
-	  //   return manifest;
-	  // });
 	}
 
 	function setupDirectories() {
@@ -455,7 +468,7 @@
 	      if (nodeInfo.optional) {
 	        return resolve(node);
 	      }
-	      console.error('error reading: ', nodeInfo, error);
+	      console.error('error reading: ', nodeInfo, e);
 	      reject(e);
 	    };
 
@@ -523,7 +536,7 @@
 	      if (nodeInfo.optional) {
 	        return resolve(node);
 	      }
-	      console.error('error reading: ', nodeInfo, error);
+	      console.error('error reading: ', nodeInfo, e);
 	      reject(e);
 	    };
 
@@ -624,9 +637,10 @@
 	  }, function (error) {
 	    console.warn("Error reading appHost from appPreferences, using default.", error);
 	  }).then(function () {
-	    return retrieveRemoteManifest(config);
-	  }).then(function (remoteManifest) {
-	    manifest = remoteManifest;
+	    return getAppManifest(config);
+	  }).then(function (appManifest) {
+	    fileCache[config.manifestFile] = appManifest;
+	    manifest = appManifest.content;
 	    return setupDirectories()
 	  }).then(function (path) {
 	    return checkForFileUpdate(config, manifest);
@@ -5261,9 +5275,10 @@
 	    var fileReader = new FileReader();
 
 	    fileReader.onload = function(e) {
-	      console.log(e.target.result.length);
+	      console.time(path);
 	      compressed = LZString.compressToUTF16(e.target.result);
-	      console.log(compressed.length);
+	      console.timeEnd(path);
+	      console.log(e.target.result.length, compressed.length);
 	      try {
 	        ls.setItem(prefix + path, compressed);
 	      } catch (e) {
@@ -5315,14 +5330,17 @@
 	}
 
 	function read(path) {
+	  console.time('read ' + path)
 	  return new Promise(function (resolve, reject) {
 	    var compressed = ls.getItem(prefix + path);
 	    if (compressed === null) {
-	      throw new Error('ENOENT', 'no such file or directory \'' + path + '\'');
+	      var error = new Error('no such file or directory \'' + path + '\'');
+	      error.code = 'ENOENT';
+	      throw error;
 	    }
 
 	    var decompressed = LZString.decompressFromUTF16(compressed);
-
+	    console.timeEnd('read ' + path);
 	    resolve(decompressed);
 	  });
 	}
