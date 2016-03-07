@@ -30,7 +30,7 @@ body {
 #ts-splash-screen {
   height: 100%;
   background-color: #4b647f;
-  background-image: url("ts_ember/background-04.png");
+  background-image: url('../assets/ts_ember/background-04.png');
   background-size: cover;
   background-position: center center;
   color: #444;
@@ -72,7 +72,7 @@ body {
   -webkit-transition: -webkit-transform 300ms ease-out;
   transition: transform 300ms ease-out;
 
-  background-image: url("ts_ember/ts-logo-color.svg");
+  background-image: url('../assets/ts_ember/ts-logo-color.svg');
   background-repeat: no-repeat;
   background-size: 100% 60%;
   background-position: center center;

@@ -45,7 +45,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var loader = __webpack_require__(1);
-	var customSplash = __webpack_require__(12);
+	var customSplash = __webpack_require__(14);
 
 	function offlineDetected() {
 	  document.getElementById('_cordova_disconnect').classList.add('fadeInDown');
@@ -98,10 +98,18 @@
 
 	var loading = false;
 
+	function getConfig() {
+	  var scriptNodes = document.getElementsByTagName('script');
+	  var currentlyLoadedScript = scriptNodes[scriptNodes.length - 1];
+	  var config = currentlyLoadedScript.dataset;
+	  return config;
+	}
+
 	function startLoading() {
 	  if (loading) {
 	    return;
 	  }
+
 	  loading = true;
 
 	  if (window.StatusBar) {
@@ -110,6 +118,7 @@
 	  }
 
 	  var fullHeight = document.documentElement.clientHeight;
+
 	  customSplash.setStatusBarHeight(fullHeight - document.documentElement.clientHeight);
 	  customSplash.show();
 
@@ -119,8 +128,6 @@
 	      window.navigator.splashscreen.hide();
 	    }
 	  }, 200);
-
-	  loader.initialize();
 
 	  loader.on('loaded', function () {
 	    window.clearTimeout(splashscreenTimeout);
@@ -161,7 +168,9 @@
 	    return showErrorMessage('Please check your internet connection.');
 	  }
 
-	  loader.load();
+	  var config = getConfig();
+
+	  loader.load(config);
 	}
 
 	document.addEventListener('deviceready', startLoading, false);
@@ -176,53 +185,101 @@
 
 	var EventEmitter = __webpack_require__(2).EventEmitter;
 	var all = __webpack_require__(3).all;
+	var objectAssign = window.Object.assign || __webpack_require__(6);
 	var Promise = window.Promise = __webpack_require__(3).Promise;
-	var semver = __webpack_require__(9);
-	var throat = __webpack_require__(6)(Promise);
-	var SparkMD5 = __webpack_require__(7);
+	var semver = __webpack_require__(7);
+	var throat = __webpack_require__(8)(Promise);
+	var SparkMD5 = __webpack_require__(9);
 
-	var config = __webpack_require__(8);
-	var fs = __webpack_require__(10);
-	var xhrPromise = __webpack_require__(11);
+	var loaderConfig = __webpack_require__(10);
+	var fs = __webpack_require__(11);
+	var xhrPromise = __webpack_require__(13);
 
 	var localDirectory = ''; // 'dist/';
 	var totalBytes, loadedBytes;
 
-	function retrieveServerAddress() {
-	  return new Promise(function (resolve, reject) {
-	    resolve(config.server);
-	  });
+	function updateLocalHash(file) {
+	  localHashes[file.manifestEntry.path] = file.md5;
+	  stringified = JSON.stringify(localHashes);
+	  window.localStorage.setItem('localHashes', stringified);
+	}
 
-	  return window.plugins.appPreferences.fetch('appServer').then(function (server) {
-	    return server;
-	  }, function (error) {
-	    console.error(error);
+	function getLocalHashes() {
+	  var content = window.localStorage.getItem('localHashes');
+	  if (!content) {
+	    return {};
+	  }
+
+	  try {
+	    return JSON.parse(content);
+	  } catch (e) {
+	    console.warn('Error reading localHashes from localStorage.', e)
+	    return {};
+	  }
+	}
+
+	var localHashes = getLocalHashes();
+
+	function getAppHost() {
+	  return new Promise(function (resolve, reject) {
+	    if (!window.plugins) {
+	      return resolve();
+	    }
+	    resolve(window.plugins.appPreferences.fetch('appServer'));
 	  });
 	}
 
-	function retrieveRemoteManifest(serverAddress) {
-	  var url = serverAddress + '/' + config.manifestFile + '?' + Date.now();
+	function retrieveRemoteManifest(config) {
+	  var path = config.manifestFile;
 
-	  return xhrPromise(url, 'text').then(function (xhr) {
-	    try {
-	      manifest = JSON.parse(xhr.response);
-	    } catch (e) {
-	      console.error('error parsing the remote manifest', xhr.response);
-	      throw e;
+	  var file = { manifestEntry: { path: path } };
+	  var manifestEntry = file.manifestEntry;
+
+	  var fileBuffer, contentType;
+
+	  return fs.readJSON(path).then(function (content) {
+	    manifestEntry.hash = localHashes[path];
+	    file.content = content;
+	  }, function (error) {
+	    console.warn('Error reading local manifest, probably doesn\'t exist.', error);
+	  }).then(function () {
+	    var url = config.appHost + '/' + manifestEntry.path + '?_=' + Date.now();
+
+	    return xhrPromise(url);
+	  }).then(function (xhr) {
+	    file.fileBuffer = xhr.response;
+	    file.contentType = xhr.contentType;
+
+	    return getMD5(file.fileBuffer);
+	  }).then(function (md5) {
+	    file.md5 = md5;
+
+	    if (manifestEntry.hash === md5) {
+	      return file.content;
 	    }
 
-	    console.log('retrieved the manifest.');
+	    console.warn('md5 mismatch', path, manifestEntry.md5, md5);
+	    manifestEntry.hash = md5;
 
-	    if (!semver.satisfies(manifest.appVersion, config.supportedTSEmberVersion)) {
-	      throw 'Invalid TableSolution app version: expected \'' + config.supportedTSEmberVersion + '\' and got \'' + manifest.version + '\'.'
-	    }
 
-	    if (!semver.satisfies(manifest.manifestVersion, config.supportedManifestVersion)) {
-	      throw 'Your application version is too low. Please go on the store and update your application.'
-	    }
+	    file.blob = new Blob([file.fileBuffer], { type: file.contentType });
 
-	    return manifest;
+	    return writeFile(file);
 	  });
+
+	  //   manifest = xhr.response;
+	  //   debugger
+
+	  //   if (!semver.satisfies(manifest.appVersion, config.supportedTSEmberVersion)) {
+	  //     throw new Error('Invalid TableSolution app version: expected \'' + config.supportedTSEmberVersion + '\' and got \'' + manifest.version + '\'.');
+	  //   }
+
+	  //   if (!semver.satisfies(manifest.manifestVersion, config.supportedManifestVersion)) {
+	  //     throw new Error('Your application version is too low. Please visit the App Store and update your application.');
+	  //   }
+
+	  //   return manifest;
+	  // });
 	}
 
 	function setupDirectories() {
@@ -230,12 +287,12 @@
 	  return fs.dir().then(function (directoryEntry) { return directoryEntry.nativeURL; });
 	}
 
-	function checkForFileUpdate(manifest) {
+	function checkForFileUpdate(config, manifest) {
 	  console.log('check for files update');
 
-	  // return new Promise(function (resolve, reject) {
-	  //   resolve(manifest.domNodes.map(function (nodeInfo) { return manifest.files[nodeInfo.path]; }).filter(function (file) { return !!file; }))
-	  // });
+	  return new Promise(function (resolve, reject) {
+	    resolve(manifest.domNodes.map(function (nodeInfo) { return manifest.files[nodeInfo.path]; }).filter(function (file) { return !!file; }))
+	  });
 
 	  return fs.exists(localDirectory + config.manifestFile).then(function(localManifestEntry) {
 	    if (!localManifestEntry) {
@@ -277,6 +334,7 @@
 	function writeFile(file) {
 	  var path = file.manifestEntry.path;
 	  var contentType = file.contentType;
+
 	  var blob = file.blob || new Blob([file.fileBuffer], { type: contentType });
 
 	  return fs.ensure(fs.dirname(path)).then(function () {
@@ -292,11 +350,13 @@
 	      }, reject);
 	    });
 	  }).then(function () {
+	    updateLocalHash(file);
+
 	    return file;
 	  });
 	}
 
-	function compareMD5(fileEntry, hash) {
+	function getMD5(fileEntry) {
 	  return new Promise(function (resolve, reject) {
 	    if (window.md5chksum) {
 	      md5chksum.file(fileEntry, resolve, reject);
@@ -334,10 +394,10 @@
 	    fileBuffer = xhr.response;
 	    contentType = xhr.contentType;
 
-	    return compareMD5(fileBuffer, manifestEntry.hash);
+	    return getMD5(fileBuffer);
 	  }).then(function (md5) {
 	    if (md5 !== manifestEntry.hash) {
-	      throw new Error('md5 mismatch: ' + hash + ' computed: ' + md5);
+	      throw new Error('md5 mismatch: ' + manifestEntry.path + ' ' + manifestEntry.hash + ' computed: ' + md5);
 	    }
 
 	    return { manifestEntry: manifestEntry, fileBuffer: fileBuffer, contentType: contentType, md5: md5 };
@@ -526,16 +586,6 @@
 	  })));
 	}
 
-	function saveManifest(manifest) {
-	  console.log('save manifest.');
-	  var manifestEntry = { path: config.manifestFile };
-	  var blob = new Blob([JSON.stringify(manifest, null, 2)], { type: 'application/json' });
-
-	  var file = { manifestEntry: manifestEntry, blob: blob };
-
-	  return writeFile(file);
-	}
-
 	function loadFilesFromCache(manifest, fileCache, files) {
 	  files.forEach(function (file) {
 	    fileCache[file.manifestEntry.path] = file;
@@ -558,29 +608,35 @@
 
 	var loader = new EventEmitter();
 
-	loader.initialize = function () {};
+	loader.initialize = function (config) {
+	  this.config = Object.assign(loaderConfig, config);
+	};
 
-	loader.load = function () {
-	  var serverAddress = config.server;
-	  var manifest = {};
-	  var fileCache = {};
+	loader.load = function (runtimeConfig) {
+	  var config = this.config = Object.assign(loaderConfig, runtimeConfig);
+	  var manifest = this.manifest = {};
+	  var fileCache = this.fileCache = {};
 
-	  retrieveServerAddress().then(function (address) {
-	    serverAddress = address || serverAddress;
-	    return retrieveRemoteManifest(serverAddress);
+	  getAppHost().then(function (appHost) {
+	    if (appHost) {
+	      config.appHost = appHost;
+	    }
+	  }, function (error) {
+	    console.warn("Error reading appHost from appPreferences, using default.", error);
+	  }).then(function () {
+	    return retrieveRemoteManifest(config);
 	  }).then(function (remoteManifest) {
-	    manifest = remoteManifest || manifest;
-	    return setupDirectories();
+	    manifest = remoteManifest;
+	    return setupDirectories()
 	  }).then(function (path) {
-	    return checkForFileUpdate(manifest);
+	    return checkForFileUpdate(config, manifest);
 	  }).then(function (files) {
-	    return downloadFiles(serverAddress, files);
+	    return downloadFiles(config.appHost, files);
 	  }).then(function (files) {
+	    return files
 	    return all(files.map(writeFile));
 	  }).then(function (files) {
 	    return loadFilesFromCache(manifest, fileCache, files);
-	  }).then(function () {
-	    return saveManifest(manifest);
 	  }).then(function () {
 	    return loadNodes(manifest, fileCache);
 	  }).then(function () {
@@ -3139,816 +3195,49 @@
 /* 6 */
 /***/ function(module, exports) {
 
-	'use strict'
+	/* eslint-disable no-unused-vars */
+	'use strict';
+	var hasOwnProperty = Object.prototype.hasOwnProperty;
+	var propIsEnumerable = Object.prototype.propertyIsEnumerable;
 
-	module.exports = function (PromiseArgument) {
-	  var Promise;
-	  function throat(size, fn) {
-	    var queue = []
-	    function run(fn, self, args) {
-	      if (size) {
-	        size--
-	        var result = new Promise(function (resolve) {
-	          resolve(fn.apply(self, args))
-	        })
-	        result.then(release, release)
-	        return result
-	      } else {
-	        return new Promise(function (resolve) {
-	          queue.push(new Delayed(resolve, fn, self, args))
-	        })
-	      }
-	    }
-	    function release() {
-	      size++
-	      if (queue.length) {
-	        var next = queue.shift()
-	        next.resolve(run(next.fn, next.self, next.args))
-	      }
-	    }
-	    if (typeof size === 'function' && typeof fn === 'number') {
-	      var temp = fn;
-	      fn = size;
-	      size = temp;
-	    }
-	    if (typeof fn === 'function') {
-	      return function () {
-	        var args = [];
-	        for (var i = 0; i < arguments.length; i++) {
-	          args.push(arguments[i]);
-	        }
-	        return run(fn, this, args)
-	      }
-	    } else {
-	      return function (fn) {
-	        var args = [];
-	        for (var i = 1; i < arguments.length; i++) {
-	          args.push(arguments[i]);
-	        }
-	        return run(fn, this, args)
-	      }
-	    }
-	  }
-	  if (typeof arguments[0] === 'number' || typeof arguments[1] === 'number') {
-	    Promise = module.exports.Promise;
-	    if (typeof Promise !== 'function') {
-	      throw new Error('You must provide a Promise polyfill for this library to work in older environments');
-	    }
-	    return throat(arguments[0], arguments[1]);
-	  } else {
-	    Promise = PromiseArgument;
-	    return throat;
-	  }
+	function toObject(val) {
+		if (val === null || val === undefined) {
+			throw new TypeError('Object.assign cannot be called with null or undefined');
+		}
+
+		return Object(val);
 	}
 
-	/* istanbul ignore next */
-	if (typeof Promise === 'function') {
-	  module.exports.Promise = Promise;
-	}
+	module.exports = Object.assign || function (target, source) {
+		var from;
+		var to = toObject(target);
+		var symbols;
 
-	function Delayed(resolve, fn, self, args) {
-	  this.resolve = resolve
-	  this.fn = fn
-	  this.self = self || null
-	  this.args = args
-	}
+		for (var s = 1; s < arguments.length; s++) {
+			from = Object(arguments[s]);
+
+			for (var key in from) {
+				if (hasOwnProperty.call(from, key)) {
+					to[key] = from[key];
+				}
+			}
+
+			if (Object.getOwnPropertySymbols) {
+				symbols = Object.getOwnPropertySymbols(from);
+				for (var i = 0; i < symbols.length; i++) {
+					if (propIsEnumerable.call(from, symbols[i])) {
+						to[symbols[i]] = from[symbols[i]];
+					}
+				}
+			}
+		}
+
+		return to;
+	};
 
 
 /***/ },
 /* 7 */
-/***/ function(module, exports, __webpack_require__) {
-
-	(function (factory) {
-	    if (true) {
-	        // Node/CommonJS
-	        module.exports = factory();
-	    } else if (typeof define === 'function' && define.amd) {
-	        // AMD
-	        define(factory);
-	    } else {
-	        // Browser globals (with support for web workers)
-	        var glob;
-
-	        try {
-	            glob = window;
-	        } catch (e) {
-	            glob = self;
-	        }
-
-	        glob.SparkMD5 = factory();
-	    }
-	}(function (undefined) {
-
-	    'use strict';
-
-	    /*
-	     * Fastest md5 implementation around (JKM md5).
-	     * Credits: Joseph Myers
-	     *
-	     * @see http://www.myersdaily.org/joseph/javascript/md5-text.html
-	     * @see http://jsperf.com/md5-shootout/7
-	     */
-
-	    /* this function is much faster,
-	      so if possible we use it. Some IEs
-	      are the only ones I know of that
-	      need the idiotic second function,
-	      generated by an if clause.  */
-	    var add32 = function (a, b) {
-	        return (a + b) & 0xFFFFFFFF;
-	    },
-	        hex_chr = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'];
-
-
-	    function cmn(q, a, b, x, s, t) {
-	        a = add32(add32(a, q), add32(x, t));
-	        return add32((a << s) | (a >>> (32 - s)), b);
-	    }
-
-	    function ff(a, b, c, d, x, s, t) {
-	        return cmn((b & c) | ((~b) & d), a, b, x, s, t);
-	    }
-
-	    function gg(a, b, c, d, x, s, t) {
-	        return cmn((b & d) | (c & (~d)), a, b, x, s, t);
-	    }
-
-	    function hh(a, b, c, d, x, s, t) {
-	        return cmn(b ^ c ^ d, a, b, x, s, t);
-	    }
-
-	    function ii(a, b, c, d, x, s, t) {
-	        return cmn(c ^ (b | (~d)), a, b, x, s, t);
-	    }
-
-	    function md5cycle(x, k) {
-	        var a = x[0],
-	            b = x[1],
-	            c = x[2],
-	            d = x[3];
-
-	        a = ff(a, b, c, d, k[0], 7, -680876936);
-	        d = ff(d, a, b, c, k[1], 12, -389564586);
-	        c = ff(c, d, a, b, k[2], 17, 606105819);
-	        b = ff(b, c, d, a, k[3], 22, -1044525330);
-	        a = ff(a, b, c, d, k[4], 7, -176418897);
-	        d = ff(d, a, b, c, k[5], 12, 1200080426);
-	        c = ff(c, d, a, b, k[6], 17, -1473231341);
-	        b = ff(b, c, d, a, k[7], 22, -45705983);
-	        a = ff(a, b, c, d, k[8], 7, 1770035416);
-	        d = ff(d, a, b, c, k[9], 12, -1958414417);
-	        c = ff(c, d, a, b, k[10], 17, -42063);
-	        b = ff(b, c, d, a, k[11], 22, -1990404162);
-	        a = ff(a, b, c, d, k[12], 7, 1804603682);
-	        d = ff(d, a, b, c, k[13], 12, -40341101);
-	        c = ff(c, d, a, b, k[14], 17, -1502002290);
-	        b = ff(b, c, d, a, k[15], 22, 1236535329);
-
-	        a = gg(a, b, c, d, k[1], 5, -165796510);
-	        d = gg(d, a, b, c, k[6], 9, -1069501632);
-	        c = gg(c, d, a, b, k[11], 14, 643717713);
-	        b = gg(b, c, d, a, k[0], 20, -373897302);
-	        a = gg(a, b, c, d, k[5], 5, -701558691);
-	        d = gg(d, a, b, c, k[10], 9, 38016083);
-	        c = gg(c, d, a, b, k[15], 14, -660478335);
-	        b = gg(b, c, d, a, k[4], 20, -405537848);
-	        a = gg(a, b, c, d, k[9], 5, 568446438);
-	        d = gg(d, a, b, c, k[14], 9, -1019803690);
-	        c = gg(c, d, a, b, k[3], 14, -187363961);
-	        b = gg(b, c, d, a, k[8], 20, 1163531501);
-	        a = gg(a, b, c, d, k[13], 5, -1444681467);
-	        d = gg(d, a, b, c, k[2], 9, -51403784);
-	        c = gg(c, d, a, b, k[7], 14, 1735328473);
-	        b = gg(b, c, d, a, k[12], 20, -1926607734);
-
-	        a = hh(a, b, c, d, k[5], 4, -378558);
-	        d = hh(d, a, b, c, k[8], 11, -2022574463);
-	        c = hh(c, d, a, b, k[11], 16, 1839030562);
-	        b = hh(b, c, d, a, k[14], 23, -35309556);
-	        a = hh(a, b, c, d, k[1], 4, -1530992060);
-	        d = hh(d, a, b, c, k[4], 11, 1272893353);
-	        c = hh(c, d, a, b, k[7], 16, -155497632);
-	        b = hh(b, c, d, a, k[10], 23, -1094730640);
-	        a = hh(a, b, c, d, k[13], 4, 681279174);
-	        d = hh(d, a, b, c, k[0], 11, -358537222);
-	        c = hh(c, d, a, b, k[3], 16, -722521979);
-	        b = hh(b, c, d, a, k[6], 23, 76029189);
-	        a = hh(a, b, c, d, k[9], 4, -640364487);
-	        d = hh(d, a, b, c, k[12], 11, -421815835);
-	        c = hh(c, d, a, b, k[15], 16, 530742520);
-	        b = hh(b, c, d, a, k[2], 23, -995338651);
-
-	        a = ii(a, b, c, d, k[0], 6, -198630844);
-	        d = ii(d, a, b, c, k[7], 10, 1126891415);
-	        c = ii(c, d, a, b, k[14], 15, -1416354905);
-	        b = ii(b, c, d, a, k[5], 21, -57434055);
-	        a = ii(a, b, c, d, k[12], 6, 1700485571);
-	        d = ii(d, a, b, c, k[3], 10, -1894986606);
-	        c = ii(c, d, a, b, k[10], 15, -1051523);
-	        b = ii(b, c, d, a, k[1], 21, -2054922799);
-	        a = ii(a, b, c, d, k[8], 6, 1873313359);
-	        d = ii(d, a, b, c, k[15], 10, -30611744);
-	        c = ii(c, d, a, b, k[6], 15, -1560198380);
-	        b = ii(b, c, d, a, k[13], 21, 1309151649);
-	        a = ii(a, b, c, d, k[4], 6, -145523070);
-	        d = ii(d, a, b, c, k[11], 10, -1120210379);
-	        c = ii(c, d, a, b, k[2], 15, 718787259);
-	        b = ii(b, c, d, a, k[9], 21, -343485551);
-
-	        x[0] = add32(a, x[0]);
-	        x[1] = add32(b, x[1]);
-	        x[2] = add32(c, x[2]);
-	        x[3] = add32(d, x[3]);
-	    }
-
-	    function md5blk(s) {
-	        var md5blks = [],
-	            i; /* Andy King said do it this way. */
-
-	        for (i = 0; i < 64; i += 4) {
-	            md5blks[i >> 2] = s.charCodeAt(i) + (s.charCodeAt(i + 1) << 8) + (s.charCodeAt(i + 2) << 16) + (s.charCodeAt(i + 3) << 24);
-	        }
-	        return md5blks;
-	    }
-
-	    function md5blk_array(a) {
-	        var md5blks = [],
-	            i; /* Andy King said do it this way. */
-
-	        for (i = 0; i < 64; i += 4) {
-	            md5blks[i >> 2] = a[i] + (a[i + 1] << 8) + (a[i + 2] << 16) + (a[i + 3] << 24);
-	        }
-	        return md5blks;
-	    }
-
-	    function md51(s) {
-	        var n = s.length,
-	            state = [1732584193, -271733879, -1732584194, 271733878],
-	            i,
-	            length,
-	            tail,
-	            tmp,
-	            lo,
-	            hi;
-
-	        for (i = 64; i <= n; i += 64) {
-	            md5cycle(state, md5blk(s.substring(i - 64, i)));
-	        }
-	        s = s.substring(i - 64);
-	        length = s.length;
-	        tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-	        for (i = 0; i < length; i += 1) {
-	            tail[i >> 2] |= s.charCodeAt(i) << ((i % 4) << 3);
-	        }
-	        tail[i >> 2] |= 0x80 << ((i % 4) << 3);
-	        if (i > 55) {
-	            md5cycle(state, tail);
-	            for (i = 0; i < 16; i += 1) {
-	                tail[i] = 0;
-	            }
-	        }
-
-	        // Beware that the final length might not fit in 32 bits so we take care of that
-	        tmp = n * 8;
-	        tmp = tmp.toString(16).match(/(.*?)(.{0,8})$/);
-	        lo = parseInt(tmp[2], 16);
-	        hi = parseInt(tmp[1], 16) || 0;
-
-	        tail[14] = lo;
-	        tail[15] = hi;
-
-	        md5cycle(state, tail);
-	        return state;
-	    }
-
-	    function md51_array(a) {
-	        var n = a.length,
-	            state = [1732584193, -271733879, -1732584194, 271733878],
-	            i,
-	            length,
-	            tail,
-	            tmp,
-	            lo,
-	            hi;
-
-	        for (i = 64; i <= n; i += 64) {
-	            md5cycle(state, md5blk_array(a.subarray(i - 64, i)));
-	        }
-
-	        // Not sure if it is a bug, however IE10 will always produce a sub array of length 1
-	        // containing the last element of the parent array if the sub array specified starts
-	        // beyond the length of the parent array - weird.
-	        // https://connect.microsoft.com/IE/feedback/details/771452/typed-array-subarray-issue
-	        a = (i - 64) < n ? a.subarray(i - 64) : new Uint8Array(0);
-
-	        length = a.length;
-	        tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-	        for (i = 0; i < length; i += 1) {
-	            tail[i >> 2] |= a[i] << ((i % 4) << 3);
-	        }
-
-	        tail[i >> 2] |= 0x80 << ((i % 4) << 3);
-	        if (i > 55) {
-	            md5cycle(state, tail);
-	            for (i = 0; i < 16; i += 1) {
-	                tail[i] = 0;
-	            }
-	        }
-
-	        // Beware that the final length might not fit in 32 bits so we take care of that
-	        tmp = n * 8;
-	        tmp = tmp.toString(16).match(/(.*?)(.{0,8})$/);
-	        lo = parseInt(tmp[2], 16);
-	        hi = parseInt(tmp[1], 16) || 0;
-
-	        tail[14] = lo;
-	        tail[15] = hi;
-
-	        md5cycle(state, tail);
-
-	        return state;
-	    }
-
-	    function rhex(n) {
-	        var s = '',
-	            j;
-	        for (j = 0; j < 4; j += 1) {
-	            s += hex_chr[(n >> (j * 8 + 4)) & 0x0F] + hex_chr[(n >> (j * 8)) & 0x0F];
-	        }
-	        return s;
-	    }
-
-	    function hex(x) {
-	        var i;
-	        for (i = 0; i < x.length; i += 1) {
-	            x[i] = rhex(x[i]);
-	        }
-	        return x.join('');
-	    }
-
-	    // In some cases the fast add32 function cannot be used..
-	    if (hex(md51('hello')) !== '5d41402abc4b2a76b9719d911017c592') {
-	        add32 = function (x, y) {
-	            var lsw = (x & 0xFFFF) + (y & 0xFFFF),
-	                msw = (x >> 16) + (y >> 16) + (lsw >> 16);
-	            return (msw << 16) | (lsw & 0xFFFF);
-	        };
-	    }
-
-	    // ---------------------------------------------------
-
-	    /**
-	     * ArrayBuffer slice polyfill.
-	     *
-	     * @see https://github.com/ttaubert/node-arraybuffer-slice
-	     */
-
-	    if (typeof ArrayBuffer !== 'undefined' && !ArrayBuffer.prototype.slice) {
-	        (function () {
-	            function clamp(val, length) {
-	                val = (val | 0) || 0;
-
-	                if (val < 0) {
-	                    return Math.max(val + length, 0);
-	                }
-
-	                return Math.min(val, length);
-	            }
-
-	            ArrayBuffer.prototype.slice = function (from, to) {
-	                var length = this.byteLength,
-	                    begin = clamp(from, length),
-	                    end = length,
-	                    num,
-	                    target,
-	                    targetArray,
-	                    sourceArray;
-
-	                if (to !== undefined) {
-	                    end = clamp(to, length);
-	                }
-
-	                if (begin > end) {
-	                    return new ArrayBuffer(0);
-	                }
-
-	                num = end - begin;
-	                target = new ArrayBuffer(num);
-	                targetArray = new Uint8Array(target);
-
-	                sourceArray = new Uint8Array(this, begin, num);
-	                targetArray.set(sourceArray);
-
-	                return target;
-	            };
-	        })();
-	    }
-
-	    // ---------------------------------------------------
-
-	    /**
-	     * Helpers.
-	     */
-
-	    function toUtf8(str) {
-	        if (/[\u0080-\uFFFF]/.test(str)) {
-	            str = unescape(encodeURIComponent(str));
-	        }
-
-	        return str;
-	    }
-
-	    function utf8Str2ArrayBuffer(str, returnUInt8Array) {
-	        var length = str.length,
-	           buff = new ArrayBuffer(length),
-	           arr = new Uint8Array(buff),
-	           i;
-
-	        for (i = 0; i < length; i += 1) {
-	            arr[i] = str.charCodeAt(i);
-	        }
-
-	        return returnUInt8Array ? arr : buff;
-	    }
-
-	    function arrayBuffer2Utf8Str(buff) {
-	        return String.fromCharCode.apply(null, new Uint8Array(buff));
-	    }
-
-	    function concatenateArrayBuffers(first, second, returnUInt8Array) {
-	        var result = new Uint8Array(first.byteLength + second.byteLength);
-
-	        result.set(new Uint8Array(first));
-	        result.set(new Uint8Array(second), first.byteLength);
-
-	        return returnUInt8Array ? result : result.buffer;
-	    }
-
-	    function hexToBinaryString(hex) {
-	        var bytes = [],
-	            length = hex.length,
-	            x;
-
-	        for (x = 0; x < length - 1; x += 2) {
-	            bytes.push(parseInt(hex.substr(x, 2), 16));
-	        }
-
-	        return String.fromCharCode.apply(String, bytes);
-	    }
-
-	    // ---------------------------------------------------
-
-	    /**
-	     * SparkMD5 OOP implementation.
-	     *
-	     * Use this class to perform an incremental md5, otherwise use the
-	     * static methods instead.
-	     */
-
-	    function SparkMD5() {
-	        // call reset to init the instance
-	        this.reset();
-	    }
-
-	    /**
-	     * Appends a string.
-	     * A conversion will be applied if an utf8 string is detected.
-	     *
-	     * @param {String} str The string to be appended
-	     *
-	     * @return {SparkMD5} The instance itself
-	     */
-	    SparkMD5.prototype.append = function (str) {
-	        // Converts the string to utf8 bytes if necessary
-	        // Then append as binary
-	        this.appendBinary(toUtf8(str));
-
-	        return this;
-	    };
-
-	    /**
-	     * Appends a binary string.
-	     *
-	     * @param {String} contents The binary string to be appended
-	     *
-	     * @return {SparkMD5} The instance itself
-	     */
-	    SparkMD5.prototype.appendBinary = function (contents) {
-	        this._buff += contents;
-	        this._length += contents.length;
-
-	        var length = this._buff.length,
-	            i;
-
-	        for (i = 64; i <= length; i += 64) {
-	            md5cycle(this._hash, md5blk(this._buff.substring(i - 64, i)));
-	        }
-
-	        this._buff = this._buff.substring(i - 64);
-
-	        return this;
-	    };
-
-	    /**
-	     * Finishes the incremental computation, reseting the internal state and
-	     * returning the result.
-	     *
-	     * @param {Boolean} raw True to get the raw string, false to get the hex string
-	     *
-	     * @return {String} The result
-	     */
-	    SparkMD5.prototype.end = function (raw) {
-	        var buff = this._buff,
-	            length = buff.length,
-	            i,
-	            tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-	            ret;
-
-	        for (i = 0; i < length; i += 1) {
-	            tail[i >> 2] |= buff.charCodeAt(i) << ((i % 4) << 3);
-	        }
-
-	        this._finish(tail, length);
-	        ret = hex(this._hash);
-
-	        if (raw) {
-	            ret = hexToBinaryString(ret);
-	        }
-
-	        this.reset();
-
-	        return ret;
-	    };
-
-	    /**
-	     * Resets the internal state of the computation.
-	     *
-	     * @return {SparkMD5} The instance itself
-	     */
-	    SparkMD5.prototype.reset = function () {
-	        this._buff = '';
-	        this._length = 0;
-	        this._hash = [1732584193, -271733879, -1732584194, 271733878];
-
-	        return this;
-	    };
-
-	    /**
-	     * Gets the internal state of the computation.
-	     *
-	     * @return {Object} The state
-	     */
-	    SparkMD5.prototype.getState = function () {
-	        return {
-	            buff: this._buff,
-	            length: this._length,
-	            hash: this._hash
-	        };
-	    };
-
-	    /**
-	     * Gets the internal state of the computation.
-	     *
-	     * @param {Object} state The state
-	     *
-	     * @return {SparkMD5} The instance itself
-	     */
-	    SparkMD5.prototype.setState = function (state) {
-	        this._buff = state.buff;
-	        this._length = state.length;
-	        this._hash = state.hash;
-
-	        return this;
-	    };
-
-	    /**
-	     * Releases memory used by the incremental buffer and other additional
-	     * resources. If you plan to use the instance again, use reset instead.
-	     */
-	    SparkMD5.prototype.destroy = function () {
-	        delete this._hash;
-	        delete this._buff;
-	        delete this._length;
-	    };
-
-	    /**
-	     * Finish the final calculation based on the tail.
-	     *
-	     * @param {Array}  tail   The tail (will be modified)
-	     * @param {Number} length The length of the remaining buffer
-	     */
-	    SparkMD5.prototype._finish = function (tail, length) {
-	        var i = length,
-	            tmp,
-	            lo,
-	            hi;
-
-	        tail[i >> 2] |= 0x80 << ((i % 4) << 3);
-	        if (i > 55) {
-	            md5cycle(this._hash, tail);
-	            for (i = 0; i < 16; i += 1) {
-	                tail[i] = 0;
-	            }
-	        }
-
-	        // Do the final computation based on the tail and length
-	        // Beware that the final length may not fit in 32 bits so we take care of that
-	        tmp = this._length * 8;
-	        tmp = tmp.toString(16).match(/(.*?)(.{0,8})$/);
-	        lo = parseInt(tmp[2], 16);
-	        hi = parseInt(tmp[1], 16) || 0;
-
-	        tail[14] = lo;
-	        tail[15] = hi;
-	        md5cycle(this._hash, tail);
-	    };
-
-	    /**
-	     * Performs the md5 hash on a string.
-	     * A conversion will be applied if utf8 string is detected.
-	     *
-	     * @param {String}  str The string
-	     * @param {Boolean} raw True to get the raw string, false to get the hex string
-	     *
-	     * @return {String} The result
-	     */
-	    SparkMD5.hash = function (str, raw) {
-	        // Converts the string to utf8 bytes if necessary
-	        // Then compute it using the binary function
-	        return SparkMD5.hashBinary(toUtf8(str), raw);
-	    };
-
-	    /**
-	     * Performs the md5 hash on a binary string.
-	     *
-	     * @param {String}  content The binary string
-	     * @param {Boolean} raw     True to get the raw string, false to get the hex string
-	     *
-	     * @return {String} The result
-	     */
-	    SparkMD5.hashBinary = function (content, raw) {
-	        var hash = md51(content),
-	            ret = hex(hash);
-
-	        return raw ? hexToBinaryString(ret) : ret;
-	    };
-
-	    // ---------------------------------------------------
-
-	    /**
-	     * SparkMD5 OOP implementation for array buffers.
-	     *
-	     * Use this class to perform an incremental md5 ONLY for array buffers.
-	     */
-	    SparkMD5.ArrayBuffer = function () {
-	        // call reset to init the instance
-	        this.reset();
-	    };
-
-	    /**
-	     * Appends an array buffer.
-	     *
-	     * @param {ArrayBuffer} arr The array to be appended
-	     *
-	     * @return {SparkMD5.ArrayBuffer} The instance itself
-	     */
-	    SparkMD5.ArrayBuffer.prototype.append = function (arr) {
-	        var buff = concatenateArrayBuffers(this._buff.buffer, arr, true),
-	            length = buff.length,
-	            i;
-
-	        this._length += arr.byteLength;
-
-	        for (i = 64; i <= length; i += 64) {
-	            md5cycle(this._hash, md5blk_array(buff.subarray(i - 64, i)));
-	        }
-
-	        this._buff = (i - 64) < length ? new Uint8Array(buff.buffer.slice(i - 64)) : new Uint8Array(0);
-
-	        return this;
-	    };
-
-	    /**
-	     * Finishes the incremental computation, reseting the internal state and
-	     * returning the result.
-	     *
-	     * @param {Boolean} raw True to get the raw string, false to get the hex string
-	     *
-	     * @return {String} The result
-	     */
-	    SparkMD5.ArrayBuffer.prototype.end = function (raw) {
-	        var buff = this._buff,
-	            length = buff.length,
-	            tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-	            i,
-	            ret;
-
-	        for (i = 0; i < length; i += 1) {
-	            tail[i >> 2] |= buff[i] << ((i % 4) << 3);
-	        }
-
-	        this._finish(tail, length);
-	        ret = hex(this._hash);
-
-	        if (raw) {
-	            ret = hexToBinaryString(ret);
-	        }
-
-	        this.reset();
-
-	        return ret;
-	    };
-
-	    /**
-	     * Resets the internal state of the computation.
-	     *
-	     * @return {SparkMD5.ArrayBuffer} The instance itself
-	     */
-	    SparkMD5.ArrayBuffer.prototype.reset = function () {
-	        this._buff = new Uint8Array(0);
-	        this._length = 0;
-	        this._hash = [1732584193, -271733879, -1732584194, 271733878];
-
-	        return this;
-	    };
-
-	    /**
-	     * Gets the internal state of the computation.
-	     *
-	     * @return {Object} The state
-	     */
-	    SparkMD5.ArrayBuffer.prototype.getState = function () {
-	        var state = SparkMD5.prototype.getState.call(this);
-
-	        // Convert buffer to a string
-	        state.buff = arrayBuffer2Utf8Str(state.buff);
-
-	        return state;
-	    };
-
-	    /**
-	     * Gets the internal state of the computation.
-	     *
-	     * @param {Object} state The state
-	     *
-	     * @return {SparkMD5.ArrayBuffer} The instance itself
-	     */
-	    SparkMD5.ArrayBuffer.prototype.setState = function (state) {
-	        // Convert string to buffer
-	        state.buff = utf8Str2ArrayBuffer(state.buff, true);
-
-	        return SparkMD5.prototype.setState.call(this, state);
-	    };
-
-	    SparkMD5.ArrayBuffer.prototype.destroy = SparkMD5.prototype.destroy;
-
-	    SparkMD5.ArrayBuffer.prototype._finish = SparkMD5.prototype._finish;
-
-	    /**
-	     * Performs the md5 hash on an array buffer.
-	     *
-	     * @param {ArrayBuffer} arr The array buffer
-	     * @param {Boolean}     raw True to get the raw string, false to get the hex one
-	     *
-	     * @return {String} The result
-	     */
-	    SparkMD5.ArrayBuffer.hash = function (arr, raw) {
-	        var hash = md51_array(new Uint8Array(arr)),
-	            ret = hex(hash);
-
-	        return raw ? hexToBinaryString(ret) : ret;
-	    };
-
-	    return SparkMD5;
-	}));
-
-
-/***/ },
-/* 8 */
-/***/ function(module, exports) {
-
-	module.exports = {
-		"name": "ts-loader",
-		"version": "1.0.0",
-		"private": true,
-		"repository": "https://github.com/kkvesper/ts-loader",
-		"dependencies": {
-			"json-loader": "^0.5.4",
-			"lz-string": "^1.4.4",
-			"q-io": "^1.13.2",
-			"semver": "^5.1.0",
-			"spark-md5": "^2.0.2",
-			"throat": "^2.0.2",
-			"webpack": "^1.12.14"
-		},
-		"supportedTSEmberVersion": ">=3.17.0",
-		"supportedManifestVersion": "^2.0.0",
-		"manifestFile": "app-manifest.json",
-		"server": "http://192.168.0.38:4200"
-	};
-
-/***/ },
-/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {exports = module.exports = SemVer;
@@ -5143,11 +4432,823 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ },
+/* 8 */
+/***/ function(module, exports) {
+
+	'use strict'
+
+	module.exports = function (PromiseArgument) {
+	  var Promise;
+	  function throat(size, fn) {
+	    var queue = []
+	    function run(fn, self, args) {
+	      if (size) {
+	        size--
+	        var result = new Promise(function (resolve) {
+	          resolve(fn.apply(self, args))
+	        })
+	        result.then(release, release)
+	        return result
+	      } else {
+	        return new Promise(function (resolve) {
+	          queue.push(new Delayed(resolve, fn, self, args))
+	        })
+	      }
+	    }
+	    function release() {
+	      size++
+	      if (queue.length) {
+	        var next = queue.shift()
+	        next.resolve(run(next.fn, next.self, next.args))
+	      }
+	    }
+	    if (typeof size === 'function' && typeof fn === 'number') {
+	      var temp = fn;
+	      fn = size;
+	      size = temp;
+	    }
+	    if (typeof fn === 'function') {
+	      return function () {
+	        var args = [];
+	        for (var i = 0; i < arguments.length; i++) {
+	          args.push(arguments[i]);
+	        }
+	        return run(fn, this, args)
+	      }
+	    } else {
+	      return function (fn) {
+	        var args = [];
+	        for (var i = 1; i < arguments.length; i++) {
+	          args.push(arguments[i]);
+	        }
+	        return run(fn, this, args)
+	      }
+	    }
+	  }
+	  if (typeof arguments[0] === 'number' || typeof arguments[1] === 'number') {
+	    Promise = module.exports.Promise;
+	    if (typeof Promise !== 'function') {
+	      throw new Error('You must provide a Promise polyfill for this library to work in older environments');
+	    }
+	    return throat(arguments[0], arguments[1]);
+	  } else {
+	    Promise = PromiseArgument;
+	    return throat;
+	  }
+	}
+
+	/* istanbul ignore next */
+	if (typeof Promise === 'function') {
+	  module.exports.Promise = Promise;
+	}
+
+	function Delayed(resolve, fn, self, args) {
+	  this.resolve = resolve
+	  this.fn = fn
+	  this.self = self || null
+	  this.args = args
+	}
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	(function (factory) {
+	    if (true) {
+	        // Node/CommonJS
+	        module.exports = factory();
+	    } else if (typeof define === 'function' && define.amd) {
+	        // AMD
+	        define(factory);
+	    } else {
+	        // Browser globals (with support for web workers)
+	        var glob;
+
+	        try {
+	            glob = window;
+	        } catch (e) {
+	            glob = self;
+	        }
+
+	        glob.SparkMD5 = factory();
+	    }
+	}(function (undefined) {
+
+	    'use strict';
+
+	    /*
+	     * Fastest md5 implementation around (JKM md5).
+	     * Credits: Joseph Myers
+	     *
+	     * @see http://www.myersdaily.org/joseph/javascript/md5-text.html
+	     * @see http://jsperf.com/md5-shootout/7
+	     */
+
+	    /* this function is much faster,
+	      so if possible we use it. Some IEs
+	      are the only ones I know of that
+	      need the idiotic second function,
+	      generated by an if clause.  */
+	    var add32 = function (a, b) {
+	        return (a + b) & 0xFFFFFFFF;
+	    },
+	        hex_chr = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'];
+
+
+	    function cmn(q, a, b, x, s, t) {
+	        a = add32(add32(a, q), add32(x, t));
+	        return add32((a << s) | (a >>> (32 - s)), b);
+	    }
+
+	    function ff(a, b, c, d, x, s, t) {
+	        return cmn((b & c) | ((~b) & d), a, b, x, s, t);
+	    }
+
+	    function gg(a, b, c, d, x, s, t) {
+	        return cmn((b & d) | (c & (~d)), a, b, x, s, t);
+	    }
+
+	    function hh(a, b, c, d, x, s, t) {
+	        return cmn(b ^ c ^ d, a, b, x, s, t);
+	    }
+
+	    function ii(a, b, c, d, x, s, t) {
+	        return cmn(c ^ (b | (~d)), a, b, x, s, t);
+	    }
+
+	    function md5cycle(x, k) {
+	        var a = x[0],
+	            b = x[1],
+	            c = x[2],
+	            d = x[3];
+
+	        a = ff(a, b, c, d, k[0], 7, -680876936);
+	        d = ff(d, a, b, c, k[1], 12, -389564586);
+	        c = ff(c, d, a, b, k[2], 17, 606105819);
+	        b = ff(b, c, d, a, k[3], 22, -1044525330);
+	        a = ff(a, b, c, d, k[4], 7, -176418897);
+	        d = ff(d, a, b, c, k[5], 12, 1200080426);
+	        c = ff(c, d, a, b, k[6], 17, -1473231341);
+	        b = ff(b, c, d, a, k[7], 22, -45705983);
+	        a = ff(a, b, c, d, k[8], 7, 1770035416);
+	        d = ff(d, a, b, c, k[9], 12, -1958414417);
+	        c = ff(c, d, a, b, k[10], 17, -42063);
+	        b = ff(b, c, d, a, k[11], 22, -1990404162);
+	        a = ff(a, b, c, d, k[12], 7, 1804603682);
+	        d = ff(d, a, b, c, k[13], 12, -40341101);
+	        c = ff(c, d, a, b, k[14], 17, -1502002290);
+	        b = ff(b, c, d, a, k[15], 22, 1236535329);
+
+	        a = gg(a, b, c, d, k[1], 5, -165796510);
+	        d = gg(d, a, b, c, k[6], 9, -1069501632);
+	        c = gg(c, d, a, b, k[11], 14, 643717713);
+	        b = gg(b, c, d, a, k[0], 20, -373897302);
+	        a = gg(a, b, c, d, k[5], 5, -701558691);
+	        d = gg(d, a, b, c, k[10], 9, 38016083);
+	        c = gg(c, d, a, b, k[15], 14, -660478335);
+	        b = gg(b, c, d, a, k[4], 20, -405537848);
+	        a = gg(a, b, c, d, k[9], 5, 568446438);
+	        d = gg(d, a, b, c, k[14], 9, -1019803690);
+	        c = gg(c, d, a, b, k[3], 14, -187363961);
+	        b = gg(b, c, d, a, k[8], 20, 1163531501);
+	        a = gg(a, b, c, d, k[13], 5, -1444681467);
+	        d = gg(d, a, b, c, k[2], 9, -51403784);
+	        c = gg(c, d, a, b, k[7], 14, 1735328473);
+	        b = gg(b, c, d, a, k[12], 20, -1926607734);
+
+	        a = hh(a, b, c, d, k[5], 4, -378558);
+	        d = hh(d, a, b, c, k[8], 11, -2022574463);
+	        c = hh(c, d, a, b, k[11], 16, 1839030562);
+	        b = hh(b, c, d, a, k[14], 23, -35309556);
+	        a = hh(a, b, c, d, k[1], 4, -1530992060);
+	        d = hh(d, a, b, c, k[4], 11, 1272893353);
+	        c = hh(c, d, a, b, k[7], 16, -155497632);
+	        b = hh(b, c, d, a, k[10], 23, -1094730640);
+	        a = hh(a, b, c, d, k[13], 4, 681279174);
+	        d = hh(d, a, b, c, k[0], 11, -358537222);
+	        c = hh(c, d, a, b, k[3], 16, -722521979);
+	        b = hh(b, c, d, a, k[6], 23, 76029189);
+	        a = hh(a, b, c, d, k[9], 4, -640364487);
+	        d = hh(d, a, b, c, k[12], 11, -421815835);
+	        c = hh(c, d, a, b, k[15], 16, 530742520);
+	        b = hh(b, c, d, a, k[2], 23, -995338651);
+
+	        a = ii(a, b, c, d, k[0], 6, -198630844);
+	        d = ii(d, a, b, c, k[7], 10, 1126891415);
+	        c = ii(c, d, a, b, k[14], 15, -1416354905);
+	        b = ii(b, c, d, a, k[5], 21, -57434055);
+	        a = ii(a, b, c, d, k[12], 6, 1700485571);
+	        d = ii(d, a, b, c, k[3], 10, -1894986606);
+	        c = ii(c, d, a, b, k[10], 15, -1051523);
+	        b = ii(b, c, d, a, k[1], 21, -2054922799);
+	        a = ii(a, b, c, d, k[8], 6, 1873313359);
+	        d = ii(d, a, b, c, k[15], 10, -30611744);
+	        c = ii(c, d, a, b, k[6], 15, -1560198380);
+	        b = ii(b, c, d, a, k[13], 21, 1309151649);
+	        a = ii(a, b, c, d, k[4], 6, -145523070);
+	        d = ii(d, a, b, c, k[11], 10, -1120210379);
+	        c = ii(c, d, a, b, k[2], 15, 718787259);
+	        b = ii(b, c, d, a, k[9], 21, -343485551);
+
+	        x[0] = add32(a, x[0]);
+	        x[1] = add32(b, x[1]);
+	        x[2] = add32(c, x[2]);
+	        x[3] = add32(d, x[3]);
+	    }
+
+	    function md5blk(s) {
+	        var md5blks = [],
+	            i; /* Andy King said do it this way. */
+
+	        for (i = 0; i < 64; i += 4) {
+	            md5blks[i >> 2] = s.charCodeAt(i) + (s.charCodeAt(i + 1) << 8) + (s.charCodeAt(i + 2) << 16) + (s.charCodeAt(i + 3) << 24);
+	        }
+	        return md5blks;
+	    }
+
+	    function md5blk_array(a) {
+	        var md5blks = [],
+	            i; /* Andy King said do it this way. */
+
+	        for (i = 0; i < 64; i += 4) {
+	            md5blks[i >> 2] = a[i] + (a[i + 1] << 8) + (a[i + 2] << 16) + (a[i + 3] << 24);
+	        }
+	        return md5blks;
+	    }
+
+	    function md51(s) {
+	        var n = s.length,
+	            state = [1732584193, -271733879, -1732584194, 271733878],
+	            i,
+	            length,
+	            tail,
+	            tmp,
+	            lo,
+	            hi;
+
+	        for (i = 64; i <= n; i += 64) {
+	            md5cycle(state, md5blk(s.substring(i - 64, i)));
+	        }
+	        s = s.substring(i - 64);
+	        length = s.length;
+	        tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+	        for (i = 0; i < length; i += 1) {
+	            tail[i >> 2] |= s.charCodeAt(i) << ((i % 4) << 3);
+	        }
+	        tail[i >> 2] |= 0x80 << ((i % 4) << 3);
+	        if (i > 55) {
+	            md5cycle(state, tail);
+	            for (i = 0; i < 16; i += 1) {
+	                tail[i] = 0;
+	            }
+	        }
+
+	        // Beware that the final length might not fit in 32 bits so we take care of that
+	        tmp = n * 8;
+	        tmp = tmp.toString(16).match(/(.*?)(.{0,8})$/);
+	        lo = parseInt(tmp[2], 16);
+	        hi = parseInt(tmp[1], 16) || 0;
+
+	        tail[14] = lo;
+	        tail[15] = hi;
+
+	        md5cycle(state, tail);
+	        return state;
+	    }
+
+	    function md51_array(a) {
+	        var n = a.length,
+	            state = [1732584193, -271733879, -1732584194, 271733878],
+	            i,
+	            length,
+	            tail,
+	            tmp,
+	            lo,
+	            hi;
+
+	        for (i = 64; i <= n; i += 64) {
+	            md5cycle(state, md5blk_array(a.subarray(i - 64, i)));
+	        }
+
+	        // Not sure if it is a bug, however IE10 will always produce a sub array of length 1
+	        // containing the last element of the parent array if the sub array specified starts
+	        // beyond the length of the parent array - weird.
+	        // https://connect.microsoft.com/IE/feedback/details/771452/typed-array-subarray-issue
+	        a = (i - 64) < n ? a.subarray(i - 64) : new Uint8Array(0);
+
+	        length = a.length;
+	        tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+	        for (i = 0; i < length; i += 1) {
+	            tail[i >> 2] |= a[i] << ((i % 4) << 3);
+	        }
+
+	        tail[i >> 2] |= 0x80 << ((i % 4) << 3);
+	        if (i > 55) {
+	            md5cycle(state, tail);
+	            for (i = 0; i < 16; i += 1) {
+	                tail[i] = 0;
+	            }
+	        }
+
+	        // Beware that the final length might not fit in 32 bits so we take care of that
+	        tmp = n * 8;
+	        tmp = tmp.toString(16).match(/(.*?)(.{0,8})$/);
+	        lo = parseInt(tmp[2], 16);
+	        hi = parseInt(tmp[1], 16) || 0;
+
+	        tail[14] = lo;
+	        tail[15] = hi;
+
+	        md5cycle(state, tail);
+
+	        return state;
+	    }
+
+	    function rhex(n) {
+	        var s = '',
+	            j;
+	        for (j = 0; j < 4; j += 1) {
+	            s += hex_chr[(n >> (j * 8 + 4)) & 0x0F] + hex_chr[(n >> (j * 8)) & 0x0F];
+	        }
+	        return s;
+	    }
+
+	    function hex(x) {
+	        var i;
+	        for (i = 0; i < x.length; i += 1) {
+	            x[i] = rhex(x[i]);
+	        }
+	        return x.join('');
+	    }
+
+	    // In some cases the fast add32 function cannot be used..
+	    if (hex(md51('hello')) !== '5d41402abc4b2a76b9719d911017c592') {
+	        add32 = function (x, y) {
+	            var lsw = (x & 0xFFFF) + (y & 0xFFFF),
+	                msw = (x >> 16) + (y >> 16) + (lsw >> 16);
+	            return (msw << 16) | (lsw & 0xFFFF);
+	        };
+	    }
+
+	    // ---------------------------------------------------
+
+	    /**
+	     * ArrayBuffer slice polyfill.
+	     *
+	     * @see https://github.com/ttaubert/node-arraybuffer-slice
+	     */
+
+	    if (typeof ArrayBuffer !== 'undefined' && !ArrayBuffer.prototype.slice) {
+	        (function () {
+	            function clamp(val, length) {
+	                val = (val | 0) || 0;
+
+	                if (val < 0) {
+	                    return Math.max(val + length, 0);
+	                }
+
+	                return Math.min(val, length);
+	            }
+
+	            ArrayBuffer.prototype.slice = function (from, to) {
+	                var length = this.byteLength,
+	                    begin = clamp(from, length),
+	                    end = length,
+	                    num,
+	                    target,
+	                    targetArray,
+	                    sourceArray;
+
+	                if (to !== undefined) {
+	                    end = clamp(to, length);
+	                }
+
+	                if (begin > end) {
+	                    return new ArrayBuffer(0);
+	                }
+
+	                num = end - begin;
+	                target = new ArrayBuffer(num);
+	                targetArray = new Uint8Array(target);
+
+	                sourceArray = new Uint8Array(this, begin, num);
+	                targetArray.set(sourceArray);
+
+	                return target;
+	            };
+	        })();
+	    }
+
+	    // ---------------------------------------------------
+
+	    /**
+	     * Helpers.
+	     */
+
+	    function toUtf8(str) {
+	        if (/[\u0080-\uFFFF]/.test(str)) {
+	            str = unescape(encodeURIComponent(str));
+	        }
+
+	        return str;
+	    }
+
+	    function utf8Str2ArrayBuffer(str, returnUInt8Array) {
+	        var length = str.length,
+	           buff = new ArrayBuffer(length),
+	           arr = new Uint8Array(buff),
+	           i;
+
+	        for (i = 0; i < length; i += 1) {
+	            arr[i] = str.charCodeAt(i);
+	        }
+
+	        return returnUInt8Array ? arr : buff;
+	    }
+
+	    function arrayBuffer2Utf8Str(buff) {
+	        return String.fromCharCode.apply(null, new Uint8Array(buff));
+	    }
+
+	    function concatenateArrayBuffers(first, second, returnUInt8Array) {
+	        var result = new Uint8Array(first.byteLength + second.byteLength);
+
+	        result.set(new Uint8Array(first));
+	        result.set(new Uint8Array(second), first.byteLength);
+
+	        return returnUInt8Array ? result : result.buffer;
+	    }
+
+	    function hexToBinaryString(hex) {
+	        var bytes = [],
+	            length = hex.length,
+	            x;
+
+	        for (x = 0; x < length - 1; x += 2) {
+	            bytes.push(parseInt(hex.substr(x, 2), 16));
+	        }
+
+	        return String.fromCharCode.apply(String, bytes);
+	    }
+
+	    // ---------------------------------------------------
+
+	    /**
+	     * SparkMD5 OOP implementation.
+	     *
+	     * Use this class to perform an incremental md5, otherwise use the
+	     * static methods instead.
+	     */
+
+	    function SparkMD5() {
+	        // call reset to init the instance
+	        this.reset();
+	    }
+
+	    /**
+	     * Appends a string.
+	     * A conversion will be applied if an utf8 string is detected.
+	     *
+	     * @param {String} str The string to be appended
+	     *
+	     * @return {SparkMD5} The instance itself
+	     */
+	    SparkMD5.prototype.append = function (str) {
+	        // Converts the string to utf8 bytes if necessary
+	        // Then append as binary
+	        this.appendBinary(toUtf8(str));
+
+	        return this;
+	    };
+
+	    /**
+	     * Appends a binary string.
+	     *
+	     * @param {String} contents The binary string to be appended
+	     *
+	     * @return {SparkMD5} The instance itself
+	     */
+	    SparkMD5.prototype.appendBinary = function (contents) {
+	        this._buff += contents;
+	        this._length += contents.length;
+
+	        var length = this._buff.length,
+	            i;
+
+	        for (i = 64; i <= length; i += 64) {
+	            md5cycle(this._hash, md5blk(this._buff.substring(i - 64, i)));
+	        }
+
+	        this._buff = this._buff.substring(i - 64);
+
+	        return this;
+	    };
+
+	    /**
+	     * Finishes the incremental computation, reseting the internal state and
+	     * returning the result.
+	     *
+	     * @param {Boolean} raw True to get the raw string, false to get the hex string
+	     *
+	     * @return {String} The result
+	     */
+	    SparkMD5.prototype.end = function (raw) {
+	        var buff = this._buff,
+	            length = buff.length,
+	            i,
+	            tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	            ret;
+
+	        for (i = 0; i < length; i += 1) {
+	            tail[i >> 2] |= buff.charCodeAt(i) << ((i % 4) << 3);
+	        }
+
+	        this._finish(tail, length);
+	        ret = hex(this._hash);
+
+	        if (raw) {
+	            ret = hexToBinaryString(ret);
+	        }
+
+	        this.reset();
+
+	        return ret;
+	    };
+
+	    /**
+	     * Resets the internal state of the computation.
+	     *
+	     * @return {SparkMD5} The instance itself
+	     */
+	    SparkMD5.prototype.reset = function () {
+	        this._buff = '';
+	        this._length = 0;
+	        this._hash = [1732584193, -271733879, -1732584194, 271733878];
+
+	        return this;
+	    };
+
+	    /**
+	     * Gets the internal state of the computation.
+	     *
+	     * @return {Object} The state
+	     */
+	    SparkMD5.prototype.getState = function () {
+	        return {
+	            buff: this._buff,
+	            length: this._length,
+	            hash: this._hash
+	        };
+	    };
+
+	    /**
+	     * Gets the internal state of the computation.
+	     *
+	     * @param {Object} state The state
+	     *
+	     * @return {SparkMD5} The instance itself
+	     */
+	    SparkMD5.prototype.setState = function (state) {
+	        this._buff = state.buff;
+	        this._length = state.length;
+	        this._hash = state.hash;
+
+	        return this;
+	    };
+
+	    /**
+	     * Releases memory used by the incremental buffer and other additional
+	     * resources. If you plan to use the instance again, use reset instead.
+	     */
+	    SparkMD5.prototype.destroy = function () {
+	        delete this._hash;
+	        delete this._buff;
+	        delete this._length;
+	    };
+
+	    /**
+	     * Finish the final calculation based on the tail.
+	     *
+	     * @param {Array}  tail   The tail (will be modified)
+	     * @param {Number} length The length of the remaining buffer
+	     */
+	    SparkMD5.prototype._finish = function (tail, length) {
+	        var i = length,
+	            tmp,
+	            lo,
+	            hi;
+
+	        tail[i >> 2] |= 0x80 << ((i % 4) << 3);
+	        if (i > 55) {
+	            md5cycle(this._hash, tail);
+	            for (i = 0; i < 16; i += 1) {
+	                tail[i] = 0;
+	            }
+	        }
+
+	        // Do the final computation based on the tail and length
+	        // Beware that the final length may not fit in 32 bits so we take care of that
+	        tmp = this._length * 8;
+	        tmp = tmp.toString(16).match(/(.*?)(.{0,8})$/);
+	        lo = parseInt(tmp[2], 16);
+	        hi = parseInt(tmp[1], 16) || 0;
+
+	        tail[14] = lo;
+	        tail[15] = hi;
+	        md5cycle(this._hash, tail);
+	    };
+
+	    /**
+	     * Performs the md5 hash on a string.
+	     * A conversion will be applied if utf8 string is detected.
+	     *
+	     * @param {String}  str The string
+	     * @param {Boolean} raw True to get the raw string, false to get the hex string
+	     *
+	     * @return {String} The result
+	     */
+	    SparkMD5.hash = function (str, raw) {
+	        // Converts the string to utf8 bytes if necessary
+	        // Then compute it using the binary function
+	        return SparkMD5.hashBinary(toUtf8(str), raw);
+	    };
+
+	    /**
+	     * Performs the md5 hash on a binary string.
+	     *
+	     * @param {String}  content The binary string
+	     * @param {Boolean} raw     True to get the raw string, false to get the hex string
+	     *
+	     * @return {String} The result
+	     */
+	    SparkMD5.hashBinary = function (content, raw) {
+	        var hash = md51(content),
+	            ret = hex(hash);
+
+	        return raw ? hexToBinaryString(ret) : ret;
+	    };
+
+	    // ---------------------------------------------------
+
+	    /**
+	     * SparkMD5 OOP implementation for array buffers.
+	     *
+	     * Use this class to perform an incremental md5 ONLY for array buffers.
+	     */
+	    SparkMD5.ArrayBuffer = function () {
+	        // call reset to init the instance
+	        this.reset();
+	    };
+
+	    /**
+	     * Appends an array buffer.
+	     *
+	     * @param {ArrayBuffer} arr The array to be appended
+	     *
+	     * @return {SparkMD5.ArrayBuffer} The instance itself
+	     */
+	    SparkMD5.ArrayBuffer.prototype.append = function (arr) {
+	        var buff = concatenateArrayBuffers(this._buff.buffer, arr, true),
+	            length = buff.length,
+	            i;
+
+	        this._length += arr.byteLength;
+
+	        for (i = 64; i <= length; i += 64) {
+	            md5cycle(this._hash, md5blk_array(buff.subarray(i - 64, i)));
+	        }
+
+	        this._buff = (i - 64) < length ? new Uint8Array(buff.buffer.slice(i - 64)) : new Uint8Array(0);
+
+	        return this;
+	    };
+
+	    /**
+	     * Finishes the incremental computation, reseting the internal state and
+	     * returning the result.
+	     *
+	     * @param {Boolean} raw True to get the raw string, false to get the hex string
+	     *
+	     * @return {String} The result
+	     */
+	    SparkMD5.ArrayBuffer.prototype.end = function (raw) {
+	        var buff = this._buff,
+	            length = buff.length,
+	            tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	            i,
+	            ret;
+
+	        for (i = 0; i < length; i += 1) {
+	            tail[i >> 2] |= buff[i] << ((i % 4) << 3);
+	        }
+
+	        this._finish(tail, length);
+	        ret = hex(this._hash);
+
+	        if (raw) {
+	            ret = hexToBinaryString(ret);
+	        }
+
+	        this.reset();
+
+	        return ret;
+	    };
+
+	    /**
+	     * Resets the internal state of the computation.
+	     *
+	     * @return {SparkMD5.ArrayBuffer} The instance itself
+	     */
+	    SparkMD5.ArrayBuffer.prototype.reset = function () {
+	        this._buff = new Uint8Array(0);
+	        this._length = 0;
+	        this._hash = [1732584193, -271733879, -1732584194, 271733878];
+
+	        return this;
+	    };
+
+	    /**
+	     * Gets the internal state of the computation.
+	     *
+	     * @return {Object} The state
+	     */
+	    SparkMD5.ArrayBuffer.prototype.getState = function () {
+	        var state = SparkMD5.prototype.getState.call(this);
+
+	        // Convert buffer to a string
+	        state.buff = arrayBuffer2Utf8Str(state.buff);
+
+	        return state;
+	    };
+
+	    /**
+	     * Gets the internal state of the computation.
+	     *
+	     * @param {Object} state The state
+	     *
+	     * @return {SparkMD5.ArrayBuffer} The instance itself
+	     */
+	    SparkMD5.ArrayBuffer.prototype.setState = function (state) {
+	        // Convert string to buffer
+	        state.buff = utf8Str2ArrayBuffer(state.buff, true);
+
+	        return SparkMD5.prototype.setState.call(this, state);
+	    };
+
+	    SparkMD5.ArrayBuffer.prototype.destroy = SparkMD5.prototype.destroy;
+
+	    SparkMD5.ArrayBuffer.prototype._finish = SparkMD5.prototype._finish;
+
+	    /**
+	     * Performs the md5 hash on an array buffer.
+	     *
+	     * @param {ArrayBuffer} arr The array buffer
+	     * @param {Boolean}     raw True to get the raw string, false to get the hex one
+	     *
+	     * @return {String} The result
+	     */
+	    SparkMD5.ArrayBuffer.hash = function (arr, raw) {
+	        var hash = md51_array(new Uint8Array(arr)),
+	            ret = hex(hash);
+
+	        return raw ? hexToBinaryString(ret) : ret;
+	    };
+
+	    return SparkMD5;
+	}));
+
+
+/***/ },
 /* 10 */
+/***/ function(module, exports) {
+
+	module.exports = {
+		"name": "ts-loader",
+		"version": "1.0.0",
+		"private": true,
+		"repository": "https://github.com/kkvesper/ts-loader",
+		"dependencies": {
+			"json-loader": "^0.5.4",
+			"lz-string": "^1.4.4",
+			"object-assign": "^4.0.1",
+			"q-io": "^1.13.2",
+			"semver": "^5.1.0",
+			"spark-md5": "^2.0.2",
+			"throat": "^2.0.2",
+			"webpack": "^1.12.14"
+		},
+		"manifestFile": "app-manifest.json",
+		"supportedTSEmberVersion": ">=3.17.0",
+		"supportedManifestVersion": "^2.0.0"
+	};
+
+/***/ },
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Promise = window.Promise = __webpack_require__(3).Promise;
-	var LZString = __webpack_require__(13);
+	var LZString = __webpack_require__(12);
 
 	var ls = window.localStorage;
 	var prefix = 'lspfs:';
@@ -5157,7 +5258,7 @@
 	  this.onerror = onerror;
 	  this.write = function (blob) {
 	    var that = this;
-	    var fileReader= new FileReader();
+	    var fileReader = new FileReader();
 
 	    fileReader.onload = function(e) {
 	      console.log(e.target.result.length);
@@ -5216,6 +5317,10 @@
 	function read(path) {
 	  return new Promise(function (resolve, reject) {
 	    var compressed = ls.getItem(prefix + path);
+	    if (compressed === null) {
+	      throw new Error('ENOENT', 'no such file or directory \'' + path + '\'');
+	    }
+
 	    var decompressed = LZString.decompressFromUTF16(compressed);
 
 	    resolve(decompressed);
@@ -5228,6 +5333,10 @@
 	  });
 	}
 
+	function remove(path) {
+
+	}
+
 	module.exports = {
 	  dir: dir,
 	  dirname: dirname,
@@ -5235,155 +5344,13 @@
 	  exists: exists,
 	  file: file,
 	  read: read,
-	  readJSON: readJSON
+	  readJSON: readJSON,
+	  remove: remove
 	};
-
-
-/***/ },
-/* 11 */
-/***/ function(module, exports) {
-
-	function xhrPromise(url, responseType) {
-	  responseType = responseType || 'arraybuffer';
-
-	  return new Promise(function (resolve, reject, progress) {
-	    var xhr = new window.XMLHttpRequest();
-
-	    xhr.onload = function (e) {
-	      if (this.status !== 200) {
-	        return reject('xhr status: ' + this.status + ', url: ' + url);
-	      }
-
-	      resolve({ response: this.response, contentType: this.getResponseHeader('Content-Type')});
-	    };
-
-	    xhr.onerror = function (e) {
-	      reject('xhr failed: ' + url);
-	    }
-	    xhr.ontimeout = function () {
-	      reject('xhr timeout: ' + url)
-	    };
-	    xhr.onabort = function () {
-	      reject('xhr abort: ' + url)
-	    };
-	    xhr.addEventListener('progress', progress);
-
-	    xhr.open('GET', url, true);
-
-	    xhr.responseType = responseType;
-
-	    xhr.send();
-	  });
-	}
-
-	module.exports = xhrPromise;
 
 
 /***/ },
 /* 12 */
-/***/ function(module, exports) {
-
-	var splash, loaderBox, icon, progress; // dom elements
-	var timeout;
-
-	function checkOrientation() {
-	  if (window.orientation == 0 || window.orientation == 180) { // portrait
-	    icon.classList.add('portrait');
-	  } else { //landscape
-	    icon.classList.remove('portrait');
-	  }
-	}
-
-	window.addEventListener('orientationchange', checkOrientation);
-
-	function show() {
-	  window.clearTimeout(timeout);
-	  splash.style.display = '';
-	  splash.style.transition = '';
-	  splash.style.webkitTransition = '';
-	  splash.style.opacity = 1;
-	}
-
-	function hide() {
-	  hideLoader();
-
-	  window.clearTimeout(timeout);
-	  timeout = window.setTimeout(function () {
-	    splash.style.transition = 'opacity 300ms linear';
-	    splash.style.webkitTransition = 'opacity 300ms linear';
-	    splash.style.opacity = 0;
-
-	    timeout = window.setTimeout(function () {
-	      splash.style.display = 'none';
-	    }, 300);
-	  }, 300);
-	}
-
-	function setProgress(value) {
-	  progress.textContent = value;
-	}
-
-	function setProgressScale(scale) {
-	  loaderBox.style.webkitTransform = 'scale(' + scale + ')';
-	  loaderBox.style.transform = 'scale(' + scale + ')';
-	}
-
-	function setIconVerticalPosition(position) {
-	  icon.style.webkitTransform = 'translateY(' + position + ')';
-	  icon.style.transform = 'translateY(' + position + ')';
-	}
-
-	function showLoader() {
-	  setIconVerticalPosition('-40px');
-	  setProgressScale(1);
-	}
-
-	function hideLoader() {
-	  setIconVerticalPosition(0);
-	  setProgressScale(0);
-	}
-
-	function setStatusBarHeight(height) {
-	  splash.style.marginTop =  height + 'px';
-	}
-
-	function create() {
-	  splash = document.createElement('div');
-	  splash.id = 'ts-splash-screen';
-
-	  icon = document.createElement('div');
-	  icon.id = 'ts-splash-icon';
-	  splash.appendChild(icon);
-
-	  loaderBox = document.createElement('div');
-	  loaderBox.id = 'ts-splash-loader';
-	  icon.appendChild(loaderBox);
-
-	  var tsSplashSpinner = document.createElement('div');
-	  tsSplashSpinner.id = 'ts-splash-spinner';
-	  loaderBox.appendChild(tsSplashSpinner);
-	  progress = document.createElement('div');
-	  progress.id = 'ts-splash-progress';
-	  loaderBox.appendChild(progress);
-
-	  document.body.appendChild(splash);
-
-	  checkOrientation();
-	}
-
-	module.exports = {
-	  create: create,
-	  show: show,
-	  hide: hide,
-	  setProgress: setProgress,
-	  showLoader: showLoader,
-	  hideLoader: hideLoader,
-	  setStatusBarHeight: setStatusBarHeight
-	};
-
-
-/***/ },
-/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;// Copyright (c) 2013 Pieroxy <pieroxy@pieroxy.net>
@@ -5887,6 +5854,150 @@
 	} else if( typeof module !== 'undefined' && module != null ) {
 	  module.exports = LZString
 	}
+
+
+/***/ },
+/* 13 */
+/***/ function(module, exports) {
+
+	function xhrPromise(url, responseType) {
+	  responseType = responseType || 'arraybuffer';
+
+	  return new Promise(function (resolve, reject, progress) {
+	    var xhr = new window.XMLHttpRequest();
+
+	    xhr.onload = function (e) {
+	      if (this.status !== 200) {
+	        return reject('xhr status: ' + this.status + ', url: ' + url);
+	      }
+
+	      resolve({ response: this.response, contentType: this.getResponseHeader('Content-Type')});
+	    };
+
+	    xhr.onerror = function (e) {
+	      reject('xhr failed: ' + url);
+	    }
+	    xhr.ontimeout = function () {
+	      reject('xhr timeout: ' + url)
+	    };
+	    xhr.onabort = function () {
+	      reject('xhr abort: ' + url)
+	    };
+	    xhr.addEventListener('progress', progress);
+
+	    xhr.open('GET', url, true);
+
+	    // For IE, set the responseType after open.
+	    xhr.responseType = responseType;
+
+	    xhr.send();
+	  });
+	}
+
+	module.exports = xhrPromise;
+
+
+/***/ },
+/* 14 */
+/***/ function(module, exports) {
+
+	var splash, loaderBox, icon, progress; // dom elements
+	var timeout;
+
+	function checkOrientation() {
+	  if (window.orientation == 0 || window.orientation == 180) { // portrait
+	    icon.classList.add('portrait');
+	  } else { //landscape
+	    icon.classList.remove('portrait');
+	  }
+	}
+
+	window.addEventListener('orientationchange', checkOrientation);
+
+	function show() {
+	  window.clearTimeout(timeout);
+	  splash.style.display = '';
+	  splash.style.transition = '';
+	  splash.style.webkitTransition = '';
+	  splash.style.opacity = 1;
+	}
+
+	function hide() {
+	  hideLoader();
+
+	  window.clearTimeout(timeout);
+	  timeout = window.setTimeout(function () {
+	    splash.style.transition = 'opacity 300ms linear';
+	    splash.style.webkitTransition = 'opacity 300ms linear';
+	    splash.style.opacity = 0;
+
+	    timeout = window.setTimeout(function () {
+	      splash.style.display = 'none';
+	    }, 300);
+	  }, 300);
+	}
+
+	function setProgress(value) {
+	  progress.textContent = value;
+	}
+
+	function setProgressScale(scale) {
+	  loaderBox.style.webkitTransform = 'scale(' + scale + ')';
+	  loaderBox.style.transform = 'scale(' + scale + ')';
+	}
+
+	function setIconVerticalPosition(position) {
+	  icon.style.webkitTransform = 'translateY(' + position + ')';
+	  icon.style.transform = 'translateY(' + position + ')';
+	}
+
+	function showLoader() {
+	  setIconVerticalPosition('-40px');
+	  setProgressScale(1);
+	}
+
+	function hideLoader() {
+	  setIconVerticalPosition(0);
+	  setProgressScale(0);
+	}
+
+	function setStatusBarHeight(height) {
+	  splash.style.marginTop =  height + 'px';
+	}
+
+	function create() {
+	  splash = document.createElement('div');
+	  splash.id = 'ts-splash-screen';
+
+	  icon = document.createElement('div');
+	  icon.id = 'ts-splash-icon';
+	  splash.appendChild(icon);
+
+	  loaderBox = document.createElement('div');
+	  loaderBox.id = 'ts-splash-loader';
+	  icon.appendChild(loaderBox);
+
+	  var tsSplashSpinner = document.createElement('div');
+	  tsSplashSpinner.id = 'ts-splash-spinner';
+	  loaderBox.appendChild(tsSplashSpinner);
+	  progress = document.createElement('div');
+	  progress.id = 'ts-splash-progress';
+	  loaderBox.appendChild(progress);
+
+	  document.body.appendChild(splash);
+
+	  checkOrientation();
+	}
+
+	module.exports = {
+	  create: create,
+	  show: show,
+	  hide: hide,
+	  setProgress: setProgress,
+	  showLoader: showLoader,
+	  hideLoader: hideLoader,
+	  setStatusBarHeight: setStatusBarHeight
+	};
 
 
 /***/ }
