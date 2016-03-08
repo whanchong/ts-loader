@@ -14,6 +14,6 @@
     "webpack": "^1.12.14"
   },
   "manifestFile": "app-manifest.json",
-  "supportedTSEmberVersion": ">=3.17.0",
+  "supportedAppVersion": ">=3.17.0",
   "supportedManifestVersion": "^2.0.0"
 }

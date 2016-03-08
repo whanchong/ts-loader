@@ -283,8 +283,8 @@
 	    });
 	  }).then(function () {
 	    var manifest = file.content;
-	    if (!semver.satisfies(manifest.appVersion, config.supportedTSEmberVersion)) {
-	      throw new Error('Invalid TableSolution app version: expected \'' + config.supportedTSEmberVersion + '\' and got \'' + manifest.version + '\'.');
+	    if (!semver.satisfies(manifest.appVersion, config.supportedAppVersion)) {
+	      throw new Error('Unsupported application version: expected \'' + config.supportedAppVersion + '\' and got \'' + manifest.version + '\'.');
 	    }
 
 	    if (!semver.satisfies(manifest.manifestVersion, config.supportedManifestVersion)) {
@@ -295,52 +295,15 @@
 	  });
 	}
 
-	function setupDirectories() {
-	  console.log('setup directories');
-	  return fs.dir().then(function (directoryEntry) { return directoryEntry.nativeURL; });
-	}
-
-	function checkForFileUpdate(config, manifest) {
-	  console.log('check for files update');
-
+	function getFilesToLoad(manifest, config) {
 	  return new Promise(function (resolve, reject) {
-	    resolve(manifest.domNodes.map(function (nodeInfo) { return manifest.files[nodeInfo.path]; }).filter(function (file) { return !!file; }))
-	  });
-
-	  return fs.exists(localDirectory + config.manifestFile).then(function(localManifestEntry) {
-	    if (!localManifestEntry) {
-	      console.log('no local manifest found.');
-	      return manifest.domNodes.map(function (nodeInfo) {return manifest.files[nodeInfo.path]; }).filter(function (file) { return !!file; });
-	    }
-
-	    return fs.readJSON(localDirectory + config.manifestFile).then(function (localManifest) {
-	      var remoteFiles = manifest.files || {};
-	      var localFiles = localManifest.files || {};
-
-	      // looking for files to download
-	      var newFiles = [];
-	      for (var filePath in remoteFiles) {
-	        var localFile = localFiles[filePath];
-	        var remoteFile = remoteFiles[filePath];
-	        if (!localFile || localFile.hash !== remoteFile.hash) {
-	          newFiles.push(remoteFile);
-	          console.log('files to download:', filePath)
-	        }
-	      }
-
-	      // looking for files to delete
-	      var removePromises = [];
-	      for (var filePath in localFiles) {
-	        if (!remoteFiles[filePath]) {
-	          removePromises.push(fs.remove(localDirectory + filePath));
-	          console.log('files to delete:', filePath)
-	        }
-	      }
-
-	      return all(removePromises).then(function () {
-	        return newFiles;
-	      });
+	    var filesToLoad = manifest.domNodes.map(function (nodeInfo) {
+	      return manifest.files[nodeInfo.path];
+	    }).filter(function (file) {
+	      return file && (!config.useLocalCache || file.hash != localHashes[file.path]);
 	    });
+
+	    return resolve(filesToLoad);
 	  });
 	}
 
@@ -621,12 +584,8 @@
 
 	var loader = new EventEmitter();
 
-	loader.initialize = function (config) {
-	  this.config = Object.assign(loaderConfig, config);
-	};
-
 	loader.load = function (runtimeConfig) {
-	  var config = this.config = Object.assign(loaderConfig, runtimeConfig);
+	  var config = this.config = objectAssign(loaderConfig, runtimeConfig);
 	  var manifest = this.manifest = {};
 	  var fileCache = this.fileCache = {};
 
@@ -641,14 +600,15 @@
 	  }).then(function (appManifest) {
 	    fileCache[config.manifestFile] = appManifest;
 	    manifest = appManifest.content;
-	    return setupDirectories()
-	  }).then(function (path) {
-	    return checkForFileUpdate(config, manifest);
+
+	    return getFilesToLoad(manifest, config);
 	  }).then(function (files) {
 	    return downloadFiles(config.appHost, files);
 	  }).then(function (files) {
-	    return files
-	    return all(files.map(writeFile));
+	    if (config.useLocalCache) {
+	      return all(files.map(writeFile));
+	    }
+	    return files;
 	  }).then(function (files) {
 	    return loadFilesFromCache(manifest, fileCache, files);
 	  }).then(function () {
@@ -5253,7 +5213,7 @@
 			"webpack": "^1.12.14"
 		},
 		"manifestFile": "app-manifest.json",
-		"supportedTSEmberVersion": ">=3.17.0",
+		"supportedAppVersion": ">=3.17.0",
 		"supportedManifestVersion": "^2.0.0"
 	};
 
