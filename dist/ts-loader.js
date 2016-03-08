@@ -185,14 +185,14 @@
 
 	var EventEmitter = __webpack_require__(2).EventEmitter;
 	var all = __webpack_require__(3).all;
-	var objectAssign = window.Object.assign || __webpack_require__(6);
 	var Promise = window.Promise = __webpack_require__(3).Promise;
-	var semver = __webpack_require__(7);
-	var throat = __webpack_require__(8)(Promise);
-	var SparkMD5 = __webpack_require__(9);
+	var semver = __webpack_require__(6);
+	var throat = __webpack_require__(7)(Promise);
+	var SparkMD5 = __webpack_require__(8);
 
-	var loaderConfig = __webpack_require__(10);
-	var fs = __webpack_require__(11);
+	var loaderConfig = __webpack_require__(9);
+	var fs = __webpack_require__(10);
+	var objectAssign = __webpack_require__(12);
 	var xhrPromise = __webpack_require__(13);
 
 	var localDirectory = ''; // 'dist/';
@@ -245,6 +245,10 @@
 	      throw error;
 	    }
 	  }).then(function () {
+	    if (!config.appHost) {
+	      throw new Error('appHost is missing.')
+	    }
+
 	    var url = config.appHost + '/' + manifestEntry.path;
 
 	    return xhrPromise(url);
@@ -384,8 +388,6 @@
 	  totalBytes = files.reduce(function (total, file) { return total + file.size }, 0);
 	  loadedBytes = 0;
 
-	  console.log(files.length + ' files to download..');
-
 	  var promises = files.map(throat(5, function (file) {
 	    return downloadFile(serverAddress, file);
 	  }));
@@ -401,7 +403,7 @@
 	  }
 	}
 
-	function createLocalScriptNode(fileCache, nodeInfo) {
+	function createLocalScriptNode(fileCache, nodeInfo, config) {
 	  return new Promise(function (resolve, reject) {
 	    var node = document.createElement('script');
 	    node.setAttribute('type', 'text/javascript');
@@ -422,7 +424,21 @@
 	    var fileReader= new FileReader();
 
 	    fileReader.onload = function(e) {
-	      node.text = e.target.result;
+	      var text = e.target.result;
+
+	      if (config.rewriteSourcemaps) {
+	        var sourceIndex = text.lastIndexOf('\n//# sourceMappingURL=');
+
+	        if (sourceIndex === -1) {
+	          sourceIndex = text.length;
+	        }
+
+	        newSource = '\n//# sourceMappingURL=' + nodeInfo.path.replace('.js', '.map');
+
+	        text = text.substring(0, sourceIndex).concat(newSource);
+	      }
+
+	      node.text = text;
 	      node.id = nodeInfo.path;
 	      resolve(node);
 	    };
@@ -532,14 +548,14 @@
 	  });
 	}
 
-	function loadNodePromise(fileCache, nodeInfo) {
+	function loadNodePromise(fileCache, nodeInfo, config) {
 	  var isCached = fileCache.hasOwnProperty(nodeInfo.path);
 
 	  var type = isCached ? fileCache[nodeInfo.path].manifestEntry.type : nodeInfo.type;
 
 	  if (type === 'js') {
 	    if (isCached) {
-	      return createLocalScriptNode(fileCache, nodeInfo);
+	      return createLocalScriptNode(fileCache, nodeInfo, config);
 	    }
 	    return createRemoteScriptNode(nodeInfo);
 	  }
@@ -554,11 +570,9 @@
 	  throw new Error('Unknown node type: ' + type);
 	}
 
-	function loadNodes(manifest, fileCache) {
-	  console.log('load dom nodes.');
-
+	function loadNodes(manifest, fileCache, config) {
 	  return all(manifest.domNodes.map(throat(1, function (nodeInfo) {
-	    return loadNodePromise(fileCache, nodeInfo);
+	    return loadNodePromise(fileCache, nodeInfo, config);
 	  })));
 	}
 
@@ -585,7 +599,11 @@
 	var loader = new EventEmitter();
 
 	loader.load = function (runtimeConfig) {
+	  // We're passing in a dataSet as runtimeConfig and Safari's Object.assign doesn't work with it
+	  // so we use our own objectAssign that doesn't mutate data.
+
 	  var config = this.config = objectAssign(loaderConfig, runtimeConfig);
+
 	  var manifest = this.manifest = {};
 	  var fileCache = this.fileCache = {};
 
@@ -612,7 +630,7 @@
 	  }).then(function (files) {
 	    return loadFilesFromCache(manifest, fileCache, files);
 	  }).then(function () {
-	    return loadNodes(manifest, fileCache);
+	    return loadNodes(manifest, fileCache, config);
 	  }).then(function () {
 	    loader.emit('loaded');
 	  }).catch(function (e) {
@@ -3167,51 +3185,6 @@
 
 /***/ },
 /* 6 */
-/***/ function(module, exports) {
-
-	/* eslint-disable no-unused-vars */
-	'use strict';
-	var hasOwnProperty = Object.prototype.hasOwnProperty;
-	var propIsEnumerable = Object.prototype.propertyIsEnumerable;
-
-	function toObject(val) {
-		if (val === null || val === undefined) {
-			throw new TypeError('Object.assign cannot be called with null or undefined');
-		}
-
-		return Object(val);
-	}
-
-	module.exports = Object.assign || function (target, source) {
-		var from;
-		var to = toObject(target);
-		var symbols;
-
-		for (var s = 1; s < arguments.length; s++) {
-			from = Object(arguments[s]);
-
-			for (var key in from) {
-				if (hasOwnProperty.call(from, key)) {
-					to[key] = from[key];
-				}
-			}
-
-			if (Object.getOwnPropertySymbols) {
-				symbols = Object.getOwnPropertySymbols(from);
-				for (var i = 0; i < symbols.length; i++) {
-					if (propIsEnumerable.call(from, symbols[i])) {
-						to[symbols[i]] = from[symbols[i]];
-					}
-				}
-			}
-		}
-
-		return to;
-	};
-
-
-/***/ },
-/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {exports = module.exports = SemVer;
@@ -4406,7 +4379,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
 
 /***/ },
-/* 8 */
+/* 7 */
 /***/ function(module, exports) {
 
 	'use strict'
@@ -4485,7 +4458,7 @@
 
 
 /***/ },
-/* 9 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	(function (factory) {
@@ -5194,7 +5167,7 @@
 
 
 /***/ },
-/* 10 */
+/* 9 */
 /***/ function(module, exports) {
 
 	module.exports = {
@@ -5205,7 +5178,6 @@
 		"dependencies": {
 			"json-loader": "^0.5.4",
 			"lz-string": "^1.4.4",
-			"object-assign": "^4.0.1",
 			"q-io": "^1.13.2",
 			"semver": "^5.1.0",
 			"spark-md5": "^2.0.2",
@@ -5218,11 +5190,11 @@
 	};
 
 /***/ },
-/* 11 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Promise = window.Promise = __webpack_require__(3).Promise;
-	var LZString = __webpack_require__(12);
+	var LZString = __webpack_require__(11);
 
 	var ls = window.localStorage;
 	var prefix = 'lspfs:';
@@ -5328,7 +5300,7 @@
 
 
 /***/ },
-/* 12 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;// Copyright (c) 2013 Pieroxy <pieroxy@pieroxy.net>
@@ -5832,6 +5804,32 @@
 	} else if( typeof module !== 'undefined' && module != null ) {
 	  module.exports = LZString
 	}
+
+
+/***/ },
+/* 12 */
+/***/ function(module, exports) {
+
+	function objectAssign() {
+	  function clobber(t, s) {
+	    var keys = Object.keys(s);
+	    for (var i = 0; i < keys.length; i += 1) {
+	      var key = keys[i];
+	      t[key] = s[key];
+	    }
+	  }
+
+	  var out = {};
+
+	  for (var i = 0; i < arguments.length; i += 1) {
+	    var o = arguments[i];
+	    clobber(out, o);
+	  }
+
+	  return out;
+	}
+
+	module.exports = objectAssign;
 
 
 /***/ },
