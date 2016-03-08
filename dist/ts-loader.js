@@ -152,7 +152,6 @@
 	    document.addEventListener("online", onlineDetected, false);
 
 	    window.setTimeout(function () {
-
 	      customSplash.hide();
 	    }, 200);
 	  });
@@ -195,7 +194,6 @@
 	var objectAssign = __webpack_require__(12);
 	var xhrPromise = __webpack_require__(13);
 
-	var localDirectory = ''; // 'dist/';
 	var totalBytes, loadedBytes;
 
 	function updateLocalHash(file) {
@@ -256,11 +254,14 @@
 	    file.fileBuffer = xhr.response;
 	    file.contentType = xhr.contentType;
 
+	    if (!config.performMD5) {
+	      return;
+	    }
 	    return getMD5(file.fileBuffer);
 	  }).then(function (md5) {
 	    file.md5 = md5;
 
-	    if (manifestEntry.hash === md5) {
+	    if (md5 && manifestEntry.hash === md5) {
 	      return file;
 	    }
 
@@ -268,13 +269,14 @@
 
 	    file.blob = new Blob([file.fileBuffer], { type: file.contentType });
 
-	    return writeFile(file).then(function () {
+	    return writeFile(file, config).then(function () {
 	      return new Promise(function (resolve, reject) {
 	        var blob = file.blob;
 	        var fileReader= new FileReader();
 
 	        fileReader.onload = function(e) {
 	          file.content = JSON.parse(e.target.result);
+
 	          resolve(file);
 	        };
 
@@ -311,7 +313,7 @@
 	  });
 	}
 
-	function writeFile(file) {
+	function writeFile(file, config) {
 	  var path = file.manifestEntry.path;
 	  var contentType = file.contentType;
 
@@ -321,16 +323,22 @@
 	    return fs.file(path, { create: true });
 	  }).then(function (fileEntry) {
 	    return new Promise(function (resolve, reject) {
+	      if (!config.useLocalCache) {
+	        return resolve();
+	      }
+
 	      fileEntry.createWriter(function (writer) {
 	        writer.onwriteend = function () {
-	          resolve(fileEntry);
+	          resolve();
 	        };
 	        writer.onerror = reject;
 	        writer.write(blob);
 	      }, reject);
 	    });
 	  }).then(function () {
-	    updateLocalHash(file);
+	    if (config.useLocalCache) {
+	      updateLocalHash(file);
+	    }
 
 	    return file;
 	  });
@@ -347,8 +355,9 @@
 	  });
 	}
 
-	function downloadFile(serverAddress, manifestEntry) {
-	  var url = serverAddress + '/' + manifestEntry.path + '?' + manifestEntry.hash;
+	function downloadFile(config, manifestEntry) {
+	  var appHost = config.appHost;
+	  var url = appHost + '/' + manifestEntry.path + '?' + manifestEntry.hash;
 
 	  var previousBytes = 0;
 
@@ -374,6 +383,10 @@
 	    fileBuffer = xhr.response;
 	    contentType = xhr.contentType;
 
+	    if (!config.performMD5) {
+	      return manifestEntry.hash;
+	    }
+
 	    return getMD5(fileBuffer);
 	  }).then(function (md5) {
 	    if (md5 !== manifestEntry.hash) {
@@ -384,12 +397,12 @@
 	  });
 	}
 
-	function downloadFiles(serverAddress, files) {
+	function downloadFiles(config, files) {
 	  totalBytes = files.reduce(function (total, file) { return total + file.size }, 0);
 	  loadedBytes = 0;
 
 	  var promises = files.map(throat(5, function (file) {
-	    return downloadFile(serverAddress, file);
+	    return downloadFile(config, file);
 	  }));
 
 	  return all(promises);
@@ -548,7 +561,7 @@
 	  });
 	}
 
-	function loadNodePromise(fileCache, nodeInfo, config) {
+	function createNode(fileCache, nodeInfo, config) {
 	  var isCached = fileCache.hasOwnProperty(nodeInfo.path);
 
 	  var type = isCached ? fileCache[nodeInfo.path].manifestEntry.type : nodeInfo.type;
@@ -570,18 +583,12 @@
 	  throw new Error('Unknown node type: ' + type);
 	}
 
-	function loadNodes(manifest, fileCache, config) {
-	  return all(manifest.domNodes.map(throat(1, function (nodeInfo) {
-	    return loadNodePromise(fileCache, nodeInfo, config);
-	  })));
-	}
-
 	function loadFilesFromCache(manifest, fileCache, files) {
+	  var filesToLoad = [];
+
 	  files.forEach(function (file) {
 	    fileCache[file.manifestEntry.path] = file;
 	  });
-
-	  var filesToLoad = [];
 
 	  manifest.domNodes.forEach(function (nodeInfo) {
 	    if (!fileCache[nodeInfo.path] && manifest.files[nodeInfo.path]) {
@@ -621,16 +628,17 @@
 
 	    return getFilesToLoad(manifest, config);
 	  }).then(function (files) {
-	    return downloadFiles(config.appHost, files);
+	    return downloadFiles(config, files);
 	  }).then(function (files) {
-	    if (config.useLocalCache) {
-	      return all(files.map(writeFile));
-	    }
-	    return files;
+	    return all(files.map(function (file) {
+	      return writeFile(file, config);
+	    }));
 	  }).then(function (files) {
 	    return loadFilesFromCache(manifest, fileCache, files);
 	  }).then(function () {
-	    return loadNodes(manifest, fileCache, config);
+	    return all(manifest.domNodes.map(throat(1, function (nodeInfo) {
+	      return createNode(fileCache, nodeInfo, config);
+	    })));
 	  }).then(function () {
 	    loader.emit('loaded');
 	  }).catch(function (e) {
@@ -5207,10 +5215,7 @@
 	    var fileReader = new FileReader();
 
 	    fileReader.onload = function(e) {
-	      console.time(path);
 	      compressed = LZString.compressToUTF16(e.target.result);
-	      console.timeEnd(path);
-	      console.log(e.target.result.length, compressed.length);
 	      try {
 	        ls.setItem(prefix + path, compressed);
 	      } catch (e) {
@@ -5262,7 +5267,6 @@
 	}
 
 	function read(path) {
-	  console.time('read ' + path)
 	  return new Promise(function (resolve, reject) {
 	    var compressed = ls.getItem(prefix + path);
 	    if (compressed === null) {
@@ -5272,7 +5276,6 @@
 	    }
 
 	    var decompressed = LZString.decompressFromUTF16(compressed);
-	    console.timeEnd('read ' + path);
 	    resolve(decompressed);
 	  });
 	}

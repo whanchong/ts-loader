@@ -29,6 +29,7 @@ body {
 
 #ts-splash-screen {
   height: 100%;
+  width: 100%;
   background-color: #4b647f;
   background-image: url('../assets/ts_ember/background-04.png');
   background-size: cover;
@@ -36,10 +37,9 @@ body {
   color: #444;
 
   display: -webkit-box;
-  -webkit-box-orient: vertical;
-  box-orient: vertical;
-  -webkit-box-pack: center;
-  box-pack: center;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: flex;
 
   position: absolute;
   z-index: 99999;
@@ -66,16 +66,17 @@ body {
 
 #ts-splash-icon {
   position: relative;
-  width: 25%;
-  height: 33.33%;
   display: inline-block;
   -webkit-transition: -webkit-transform 300ms ease-out;
   transition: transform 300ms ease-out;
-
+  width: 100%;
+  height: 33.33%;
+  max-width: 420px;
   background-image: url('../assets/ts_ember/ts-logo-color.svg');
   background-repeat: no-repeat;
-  background-size: 100% 60%;
+  background-size: contain;
   background-position: center center;
+  margin: 5% auto 0 auto;
 }
 
 #ts-splash-icon.portrait {
