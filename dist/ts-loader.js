@@ -243,11 +243,7 @@
 	      throw error;
 	    }
 	  }).then(function () {
-	    if (!config.appHost) {
-	      throw new Error('appHost is missing.')
-	    }
-
-	    var url = config.appHost + '/' + manifestEntry.path;
+	    var url = (config.appHost || '') + '/' + manifestEntry.path;
 
 	    return xhrPromise(url);
 	  }).then(function (xhr) {
@@ -615,9 +611,7 @@
 	  var fileCache = this.fileCache = {};
 
 	  getAppHost().then(function (appHost) {
-	    if (appHost) {
-	      config.appHost = appHost;
-	    }
+	    config.appHost = appHost || '';
 	  }, function (error) {
 	    console.warn("Error reading appHost from appPreferences, using default.", error);
 	  }).then(function () {
@@ -5180,7 +5174,7 @@
 
 	module.exports = {
 		"name": "ts-loader",
-		"version": "1.0.0",
+		"version": "1.0.1",
 		"private": true,
 		"repository": "https://github.com/kkvesper/ts-loader",
 		"dependencies": {
