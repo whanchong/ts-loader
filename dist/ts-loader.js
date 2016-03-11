@@ -119,8 +119,10 @@
 
 	  var fullHeight = document.documentElement.clientHeight;
 
-	  customSplash.setStatusBarHeight(fullHeight - document.documentElement.clientHeight);
-	  customSplash.show();
+	  var statusBarTimeout = window.setTimeout(function () {
+	    customSplash.setStatusBarHeight(fullHeight - document.documentElement.clientHeight);
+	    customSplash.show();
+	  }, 0);
 
 	  var splashscreenTimeout = window.setTimeout(function () {
 	    customSplash.showLoader();
@@ -130,6 +132,7 @@
 	  }, 200);
 
 	  loader.on('loaded', function () {
+	    window.clearTimeout(statusBarTimeout);
 	    window.clearTimeout(splashscreenTimeout);
 
 	    if (window.navigator.splashscreen) {
@@ -5911,7 +5914,7 @@
 	}
 
 	function setProgress(value) {
-	  progress.textContent = value;
+	  loaderBox.textContent = value;
 	}
 
 	function setProgressScale(scale) {
@@ -5919,43 +5922,37 @@
 	  loaderBox.style.transform = 'scale(' + scale + ')';
 	}
 
-	function setIconVerticalPosition(position) {
-	  icon.style.webkitTransform = 'translateY(' + position + ')';
-	  icon.style.transform = 'translateY(' + position + ')';
-	}
-
 	function showLoader() {
-	  setIconVerticalPosition('-40px');
 	  setProgressScale(1);
 	}
 
 	function hideLoader() {
-	  setIconVerticalPosition(0);
 	  setProgressScale(0);
 	}
 
 	function setStatusBarHeight(height) {
-	  splash.style.marginTop =  height + 'px';
+	  splash.style.marginTop =  -height + 'px';
 	}
 
 	function create() {
 	  splash = document.createElement('div');
 	  splash.id = 'ts-splash-screen';
 
+	  logo = document.createElement('div');
+	  logo.id = 'ts-splash-logo';
+	  splash.appendChild(logo);
+
+	  overlap = document.createElement('div');
+	  overlap.id = 'ts-splash-overlap';
+	  logo.appendChild(overlap);
+
 	  icon = document.createElement('div');
 	  icon.id = 'ts-splash-icon';
-	  splash.appendChild(icon);
+	  logo.appendChild(icon);
 
 	  loaderBox = document.createElement('div');
 	  loaderBox.id = 'ts-splash-loader';
-	  icon.appendChild(loaderBox);
-
-	  var tsSplashSpinner = document.createElement('div');
-	  tsSplashSpinner.id = 'ts-splash-spinner';
-	  loaderBox.appendChild(tsSplashSpinner);
-	  progress = document.createElement('div');
-	  progress.id = 'ts-splash-progress';
-	  loaderBox.appendChild(progress);
+	  logo.appendChild(loaderBox);
 
 	  document.body.appendChild(splash);
 
