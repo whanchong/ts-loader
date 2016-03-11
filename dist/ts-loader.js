@@ -5177,7 +5177,7 @@
 
 	module.exports = {
 		"name": "ts-loader",
-		"version": "1.0.1",
+		"version": "1.0.2",
 		"private": true,
 		"repository": "https://github.com/kkvesper/ts-loader",
 		"dependencies": {
