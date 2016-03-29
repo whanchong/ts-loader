@@ -356,7 +356,7 @@
 
 	function downloadFile(config, manifestEntry) {
 	  var appHost = config.appHost;
-	  var url = appHost + '/' + manifestEntry.path + '?' + manifestEntry.hash;
+	  var url = appHost + '/' + manifestEntry.path;
 
 	  var previousBytes = 0;
 
@@ -492,7 +492,7 @@
 	  });
 	}
 
-	function createLocalStyleSheetNode(fileCache, nodeInfo) {
+	function createLocalStyleSheetNode(fileCache, nodeInfo, config) {
 	  return new Promise(function (resolve, reject) {
 	    var node = document.createElement('style');
 	    node.setAttribute('type', 'text/css');
@@ -513,14 +513,30 @@
 	    var fileReader= new FileReader();
 
 	    fileReader.onload = function(e) {
+	      var text = e.target.result;
+
+	      if (config.rewriteSourcemaps) {
+	        var sourceIndex = text.lastIndexOf('\n/*# sourceMappingURL=');
+
+	        if (sourceIndex === -1) {
+	          sourceIndex = text.length;
+	        }
+
+	        // https://bugs.chromium.org/p/chromium/issues/detail?id=466094
+	        newSource  = '\n/*# sourceURL=' + location.origin + '/' + nodeInfo.path + ' */';
+	        newSource += '\n/*# sourceMappingURL=../' + nodeInfo.path + '.map */';
+
+	        text = text.substring(0, sourceIndex).concat(newSource);
+	      }
+
 	      try {
-	        node.innerHTML = e.target.result
+	        node.innerHTML = text;
 	      } catch (e) {
 	        console.error(e);
 	        return reject(e);
 	      }
 	      node.id = nodeInfo.path;
-	      resolve(node)
+	      resolve(node);
 	    };
 
 	    fileReader.onerror = function (e) {
@@ -574,7 +590,7 @@
 
 	  if (type === 'css') {
 	    if (isCached) {
-	      return createLocalStyleSheetNode(fileCache, nodeInfo);
+	      return createLocalStyleSheetNode(fileCache, nodeInfo, config);
 	    }
 	    return createRemoteStyleSheetNode(nodeInfo);
 	  }
@@ -5177,7 +5193,7 @@
 
 	module.exports = {
 		"name": "ts-loader",
-		"version": "1.0.2",
+		"version": "1.1.0",
 		"private": true,
 		"repository": "https://github.com/kkvesper/ts-loader",
 		"dependencies": {

@@ -1,6 +1,6 @@
 {
   "name": "ts-loader",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "private": true,
   "repository": "https://github.com/kkvesper/ts-loader",
   "dependencies": {
