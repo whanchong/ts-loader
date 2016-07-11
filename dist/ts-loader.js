@@ -47,26 +47,6 @@
 	var loader = __webpack_require__(1);
 	var customSplash = __webpack_require__(14);
 
-	function offlineDetected() {
-	  document.getElementById('_cordova_disconnect').classList.add('fadeInDown');
-	  document.getElementById('_cordova_disconnect').classList.add('animated');
-	  document.getElementById('_cordova_disconnect').classList.add('show');
-	  setTimeout(function() {
-	    document.getElementById('_cordova_disconnect').classList.remove('fadeInDown');
-	    document.getElementById('_cordova_disconnect').classList.remove('animated');
-	  }, 1000);
-	}
-
-	function onlineDetected() {
-	  document.getElementById('_cordova_disconnect').classList.add('fadeOutUp');
-	  document.getElementById('_cordova_disconnect').classList.add('animated');
-	  setTimeout(function() {
-	    document.getElementById('_cordova_disconnect').classList.remove('fadeOutUp');
-	    document.getElementById('_cordova_disconnect').classList.remove('animated');
-	    document.getElementById('_cordova_disconnect').classList.remove('show');
-	  }, 1000);
-	}
-
 	function detectNavigatorLocale() {
 	  var language = window.navigator.language;
 
@@ -150,9 +130,6 @@
 	    if (window.I18n) {
 	      window.I18n.locale = detectNavigatorLocale();
 	    }
-
-	    document.addEventListener("offline", offlineDetected, false);
-	    document.addEventListener("online", onlineDetected, false);
 
 	    window.setTimeout(function () {
 	      customSplash.hide();
@@ -4046,7 +4023,7 @@
 	    else if (isX(m))
 	      ret = '>=' + M + '.0.0 <' + (+M + 1) + '.0.0';
 	    else if (isX(p))
-	      // ~1.2 == >=1.2.0- <1.3.0-
+	      // ~1.2 == >=1.2.0 <1.3.0
 	      ret = '>=' + M + '.' + m + '.0 <' + M + '.' + (+m + 1) + '.0';
 	    else if (pr) {
 	      debug('replaceTilde pr', pr);
@@ -4395,6 +4372,12 @@
 	    }
 	  }
 	  return true;
+	}
+
+	exports.prerelease = prerelease;
+	function prerelease(version, loose) {
+	  var parsed = parse(version, loose);
+	  return (parsed && parsed.prerelease.length) ? parsed.prerelease : null;
 	}
 
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
@@ -5193,14 +5176,14 @@
 
 	module.exports = {
 		"name": "ts-loader",
-		"version": "1.1.0",
+		"version": "1.2.0",
 		"private": true,
 		"repository": "https://github.com/kkvesper/ts-loader",
 		"dependencies": {
 			"json-loader": "^0.5.4",
 			"lz-string": "^1.4.4",
 			"q-io": "^1.13.2",
-			"semver": "^5.1.0",
+			"semver": "^5.2.0",
 			"spark-md5": "^2.0.2",
 			"throat": "^2.0.2",
 			"webpack": "^1.12.14"
