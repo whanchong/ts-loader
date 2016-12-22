@@ -3085,7 +3085,7 @@ document.addEventListener('DOMContentLoaded', startLoading, false);
 
 window.onerror = function (message) {
   showErrorMessage(message);
-}
+};
 
 customSplash.create();
 
