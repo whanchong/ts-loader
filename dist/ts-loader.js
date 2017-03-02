@@ -2315,10 +2315,15 @@ var icon, iconContainer, loaderBox, logo, overlap, splash, text; // dom elements
 var timeout;
 
 function checkOrientation() {
+  orientationClassName = 'portrait';
+  regExp = new RegExp('(^| )'+ orientationClassName +'( |$)');
+
   if (window.orientation == 0 || window.orientation == 180) { // portrait
-    icon.classList.add('portrait');
+    if (!regExp.test(icon.className)) {
+      icon.className += ' ' + orientationClassName;
+    }
   } else { //landscape
-    icon.classList.remove('portrait');
+    icon.className = icon.className.replace(regExp, '');
   }
 }
 
@@ -2430,17 +2435,19 @@ var xhrPromise = __webpack_require__(8);
 
 var isCordova = typeof window !== 'undefined' && typeof window.cordova !== 'undefined';
 
-var fs = CordovaPromiseFS({
-  persistent: true,
-  concurrency: 3,
-  Promise: Promise
-});
+var fs;
 
-if (!isCordova) {
+if (isCordova) {
+  fs = CordovaPromiseFS({
+    persistent: true,
+    concurrency: 3,
+    Promise: Promise
+  });
+} else {
   fs = LocalStoragePromiseFS;
 }
 
-const NOT_FOUND_ERR = 1;
+var NOT_FOUND_ERR = 1;
 
 var loaderConfig = {
   manifestFile: 'app-manifest.json',
@@ -2578,7 +2585,7 @@ function getAppManifest(config) {
     return writeFile(file, config).then(function () {
       return new Promise(function (resolve, reject) {
         var blob = file.blob;
-        var fileReader= new FileReader();
+        var fileReader = new FileReader();
 
         fileReader.onload = function(event) {
           file.content = JSON.parse(event.target.result);
@@ -2999,7 +3006,7 @@ var loaded = false;
 var loading = false;
 
 function detectNavigatorLocale() {
-  var language = window.navigator.language;
+  var language = window.navigator.language || '';
 
   if (language.match(/^en/i)) {
     return 'en';
@@ -3048,7 +3055,11 @@ function showErrorMessage(message) {
 function getConfig() {
   var scriptNodes = document.getElementsByTagName('script');
   var currentlyLoadedScript = scriptNodes[scriptNodes.length - 1];
-  return currentlyLoadedScript.dataset;
+
+  // dataset is not supported on older browser, but still can use data-* attributes and access them using getAttribute
+  // need shim for this instead of and empty object
+
+  return currentlyLoadedScript.dataset || {};
 }
 
 function startLoading(event) {
@@ -3064,11 +3075,14 @@ function startLoading(event) {
 
   var config = getConfig();
 
+  // add changes to the cordova StatusBar
   if (typeof window !== 'undefined' && typeof window.StatusBar !== 'undefined') {
+
     var statusBarBackgroundColor = config.statusBarBackgroundColor || '#282828';
+    var statusBarOverlaysWebView = !!config.statusBarOverlaysWebView;
 
     window.StatusBar.backgroundColorByHexString(statusBarBackgroundColor);
-    window.StatusBar.overlaysWebView(false);
+    window.StatusBar.overlaysWebView(statusBarOverlaysWebView);
   }
 
   var fullHeight = document.documentElement.clientHeight;
@@ -3131,6 +3145,13 @@ function startLoading(event) {
 
 document.addEventListener('deviceready', startLoading, false);
 document.addEventListener('DOMContentLoaded', startLoading, false);
+
+// might need to add this for IE 9 or earlier
+// document.addEventListener('onreadystatechange', function () {
+//   if (document.readyState === 'interactive') {
+//     startLoading()
+//   }
+// }, false);
 
 window.onerror = function (message) {
   showErrorMessage(message);
@@ -3761,7 +3782,7 @@ var ls = typeof window !== 'undefined' ? window.localStorage : {
 
 var prefix = 'lspfs:';
 
-const NOT_FOUND_ERR = 1;
+var NOT_FOUND_ERR = 1;
 
 function Writer(path, onerror) {
   this.onwriteend = function () {};
