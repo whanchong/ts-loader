@@ -1,0 +1,29 @@
+{
+  "manifestVersion": "2.1.0",
+  "domNodes": [
+    {
+      "path": "test1.js",
+      "type": "js"
+    },
+    {
+      "path": "test2.js",
+      "type": "js"
+    }
+  ],
+  "files": {
+    "test1.js": {
+      "hash": "16b96a3c504dd0654252e577c573ef33",
+      "name": "test1.js",
+      "path": "test1.js",
+      "size": 321,
+      "type": "js"
+    },
+    "test2.js": {
+      "hash": "76b96a3c504dd0654252e577c573ef33",
+      "name": "test2.js",
+      "path": "test2.js",
+      "size": 321,
+      "type": "js"
+    }
+  }
+}
