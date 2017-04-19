@@ -10,8 +10,6 @@
     "start": "webpack-dev-server --inline --progress --colors"
   },
   "dependencies": {
-    "blob-polyfill": "^1.0.20150320",
-    "js-polyfills": "^0.1.33",
     "lz-string": "^1.4.4",
     "q": "1.4.1",
     "semver": "^5.2.0",
