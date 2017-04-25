@@ -1,5 +1,11 @@
 # ts-loader CHANGELOG
 
+## v2.6.0 - 2017-04-25
+- [AppHost] Removed the use of localStorage
+- [FIX] Parsing dataset properly
+- [FIX] Avoid crash for md5 parsing of empty files
+
+
 ## v2.5.0 - 2017-01-12
 - [AppHost] If localStorage is set, use that before appPreferences
 - [DevDependencies] Update to latest webpack and eslint
