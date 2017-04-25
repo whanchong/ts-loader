@@ -1,41 +1,41 @@
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
-
+/******/
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
-
+/******/
 /******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId])
+/******/ 		if(installedModules[moduleId]) {
 /******/ 			return installedModules[moduleId].exports;
-
+/******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			i: moduleId,
 /******/ 			l: false,
 /******/ 			exports: {}
 /******/ 		};
-
+/******/
 /******/ 		// Execute the module function
 /******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-
+/******/
 /******/ 		// Flag the module as loaded
 /******/ 		module.l = true;
-
+/******/
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
-
-
+/******/
+/******/
 /******/ 	// expose the modules object (__webpack_modules__)
 /******/ 	__webpack_require__.m = modules;
-
+/******/
 /******/ 	// expose the module cache
 /******/ 	__webpack_require__.c = installedModules;
-
+/******/
 /******/ 	// identity function for calling harmony imports with the correct context
 /******/ 	__webpack_require__.i = function(value) { return value; };
-
+/******/
 /******/ 	// define getter function for harmony exports
 /******/ 	__webpack_require__.d = function(exports, name, getter) {
 /******/ 		if(!__webpack_require__.o(exports, name)) {
@@ -46,7 +46,7 @@
 /******/ 			});
 /******/ 		}
 /******/ 	};
-
+/******/
 /******/ 	// getDefaultExport function for compatibility with non-harmony modules
 /******/ 	__webpack_require__.n = function(module) {
 /******/ 		var getter = module && module.__esModule ?
@@ -55,13 +55,13 @@
 /******/ 		__webpack_require__.d(getter, 'a', getter);
 /******/ 		return getter;
 /******/ 	};
-
+/******/
 /******/ 	// Object.prototype.hasOwnProperty.call
 /******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
-
+/******/
 /******/ 	// __webpack_public_path__
 /******/ 	__webpack_require__.p = "";
-
+/******/
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(__webpack_require__.s = 17);
 /******/ })
@@ -589,7 +589,7 @@ Q.nextTick = nextTick;
 Q.longStackSupport = false;
 
 // enable long stacks if Q_DEBUG is set
-if (typeof process === "object" && process && {"NODE_ENV":"production"} && {"NODE_ENV":"production"}.Q_DEBUG) {
+if (typeof process === "object" && process && __webpack_require__.i({"NODE_ENV":"production"}) && __webpack_require__.i({"NODE_ENV":"production"}).Q_DEBUG) {
     Q.longStackSupport = true;
 }
 
@@ -2416,6 +2416,174 @@ module.exports = {
 /* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
+var loader = __webpack_require__(4);
+var customSplash = __webpack_require__(2);
+
+var isCordova = typeof window !== 'undefined' && typeof window.cordova !== 'undefined';
+var deviceReady = !isCordova;
+var loaded = false;
+var loading = false;
+
+function detectNavigatorLocale() {
+  var language = window.navigator.language;
+
+  if (language.match(/^en/i)) {
+    return 'en';
+  } else if (language.match(/^fr/i)) {
+    return 'fr';
+  } else if (language.match(/^it/i)) {
+    return 'it';
+  } else if (language.match(/^ko/i)) {
+    return 'ko';
+  } else if (language.match(/^(zh[_-]tw|zh[_-]hk)/i)) {
+    return 'zh-TW';
+  } else if (language.match(/^zh/i)) {
+    return 'zh-CN';
+  } else {
+    return 'ja';
+  }
+}
+
+function getDiv(id) {
+  var loaderError = document.getElementById(id);
+
+  if (!loaderError) {
+    loaderError = document.createElement('DIV');
+    loaderError.id = id;
+    document.body.appendChild(loaderError);
+  }
+
+  return loaderError;
+}
+
+function showErrorMessage(message) {
+  if (loaded) {
+    return;
+  }
+
+  var loaderError = getDiv('loader-error');
+
+  loaderError.innerHTML = 'Error: ' + message;
+  loaderError.style.display = 'block';
+
+  window.setTimeout(function () {
+    customSplash.hideLoader();
+  }, 200);
+}
+
+function parseDataAttribute (dataAttribute) {
+  if (!dataAttribute || dataAttribute.toLowerCase() === 'true') {
+    return true;
+  } else if (dataAttribute.toLowerCase() === 'false') {
+    return false;
+  }
+  return dataAttribute;
+}
+
+
+function getConfig() {
+  var scriptNodes = document.getElementsByTagName('script');
+  var currentlyLoadedScript = scriptNodes[scriptNodes.length - 1];
+  var dataset = Object.keys(currentlyLoadedScript.dataset).reduce(function(values, key) {
+    const value = currentlyLoadedScript.dataset[key];
+    values[key] = parseDataAttribute(value);
+    return values;
+  }, {});
+  return dataset;
+}
+
+function startLoading(event) {
+  if (event.type === 'deviceready') {
+    deviceReady = true;
+  }
+
+  if (loading || !deviceReady) {
+    return;
+  }
+
+  loading = true;
+
+  var config = getConfig();
+
+  if (typeof window !== 'undefined' && typeof window.StatusBar !== 'undefined') {
+    var statusBarBackgroundColor = config.statusBarBackgroundColor || '#282828';
+
+    window.StatusBar.backgroundColorByHexString(statusBarBackgroundColor);
+    window.StatusBar.overlaysWebView(false);
+  }
+
+  var fullHeight = document.documentElement.clientHeight;
+
+  var statusBarTimeout = window.setTimeout(function () {
+    customSplash.setStatusBarHeight(fullHeight - document.documentElement.clientHeight);
+    customSplash.show();
+  }, 0);
+
+  var splashscreenTimeout = window.setTimeout(function () {
+    customSplash.showLoader();
+    if (window.navigator.splashscreen) {
+      window.navigator.splashscreen.hide();
+    }
+  }, 200);
+
+  loader.on('loaded', function () {
+    window.clearTimeout(statusBarTimeout);
+    window.clearTimeout(splashscreenTimeout);
+
+    if (window.navigator.splashscreen) {
+      window.navigator.splashscreen.hide();
+    }
+
+    if (window.plugins && window.plugins.notification) {
+      window.plugins.notification.badge.hasPermission(function (granted) {
+        if (!granted) {
+          window.plugins.notification.badge.registerPermission();
+        }
+      });
+    }
+
+    if (typeof window.I18n !== 'undefined') {
+      window.I18n.locale = detectNavigatorLocale();
+    }
+
+    window.setTimeout(function () {
+      customSplash.hide();
+    }, 200);
+
+    loader.removeAllListeners();
+    loader = null;
+
+    loaded = true;
+  });
+
+  loader.on('error', showErrorMessage);
+
+  loader.on('progress', function (loaded, total) {
+    var progress = Math.max(Math.min(Math.round(100 * loaded / total), 100), 0) + '%';
+    customSplash.setProgress(progress);
+  });
+
+  if (navigator.connection && window.Connection && navigator.connection.type === window.Connection.NONE) {
+    return showErrorMessage('Please check your internet connection.');
+  }
+
+  loader.load(config);
+}
+
+document.addEventListener('deviceready', startLoading, false);
+document.addEventListener('DOMContentLoaded', startLoading, false);
+
+window.onerror = function (message) {
+  showErrorMessage(message);
+};
+
+customSplash.create();
+
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
 var EventEmitter = __webpack_require__(9).EventEmitter;
 var all = __webpack_require__(0).all;
 var Promise = __webpack_require__(0).Promise;
@@ -2430,13 +2598,14 @@ var xhrPromise = __webpack_require__(8);
 
 var isCordova = typeof window !== 'undefined' && typeof window.cordova !== 'undefined';
 
-var fs = CordovaPromiseFS({
-  persistent: true,
-  concurrency: 3,
-  Promise: Promise
-});
-
-if (!isCordova) {
+var fs;
+if (isCordova) {
+  fs = CordovaPromiseFS({
+    persistent: true,
+    concurrency: 3,
+    Promise: Promise
+  });
+} else {
   fs = LocalStoragePromiseFS;
 }
 
@@ -2474,15 +2643,12 @@ function updateLocalHash(file) {
   window.localStorage.setItem('localHashes', stringified);
 }
 
-function moreConfig() {
+function getAppHost(config) {
   function cordovaAppHost() {
     return new Promise(function (resolve, reject) {
-      var appHost = window.localStorage.getItem('appHost');
-
-      if (appHost || typeof window.plugins === 'undefined') {
-        return resolve(appHost);
+      if (config.ignoreAppSettings || typeof window.plugins === 'undefined') {
+        return resolve();
       }
-
       return window.plugins.appPreferences.fetch(resolve, reject, 'appHost');
     });
   }
@@ -2498,6 +2664,7 @@ function moreConfig() {
     };
   });
 }
+
 
 function localFile(path) {
   return fs.readJSON(path).catch(function (error) {
@@ -2693,7 +2860,12 @@ function downloadFile(config, manifestEntry) {
       return manifestEntry.hash;
     }
 
-    return getMD5(fileBuffer);
+    if (!fileBuffer) {
+      console.warn(manifestEntry.path + ' file was empty');
+      return manifestEntry.hash;
+    } else {
+      return getMD5(fileBuffer);
+    }
   }).then(function (md5) {
     if (md5 !== manifestEntry.hash) {
       throw new Error('md5 mismatch: ' + manifestEntry.path + ' ' + manifestEntry.hash + ' computed: ' + md5);
@@ -2942,14 +3114,12 @@ loader.load = function (runtimeConfig) {
   var manifest = this.manifest = {};
   var fileCache = this.fileCache = {};
 
-  moreConfig().then(function (moreConfig) {
-    config.appHost = moreConfig.appHost || config.appHost || '';
-    config.publicPath = moreConfig.publicPath || config.publicPath || '';
+  getAppHost(config).then(function(returnedAppConfig) {
+    config.appHost = returnedAppConfig.appHost || config.appHost || '';
 
     if (!config.publicPath && config.appHost) {
       config.publicPath = config.appHost + '/';
     }
-  }).then(function () {
     return getAppManifest(config);
   }).then(function (appManifest) {
     fileCache[config.manifestFile] = appManifest;
@@ -2984,159 +3154,6 @@ loader.load = function (runtimeConfig) {
 };
 
 module.exports = loader;
-
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var loader = __webpack_require__(3);
-var customSplash = __webpack_require__(2);
-
-var isCordova = typeof window !== 'undefined' && typeof window.cordova !== 'undefined';
-var deviceReady = !isCordova;
-var loaded = false;
-var loading = false;
-
-function detectNavigatorLocale() {
-  var language = window.navigator.language;
-
-  if (language.match(/^en/i)) {
-    return 'en';
-  } else if (language.match(/^fr/i)) {
-    return 'fr';
-  } else if (language.match(/^it/i)) {
-    return 'it';
-  } else if (language.match(/^ko/i)) {
-    return 'ko';
-  } else if (language.match(/^(zh[_-]tw|zh[_-]hk)/i)) {
-    return 'zh-TW';
-  } else if (language.match(/^zh/i)) {
-    return 'zh-CN';
-  } else {
-    return 'ja';
-  }
-}
-
-function getDiv(id) {
-  var loaderError = document.getElementById(id);
-
-  if (!loaderError) {
-    loaderError = document.createElement('DIV');
-    loaderError.id = id;
-    document.body.appendChild(loaderError);
-  }
-
-  return loaderError;
-}
-
-function showErrorMessage(message) {
-  if (loaded) {
-    return;
-  }
-
-  var loaderError = getDiv('loader-error');
-
-  loaderError.innerHTML = 'Error: ' + message;
-  loaderError.style.display = 'block';
-
-  window.setTimeout(function () {
-    customSplash.hideLoader();
-  }, 200);
-}
-
-function getConfig() {
-  var scriptNodes = document.getElementsByTagName('script');
-  var currentlyLoadedScript = scriptNodes[scriptNodes.length - 1];
-  return currentlyLoadedScript.dataset;
-}
-
-function startLoading(event) {
-  if (event.type === 'deviceready') {
-    deviceReady = true;
-  }
-
-  if (loading || !deviceReady) {
-    return;
-  }
-
-  loading = true;
-
-  var config = getConfig();
-
-  if (typeof window !== 'undefined' && typeof window.StatusBar !== 'undefined') {
-    var statusBarBackgroundColor = config.statusBarBackgroundColor || '#282828';
-
-    window.StatusBar.backgroundColorByHexString(statusBarBackgroundColor);
-    window.StatusBar.overlaysWebView(false);
-  }
-
-  var fullHeight = document.documentElement.clientHeight;
-
-  var statusBarTimeout = window.setTimeout(function () {
-    customSplash.setStatusBarHeight(fullHeight - document.documentElement.clientHeight);
-    customSplash.show();
-  }, 0);
-
-  var splashscreenTimeout = window.setTimeout(function () {
-    customSplash.showLoader();
-    if (window.navigator.splashscreen) {
-      window.navigator.splashscreen.hide();
-    }
-  }, 200);
-
-  loader.on('loaded', function () {
-    window.clearTimeout(statusBarTimeout);
-    window.clearTimeout(splashscreenTimeout);
-
-    if (window.navigator.splashscreen) {
-      window.navigator.splashscreen.hide();
-    }
-
-    if (window.plugins && window.plugins.notification) {
-      window.plugins.notification.badge.hasPermission(function (granted) {
-        if (!granted) {
-          window.plugins.notification.badge.registerPermission();
-        }
-      });
-    }
-
-    if (typeof window.I18n !== 'undefined') {
-      window.I18n.locale = detectNavigatorLocale();
-    }
-
-    window.setTimeout(function () {
-      customSplash.hide();
-    }, 200);
-
-    loader.removeAllListeners();
-    loader = null;
-
-    loaded = true;
-  });
-
-  loader.on('error', showErrorMessage);
-
-  loader.on('progress', function (loaded, total) {
-    var progress = Math.max(Math.min(Math.round(100 * loaded / total), 100), 0) + '%';
-    customSplash.setProgress(progress);
-  });
-
-  if (navigator.connection && window.Connection && navigator.connection.type === window.Connection.NONE) {
-    return showErrorMessage('Please check your internet connection.');
-  }
-
-  loader.load(config);
-}
-
-document.addEventListener('deviceready', startLoading, false);
-document.addEventListener('DOMContentLoaded', startLoading, false);
-
-window.onerror = function (message) {
-  showErrorMessage(message);
-};
-
-customSplash.create();
 
 
 /***/ }),
@@ -4748,9 +4765,9 @@ if (true) {
 // The debug function is excluded entirely from the minified version.
 /* nomin */ var debug;
 /* nomin */ if (typeof process === 'object' &&
-    /* nomin */ {"NODE_ENV":"production"} &&
-    /* nomin */ {"NODE_ENV":"production"}.NODE_DEBUG &&
-    /* nomin */ /\bsemver\b/i.test({"NODE_ENV":"production"}.NODE_DEBUG))
+    /* nomin */ __webpack_require__.i({"NODE_ENV":"production"}) &&
+    /* nomin */ __webpack_require__.i({"NODE_ENV":"production"}).NODE_DEBUG &&
+    /* nomin */ /\bsemver\b/i.test(__webpack_require__.i({"NODE_ENV":"production"}).NODE_DEBUG))
   /* nomin */ debug = function() {
     /* nomin */ var args = Array.prototype.slice.call(arguments, 0);
     /* nomin */ args.unshift('SEMVER');
@@ -7086,7 +7103,7 @@ module.exports = g;
 /* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(4);
+module.exports = __webpack_require__(3);
 
 
 /***/ })
