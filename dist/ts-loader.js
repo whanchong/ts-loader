@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 17);
+/******/ 	return __webpack_require__(__webpack_require__.s = 20);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -2119,7 +2119,7 @@ return Q;
 
 });
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1), __webpack_require__(15).setImmediate))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1), __webpack_require__(19).setImmediate))
 
 /***/ }),
 /* 1 */
@@ -2295,6 +2295,10 @@ process.off = noop;
 process.removeListener = noop;
 process.removeAllListeners = noop;
 process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
 
 process.binding = function (name) {
     throw new Error('process.binding is not supported');
@@ -2309,6 +2313,94 @@ process.umask = function() { return 0; };
 
 /***/ }),
 /* 2 */
+/***/ (function(module, exports) {
+
+var g;
+
+// This works in non-strict mode
+g = (function() {
+	return this;
+})();
+
+try {
+	// This works if eval is allowed (see CSP)
+	g = g || Function("return this")() || (1,eval)("this");
+} catch(e) {
+	// This works if the window reference is available
+	if(typeof window === "object")
+		g = window;
+}
+
+// g can still be undefined, but nothing to do about it...
+// We return undefined, instead of nothing here, so it's
+// easier to handle this case. if(!global) { ...}
+
+module.exports = g;
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports) {
+
+// Source: https://gist.github.com/k-gun/c2ea7c49edf7b757fe9561ba37cb19ca
+
+// helpers
+var regExp = function(name) {
+  return new RegExp('(^| )'+ name +'( |$)');
+};
+var forEach = function(list, fn, scope) {
+  for (var i = 0; i < list.length; i++) {
+    fn.call(scope, list[i]);
+  }
+};
+
+// class list object with basic methods
+function ClassList(element) {
+  this.element = element;
+}
+
+ClassList.prototype = {
+  add: function() {
+    forEach(arguments, function(name) {
+      if (!this.contains(name)) {
+        this.element.className += ' '+ name;
+      }
+    }, this);
+  },
+  remove: function() {
+    forEach(arguments, function(name) {
+      this.element.className = this.element.className.replace(regExp(name), '');
+    }, this);
+  },
+  toggle: function(name) {
+    return this.contains(name) ? (this.remove(name), false) : (this.add(name), true);
+  },
+  contains: function(name) {
+    return regExp(name).test(this.element.className);
+  },
+  // bonus..
+  replace: function(oldName, newName) {
+    this.remove(oldName), this.add(newName);
+  }
+};
+
+// IE8/9, Safari
+if (!('classList' in Element.prototype)) {
+  Object.defineProperty(Element.prototype, 'classList', {
+    get: function() {
+      return new ClassList(this);
+    }
+  });
+}
+
+// replace() support for others
+if (window.DOMTokenList && DOMTokenList.prototype.replace == null) {
+  DOMTokenList.prototype.replace = ClassList.prototype.replace;
+}
+
+
+/***/ }),
+/* 4 */
 /***/ (function(module, exports) {
 
 var icon, iconContainer, loaderBox, logo, overlap, splash, text; // dom elements
@@ -2413,36 +2505,55 @@ module.exports = {
 
 
 /***/ }),
-/* 3 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var loader = __webpack_require__(4);
-var customSplash = __webpack_require__(2);
+/* WEBPACK VAR INJECTION */(function(global) {// Source: https://github.com/inexorabletash/polyfill/blob/master/polyfill.js#L4428
+
+// HTMLElement.dataset
+// Needed for: IE10-
+if (!('dataset' in document.createElement('span')) &&
+    'Element' in global && Element.prototype && Object.defineProperty) {
+  Object.defineProperty(Element.prototype, 'dataset', { get: function() {
+    var result = Object.create(null);
+    for (var i = 0; i < this.attributes.length; ++i) {
+      var attr = this.attributes[i];
+      if (attr.specified && attr.name.substring(0, 5) === 'data-') {
+        (function(element, name) {
+          var prop = name.replace(/-([a-z])/g, function(m, p) {
+            return p.toUpperCase();
+          });
+          result[prop] = element.getAttribute('data-' + name); // Read-only, for IE8-
+          Object.defineProperty(result, prop, {
+            get: function() {
+              return element.getAttribute('data-' + name);
+            },
+            set: function(value) {
+              element.setAttribute('data-' + name, value);
+            }});
+        }(this, attr.name.substring(5)));
+      }
+    }
+    return result;
+  }});
+}
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+__webpack_require__(3);
+__webpack_require__(5);
+
+var loader = __webpack_require__(7);
+var customSplash = __webpack_require__(4);
 
 var isCordova = typeof window !== 'undefined' && typeof window.cordova !== 'undefined';
 var deviceReady = !isCordova;
 var loaded = false;
 var loading = false;
-
-function detectNavigatorLocale() {
-  var language = window.navigator.language;
-
-  if (language.match(/^en/i)) {
-    return 'en';
-  } else if (language.match(/^fr/i)) {
-    return 'fr';
-  } else if (language.match(/^it/i)) {
-    return 'it';
-  } else if (language.match(/^ko/i)) {
-    return 'ko';
-  } else if (language.match(/^(zh[_-]tw|zh[_-]hk)/i)) {
-    return 'zh-TW';
-  } else if (language.match(/^zh/i)) {
-    return 'zh-CN';
-  } else {
-    return 'ja';
-  }
-}
 
 function getDiv(id) {
   var loaderError = document.getElementById(id);
@@ -2484,8 +2595,8 @@ function parseDataAttribute (dataAttribute) {
 function getConfig() {
   var scriptNodes = document.getElementsByTagName('script');
   var currentlyLoadedScript = scriptNodes[scriptNodes.length - 1];
-  var dataset = Object.keys(currentlyLoadedScript.dataset).reduce(function(values, key) {
-    const value = currentlyLoadedScript.dataset[key];
+  var dataset = Object.keys(currentlyLoadedScript.dataset || {}).reduce(function(values, key) {
+    var value = currentlyLoadedScript.dataset[key];
     values[key] = parseDataAttribute(value);
     return values;
   }, {});
@@ -2542,10 +2653,6 @@ function startLoading(event) {
       });
     }
 
-    if (typeof window.I18n !== 'undefined') {
-      window.I18n.locale = detectNavigatorLocale();
-    }
-
     window.setTimeout(function () {
       customSplash.hide();
     }, 200);
@@ -2581,21 +2688,22 @@ customSplash.create();
 
 
 /***/ }),
-/* 4 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var EventEmitter = __webpack_require__(9).EventEmitter;
+var EventEmitter = __webpack_require__(13).EventEmitter;
 var all = __webpack_require__(0).all;
 var Promise = __webpack_require__(0).Promise;
-var semver = __webpack_require__(11);
-var throat = __webpack_require__(14)(Promise);
-var SparkMD5 = __webpack_require__(13);
+var semver = __webpack_require__(15);
+var throat = __webpack_require__(18)(Promise);
+var SparkMD5 = __webpack_require__(17);
 
-var CordovaPromiseFS = __webpack_require__(5);
-var LocalStoragePromiseFS = __webpack_require__(6);
-var objectAssign = __webpack_require__(7);
-var xhrPromise = __webpack_require__(8);
+var CordovaPromiseFS = __webpack_require__(8);
+var LocalStoragePromiseFS = __webpack_require__(10);
+var objectAssign = __webpack_require__(11);
+var xhrPromise = __webpack_require__(12);
 
+var hasBrowserFeatures = __webpack_require__(9);
 var isCordova = typeof window !== 'undefined' && typeof window.cordova !== 'undefined';
 
 var fs;
@@ -2609,7 +2717,7 @@ if (isCordova) {
   fs = LocalStoragePromiseFS;
 }
 
-const NOT_FOUND_ERR = 1;
+var NOT_FOUND_ERR = 1;
 
 var loaderConfig = {
   manifestFile: 'app-manifest.json',
@@ -2721,6 +2829,23 @@ function remoteFile(path, config) {
   });
 }
 
+function validateAppManifest(manifest, config) {
+  if (!manifest) {
+    throw new Error('Could not load manifest. Please check your connection and try again.');
+  }
+
+  if (!semver.satisfies(manifest.manifestVersion, config.supportedManifestVersion)) {
+    throw new Error('Your application version is too low. Please visit the App Store and update your application.');
+  }
+
+  if (typeof manifest.files !== 'object') {
+    throw new Error('Expected appManifest.files to be an object');
+  }
+  if (!Array.isArray(manifest.domNodes)) {
+    throw new Error('Expected appManifest.domNodes to be an array');
+  }
+}
+
 function getAppManifest(config) {
   var path = config.manifestFile;
 
@@ -2745,7 +2870,7 @@ function getAppManifest(config) {
     return writeFile(file, config).then(function () {
       return new Promise(function (resolve, reject) {
         var blob = file.blob;
-        var fileReader= new FileReader();
+        var fileReader = new FileReader();
 
         fileReader.onload = function(event) {
           file.content = JSON.parse(event.target.result);
@@ -2763,13 +2888,7 @@ function getAppManifest(config) {
   }).then(function (file) {
     var manifest = file && file.content;
 
-    if (!manifest) {
-      throw new Error('Could not load manifest. Please check your connection and try again.');
-    }
-
-    if (!semver.satisfies(manifest.manifestVersion, config.supportedManifestVersion)) {
-      throw new Error('Your application version is too low. Please visit the App Store and update your application.');
-    }
+    validateAppManifest(manifest, config);
 
     return file;
   });
@@ -3105,30 +3224,32 @@ function loadFilesFromCache(manifest, fileCache, files) {
 
 var loader = new EventEmitter();
 
-loader.load = function (runtimeConfig) {
-  // We're passing in a dataSet as runtimeConfig and Safari's Object.assign doesn't work with it
-  // so we use our own objectAssign that doesn't mutate data.
+loader.unsupportedBrowserLoad = function (config) {
+  var manifest;
+  var url = (config.appHost || '') + '/' + config.manifestFile;
 
-  var config = this.config = objectAssign(loaderConfig, runtimeConfig);
-
-  var manifest = this.manifest = {};
-  var fileCache = this.fileCache = {};
-
-  getAppHost(config).then(function(returnedAppConfig) {
-    config.appHost = returnedAppConfig.appHost || config.appHost || '';
-
-    if (!config.publicPath && config.appHost) {
-      config.publicPath = config.appHost + '/';
+  return xhrPromise(url, 'text').then(function (xhr) {
+    try {
+      manifest = JSON.parse(xhr.response);
+    } catch (e) {
+      throw new Error('Failed to parse manifest.');
     }
-    return getAppManifest(config);
-  }).then(function (appManifest) {
+
+    validateAppManifest(manifest, config);
+
+    all(manifest.domNodes.map(throat(1, function (nodeInfo) {
+      return createNode(loader.fileCache, nodeInfo, config);
+    })));
+  });
+};
+
+loader.normalLoad = function (config) {
+  var manifest;
+  var fileCache = loader.fileCache;
+
+  return getAppManifest(config).then(function (appManifest) {
     fileCache[config.manifestFile] = appManifest;
     manifest = appManifest.content;
-
-    // Let's validate our app-manifest to make sure it has everything we need.
-    if (typeof manifest.files !== 'object') { throw new Error('Expected appManifest.files to be an object'); }
-    if (!Array.isArray(manifest.domNodes)) { throw new Error('Expected appManifest.domNodes to be an array'); }
-
     return getFilesToLoad(manifest, config);
   }).then(function (files) {
     return downloadFiles(config, files);
@@ -3142,6 +3263,30 @@ loader.load = function (runtimeConfig) {
     return all(manifest.domNodes.map(throat(1, function (nodeInfo) {
       return createNode(fileCache, nodeInfo, config);
     })));
+  });
+};
+
+loader.load = function (runtimeConfig) {
+  // We're passing in a dataSet as runtimeConfig and Safari's Object.assign doesn't work with it
+  // so we use our own objectAssign that doesn't mutate data.
+
+  var config = this.config = objectAssign(loaderConfig, runtimeConfig);
+
+  this.fileCache = {};
+
+  getAppHost(config).then(function(returnedAppConfig) {
+    config.appHost = returnedAppConfig.appHost || config.appHost || '';
+
+    if (!config.publicPath && config.appHost) {
+      config.publicPath = config.appHost + '/';
+    }
+
+    // add fallback for browsers with unsupported features
+    if (!isCordova && !hasBrowserFeatures) {
+      return loader.unsupportedBrowserLoad(config);
+    }
+
+    loader.normalLoad(config);
   }).then(function () {
     loader.emit('loaded');
   }).catch(function (e) {
@@ -3157,7 +3302,7 @@ module.exports = loader;
 
 
 /***/ }),
-/* 5 */
+/* 8 */
 /***/ (function(module, exports) {
 
 /**
@@ -3765,11 +3910,36 @@ module.exports = function(options){
 
 
 /***/ }),
-/* 6 */
+/* 9 */
+/***/ (function(module, exports) {
+
+function hasBlob() {
+  try {
+    return !!new Blob();
+  } catch (e) {
+    return false;
+  }
+}
+
+function hasFileReader() {
+  try {
+    return !!new FileReader();
+  } catch (e) {
+    return false;
+  }
+}
+
+var hasBrowserFeatures = hasBlob() && hasFileReader();
+
+module.exports = hasBrowserFeatures;
+
+
+/***/ }),
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var Promise = __webpack_require__(0).Promise;
-var LZString = __webpack_require__(10);
+var LZString = __webpack_require__(14);
 
 var ls = typeof window !== 'undefined' ? window.localStorage : {
   getItem: function () { throw new Error('lspfs not available'); },
@@ -3778,7 +3948,7 @@ var ls = typeof window !== 'undefined' ? window.localStorage : {
 
 var prefix = 'lspfs:';
 
-const NOT_FOUND_ERR = 1;
+var NOT_FOUND_ERR = 1;
 
 function Writer(path, onerror) {
   this.onwriteend = function () {};
@@ -3869,7 +4039,7 @@ module.exports = {
 
 
 /***/ }),
-/* 7 */
+/* 11 */
 /***/ (function(module, exports) {
 
 function objectAssign() {
@@ -3895,7 +4065,7 @@ module.exports = objectAssign;
 
 
 /***/ }),
-/* 8 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var Promise = __webpack_require__(0).Promise;
@@ -3911,7 +4081,10 @@ function xhrPromise(url, responseType) {
         return reject('xhr status: ' + this.status + ', url: ' + url);
       }
 
-      return resolve({ response: this.response, contentType: this.getResponseHeader('Content-Type')});
+      return resolve({
+        response: responseType === 'text' ? this.responseText : this.response,
+        contentType: this.getResponseHeader('Content-Type')
+      });
     };
 
     xhr.onerror = function () {
@@ -3941,7 +4114,7 @@ module.exports = xhrPromise;
 
 
 /***/ }),
-/* 9 */
+/* 13 */
 /***/ (function(module, exports) {
 
 // Copyright Joyent, Inc. and other Node contributors.
@@ -4249,7 +4422,7 @@ function isUndefined(arg) {
 
 
 /***/ }),
-/* 10 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;// Copyright (c) 2013 Pieroxy <pieroxy@pieroxy.net>
@@ -4757,7 +4930,7 @@ if (true) {
 
 
 /***/ }),
-/* 11 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(process) {exports = module.exports = SemVer;
@@ -5967,7 +6140,7 @@ function prerelease(version, loose) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ }),
-/* 12 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global, process) {(function (global, undefined) {
@@ -6157,10 +6330,10 @@ function prerelease(version, loose) {
     attachTo.clearImmediate = clearImmediate;
 }(typeof self === "undefined" ? typeof global === "undefined" ? this : global : self));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(16), __webpack_require__(1)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2), __webpack_require__(1)))
 
 /***/ }),
-/* 13 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 (function (factory) {
@@ -6917,7 +7090,7 @@ function prerelease(version, loose) {
 
 
 /***/ }),
-/* 14 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7014,7 +7187,7 @@ function Delayed(resolve, fn, self, args) {
 
 
 /***/ }),
-/* 15 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var apply = Function.prototype.apply;
@@ -7067,43 +7240,16 @@ exports._unrefActive = exports.active = function(item) {
 };
 
 // setimmediate attaches itself to the global object
-__webpack_require__(12);
+__webpack_require__(16);
 exports.setImmediate = setImmediate;
 exports.clearImmediate = clearImmediate;
 
 
 /***/ }),
-/* 16 */
-/***/ (function(module, exports) {
-
-var g;
-
-// This works in non-strict mode
-g = (function() {
-	return this;
-})();
-
-try {
-	// This works if eval is allowed (see CSP)
-	g = g || Function("return this")() || (1,eval)("this");
-} catch(e) {
-	// This works if the window reference is available
-	if(typeof window === "object")
-		g = window;
-}
-
-// g can still be undefined, but nothing to do about it...
-// We return undefined, instead of nothing here, so it's
-// easier to handle this case. if(!global) { ...}
-
-module.exports = g;
-
-
-/***/ }),
-/* 17 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(3);
+module.exports = __webpack_require__(6);
 
 
 /***/ })

@@ -1,5 +1,10 @@
 # ts-loader CHANGELOG
 
+## v2.7.0 - 2017-05-11
+- [FIX] Remove detectNavigatorLocale
+- [FIX] Add polyfills
+- [README] Add more information to README
+
 ## v2.6.0 - 2017-04-25
 - [AppHost] Removed the use of localStorage
 - [FIX] Parsing dataset properly
