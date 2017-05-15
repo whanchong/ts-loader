@@ -1,5 +1,8 @@
 # ts-loader CHANGELOG
 
+## v2.7.1 - 2017-05-15
+- Avoid the download of unecessary file for browsers
+
 ## v2.7.0 - 2017-05-11
 - [FIX] Remove detectNavigatorLocale
 - [FIX] Add polyfills
