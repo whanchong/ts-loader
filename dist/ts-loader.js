@@ -3236,7 +3236,7 @@ loader.unsupportedBrowserLoad = function (config) {
 
     validateAppManifest(manifest, config);
 
-    Promise.all(manifest.domNodes.map(throat(1, function (nodeInfo) {
+    return Promise.all(manifest.domNodes.map(throat(1, function (nodeInfo) {
       return createNode(loader.fileCache, nodeInfo, config);
     })));
   });
@@ -3285,7 +3285,7 @@ loader.load = function (runtimeConfig) {
       return loader.unsupportedBrowserLoad(config);
     }
 
-    loader.normalLoad(config);
+    return loader.normalLoad(config);
   }).then(function () {
     loader.emit('loaded');
   }).catch(function (e) {

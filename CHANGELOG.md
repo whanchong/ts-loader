@@ -1,5 +1,8 @@
 # ts-loader CHANGELOG
 
+## v2.7.2 - 2017-05-16
+- [FIX] Missing return
+
 ## v2.7.1 - 2017-05-15
 - Avoid the download of unecessary file for browsers
 
