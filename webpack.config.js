@@ -1,14 +1,15 @@
-var ip = require('ip');
-var path = require('path');
-var webpack = require('webpack');
+const ip = require('ip');
+const path = require('path');
+const webpack = require('webpack');
 
-var host = ip.address();
-var port = 8080;
+const host = ip.address();
+const port = 8080;
 
 module.exports = {
   entry: {
     'ts-loader': [
       'webpack-dev-server/client?http://' + host + ':' + port,
+      'babel-polyfill',
       './lib/index.js'
     ],
     'ts-loader.min': './lib/index.js'
@@ -25,5 +26,17 @@ module.exports = {
       include: /\.min\.js$/,
       minimize: true
     })
-  ]
+  ],
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        loader: 'babel-loader',
+        exclude: /(node_modules|bower_components)/,
+        query: {
+          cacheDirectory: true
+        }
+      }
+    ]
+  }
 };
