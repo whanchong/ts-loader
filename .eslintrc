@@ -1,0 +1,22 @@
+parser: babel-eslint
+extends: airbnb-base
+env:
+  browser : true
+rules:
+  comma-dangle: [2, never]
+  max-len:
+    - 2
+    - 120
+    - 2
+    - { ignoreUrls: true, ignoreComments: false }
+  arrow-body-style: 0
+  no-mixed-operators: 0
+  no-shadow: [2, { allow: [err, error] }]
+
+  no-underscore-dangle: 0
+  guard-for-in: 0
+  no-param-reassign: [2, { props: false }]
+
+# custom rules
+  import/no-extraneous-dependencies: 0
+  no-console: 0
