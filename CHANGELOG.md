@@ -1,5 +1,12 @@
 # ts-loader CHANGELOG
 
+## v2.8.0
+- Changed code to ES6 syntax
+- Use stricter eslint rules
+- Cleaned up some code
+- Externalized dataset and classlist polyfill
+- Fixed a bug with loading style for Cordova
+
 ## v2.7.2 - 2017-05-16
 - [FIX] Missing return
 
