@@ -8,11 +8,14 @@ const port = 8080;
 module.exports = {
   entry: {
     'ts-loader': [
-      'webpack-dev-server/client?http://' + host + ':' + port,
-      'babel-polyfill',
+      `webpack-dev-server/client?http://${host}:${port}`,
+      'core-js/fn/promise',
       './lib/index.js'
     ],
-    'ts-loader.min': './lib/index.js'
+    'ts-loader.min': [
+      'core-js/fn/promise',
+      './lib/index.js'
+    ]
   },
   output: {
     path: path.join(__dirname, 'dist'),
