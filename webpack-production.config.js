@@ -1,6 +1,6 @@
-var webpack = require('webpack');
+const webpack = require('webpack');
 
-var devConfig = require('./webpack.config.js');
+const devConfig = require('./webpack.config.js');
 
 // Remove the webpack-dev-server from entries
 devConfig.entry['ts-loader'].shift();
@@ -9,7 +9,7 @@ devConfig.entry['ts-loader'].shift();
 devConfig.plugins.unshift(
   new webpack.DefinePlugin({
     'process.env': {
-      'NODE_ENV': JSON.stringify('production')
+      NODE_ENV: JSON.stringify('production')
     }
   })
 );

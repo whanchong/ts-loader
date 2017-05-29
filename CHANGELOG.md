@@ -1,6 +1,9 @@
 # ts-loader CHANGELOG
 
-## v2.8.0
+## NEXT
+- Removed babel-polyfill in favor of a more specific polyfill for Promise
+
+## v2.8.0 - 2017-05-22
 - Changed code to ES6 syntax
 - Use stricter eslint rules
 - Cleaned up some code
