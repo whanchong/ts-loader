@@ -1,6 +1,6 @@
 # ts-loader CHANGELOG
 
-## NEXT
+## v2.8.1 - 2017-05-29
 - Removed babel-polyfill in favor of a more specific polyfill for Promise
 
 ## v2.8.0 - 2017-05-22
