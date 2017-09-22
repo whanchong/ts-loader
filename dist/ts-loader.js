@@ -1863,7 +1863,7 @@ function getMD5(fileEntry) {
 
 function getBasicInfo(config) {
   function getAppHost() {
-    if (!isCordova || config.ignoreAppSettings || typeof window.plugins === 'undefined') {
+    if (!isCordova || config.ignoreAppSettings || typeof window.plugins === 'undefined' || !window.plugins.appPreferences) {
       return '';
     }
     return window.plugins.appPreferences.fetch('appHost');
