@@ -1,6 +1,13 @@
 # ts-loader
 Loader for web and Cordova app. The loader will load the files based on a manifest file and creates the relevant DOM nodes to load and start the app. With the `useLocalCache` option set to `true`, the files will be written on the persistent storage of the app.
 
+## Requirements
+
+If using in an Cordova App, the following plugins are required:
+
+- `cordova-plugin-file`
+- `cordova-plugin-file-transfer`
+
 ## Quick Start
 
 `npm run build` - Build ts-loader.js and ts-loader.min.js
@@ -103,4 +110,49 @@ Here is the DOM structure of the loader screen
     <div id="ts-splash-logo-text"></div>
   </div>
 </div>
+```
+
+If an error occurs then the following is appended to the body
+
+``` html
+<div id="loader-error">
+  <div id="loader-error-message">An unexpected error occurred, please try again.</div>
+  <button id="error-reload-button">Reload</button>
+</div>
+```
+
+## Using Cached Files
+
+In your app, if you want to load cached files like images you should use the exposed `window.cordovaFileCache` (assuming you have `useLocalCache="true"`).
+
+An example hybrid usage in React is as follows:
+
+```jsx
+export default class Img extends PureComponent {
+  static propTypes = {
+    src: PropTypes.string.isRequired,
+    alt: PropTypes.string
+  };
+
+  static defaultProps = {
+    alt: ''
+  };
+
+  render() {
+    const { src: path, alt, ...props } = this.props;
+    let src;
+    if (path.indexOf('http') === 0) {
+      src = path;
+    } else {
+      src = path;
+      // If we are using the cordova file cache use that service to resolve the relative url
+      if (isCordova && window.cordovaFileCache) {
+        src = window.cordovaFileCache.get(path);
+      }
+    }
+    return (
+      <img src={src} alt={alt} {...props} />
+    );
+  }
+}
 ```
