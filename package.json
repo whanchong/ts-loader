@@ -36,5 +36,9 @@
     "webpack": "^2.6.1",
     "webpack-dev-middleware": "^1.9.0",
     "webpack-dev-server": "^2.2.0-rc.0"
+  },
+  "dependencies": {
+    "cordova-file-cache": "^1.2.2",
+    "cordova-promise-fs": "^1.2.5"
   }
 }

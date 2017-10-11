@@ -63,15 +63,15 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 109);
+/******/ 	return __webpack_require__(__webpack_require__.s = 111);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var store      = __webpack_require__(40)('wks')
-  , uid        = __webpack_require__(25)
+var store      = __webpack_require__(42)('wks')
+  , uid        = __webpack_require__(26)
   , Symbol     = __webpack_require__(1).Symbol
   , USE_SYMBOL = typeof Symbol == 'function';
 
@@ -106,7 +106,7 @@ module.exports = function(it){
 /***/ (function(module, exports, __webpack_require__) {
 
 var dP         = __webpack_require__(14)
-  , createDesc = __webpack_require__(39);
+  , createDesc = __webpack_require__(41);
 module.exports = __webpack_require__(6) ? function(object, key, value){
   return dP.f(object, key, createDesc(1, value));
 } : function(object, key, value){
@@ -119,7 +119,7 @@ module.exports = __webpack_require__(6) ? function(object, key, value){
 /***/ (function(module, exports, __webpack_require__) {
 
 // Thank's IE8 for his funny defineProperty
-module.exports = !__webpack_require__(15)(function(){
+module.exports = !__webpack_require__(16)(function(){
   return Object.defineProperty({}, 'a', {get: function(){ return 7; }}).a != 7;
 });
 
@@ -135,7 +135,7 @@ if(typeof __e == 'number')__e = core; // eslint-disable-line no-undef
 /***/ (function(module, exports, __webpack_require__) {
 
 // Thank's IE8 for his funny defineProperty
-module.exports = !__webpack_require__(35)(function(){
+module.exports = !__webpack_require__(37)(function(){
   return Object.defineProperty({}, 'a', {get: function(){ return 7; }}).a != 7;
 });
 
@@ -161,7 +161,7 @@ module.exports = {};
 var global    = __webpack_require__(1)
   , hide      = __webpack_require__(3)
   , has       = __webpack_require__(7)
-  , SRC       = __webpack_require__(25)('src')
+  , SRC       = __webpack_require__(26)('src')
   , TO_STRING = 'toString'
   , $toString = Function[TO_STRING]
   , TPL       = ('' + $toString).split(TO_STRING);
@@ -213,7 +213,7 @@ module.exports = function(it){
 /***/ (function(module, exports, __webpack_require__) {
 
 // optional / simple context binding
-var aFunction = __webpack_require__(17);
+var aFunction = __webpack_require__(18);
 module.exports = function(fn, that, length){
   aFunction(fn);
   if(that === undefined)return fn;
@@ -246,8 +246,8 @@ module.exports = function(it){
 /***/ (function(module, exports, __webpack_require__) {
 
 var anObject       = __webpack_require__(2)
-  , IE8_DOM_DEFINE = __webpack_require__(75)
-  , toPrimitive    = __webpack_require__(95)
+  , IE8_DOM_DEFINE = __webpack_require__(80)
+  , toPrimitive    = __webpack_require__(100)
   , dP             = Object.defineProperty;
 
 exports.f = __webpack_require__(6) ? Object.defineProperty : function defineProperty(O, P, Attributes){
@@ -264,6 +264,19 @@ exports.f = __webpack_require__(6) ? Object.defineProperty : function defineProp
 
 /***/ }),
 /* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var isCordova = typeof window !== 'undefined' && typeof window.cordova !== 'undefined';
+exports.default = isCordova;
+
+/***/ }),
+/* 16 */
 /***/ (function(module, exports) {
 
 module.exports = function(exec){
@@ -275,7 +288,7 @@ module.exports = function(exec){
 };
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports) {
 
 module.exports = function(it){
@@ -283,7 +296,7 @@ module.exports = function(it){
 };
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports) {
 
 module.exports = function(it){
@@ -292,7 +305,7 @@ module.exports = function(it){
 };
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // getting tag from 19.1.3.6 Object.prototype.toString()
@@ -320,7 +333,7 @@ module.exports = function(it){
 };
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports) {
 
 // 7.2.1 RequireObjectCoercible(argument)
@@ -330,7 +343,7 @@ module.exports = function(it){
 };
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var isObject = __webpack_require__(13)
@@ -342,7 +355,7 @@ module.exports = function(it){
 };
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var def = __webpack_require__(14).f
@@ -354,17 +367,17 @@ module.exports = function(it, tag, stat){
 };
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var shared = __webpack_require__(40)('keys')
-  , uid    = __webpack_require__(25);
+var shared = __webpack_require__(42)('keys')
+  , uid    = __webpack_require__(26);
 module.exports = function(key){
   return shared[key] || (shared[key] = uid(key));
 };
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports) {
 
 // 7.1.4 ToInteger
@@ -375,18 +388,18 @@ module.exports = function(it){
 };
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // to indexed object, toObject with fallback for non-array-like ES3 strings
-var IObject = __webpack_require__(77)
-  , defined = __webpack_require__(19);
+var IObject = __webpack_require__(82)
+  , defined = __webpack_require__(20);
 module.exports = function(it){
   return IObject(defined(it));
 };
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports) {
 
 var id = 0
@@ -396,13 +409,86 @@ module.exports = function(key){
 };
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var global    = __webpack_require__(27)
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var DomNode = function DomNode(nodeInfo) {
+  _classCallCheck(this, DomNode);
+
+  _initialiseProps.call(this);
+
+  var type = nodeInfo.type;
+
+  if (type === 'js') {
+    return this.createRemoteNode(nodeInfo, 'script', {
+      type: 'text/javascript'
+    });
+  }
+
+  if (type === 'css') {
+    return this.createRemoteNode(nodeInfo, 'link', {
+      type: 'text/css',
+      rel: 'stylesheet'
+    });
+  }
+
+  throw new Error('Unknown node type: ' + type);
+};
+
+var _initialiseProps = function _initialiseProps() {
+  var _this = this;
+
+  this.updateNodeAttributes = function (node, attributes) {
+    if (attributes) {
+      Object.keys(attributes).forEach(function (key) {
+        node.setAttribute(key, attributes[key]);
+      });
+    }
+  };
+
+  this.createRemoteNode = function (nodeInfo, element, attributes) {
+    return new Promise(function (resolve, reject) {
+      var node = document.createElement(element);
+
+      _this.updateNodeAttributes(node, attributes);
+      _this.updateNodeAttributes(node, nodeInfo.attributes);
+
+      node.onload = resolve;
+
+      node.onerror = function (error) {
+        if (nodeInfo.optional) {
+          return resolve();
+        }
+        console.error('error loading: ', nodeInfo, error);
+        return reject(error);
+      };
+
+      node.setAttribute(element === 'script' ? 'src' : 'href', nodeInfo.path);
+
+      document.body.appendChild(node);
+    });
+  };
+};
+
+exports.default = DomNode;
+
+/***/ }),
+/* 28 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var global    = __webpack_require__(29)
   , core      = __webpack_require__(10)
-  , ctx       = __webpack_require__(60)
-  , hide      = __webpack_require__(64)
+  , ctx       = __webpack_require__(65)
+  , hide      = __webpack_require__(69)
   , PROTOTYPE = 'prototype';
 
 var $export = function(type, name, source){
@@ -462,7 +548,7 @@ $export.R = 128; // real proto method for `library`
 module.exports = $export;
 
 /***/ }),
-/* 27 */
+/* 29 */
 /***/ (function(module, exports) {
 
 // https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
@@ -471,20 +557,20 @@ var global = module.exports = typeof window != 'undefined' && window.Math == Mat
 if(typeof __g == 'number')__g = global; // eslint-disable-line no-undef
 
 /***/ }),
-/* 28 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = !__webpack_require__(4) && !__webpack_require__(15)(function(){
-  return Object.defineProperty(__webpack_require__(62)('div'), 'a', {get: function(){ return 7; }}).a != 7;
+module.exports = !__webpack_require__(4) && !__webpack_require__(16)(function(){
+  return Object.defineProperty(__webpack_require__(67)('div'), 'a', {get: function(){ return 7; }}).a != 7;
 });
 
 /***/ }),
-/* 29 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var anObject       = __webpack_require__(58)
-  , IE8_DOM_DEFINE = __webpack_require__(28)
-  , toPrimitive    = __webpack_require__(32)
+var anObject       = __webpack_require__(63)
+  , IE8_DOM_DEFINE = __webpack_require__(30)
+  , toPrimitive    = __webpack_require__(34)
   , dP             = Object.defineProperty;
 
 exports.f = __webpack_require__(4) ? Object.defineProperty : function defineProperty(O, P, Attributes){
@@ -500,7 +586,7 @@ exports.f = __webpack_require__(4) ? Object.defineProperty : function defineProp
 };
 
 /***/ }),
-/* 30 */
+/* 32 */
 /***/ (function(module, exports) {
 
 module.exports = function(bitmap, value){
@@ -513,22 +599,22 @@ module.exports = function(bitmap, value){
 };
 
 /***/ }),
-/* 31 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // to indexed object, toObject with fallback for non-array-like ES3 strings
-var IObject = __webpack_require__(65)
-  , defined = __webpack_require__(61);
+var IObject = __webpack_require__(70)
+  , defined = __webpack_require__(66);
 module.exports = function(it){
   return IObject(defined(it));
 };
 
 /***/ }),
-/* 32 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // 7.1.1 ToPrimitive(input [, PreferredType])
-var isObject = __webpack_require__(16);
+var isObject = __webpack_require__(17);
 // instead of the ES6 spec version, we didn't implement @@toPrimitive case
 // and the second argument - flag - preferred type is a string
 module.exports = function(it, S){
@@ -541,7 +627,7 @@ module.exports = function(it, S){
 };
 
 /***/ }),
-/* 33 */
+/* 35 */
 /***/ (function(module, exports) {
 
 // IE 8- don't enum bug keys
@@ -550,7 +636,7 @@ module.exports = (
 ).split(',');
 
 /***/ }),
-/* 34 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var global    = __webpack_require__(1)
@@ -598,7 +684,7 @@ $export.R = 128; // real proto method for `library`
 module.exports = $export;
 
 /***/ }),
-/* 35 */
+/* 37 */
 /***/ (function(module, exports) {
 
 module.exports = function(exec){
@@ -610,26 +696,26 @@ module.exports = function(exec){
 };
 
 /***/ }),
-/* 36 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__(1).document && document.documentElement;
 
 /***/ }),
-/* 37 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var LIBRARY        = __webpack_require__(38)
-  , $export        = __webpack_require__(34)
+var LIBRARY        = __webpack_require__(40)
+  , $export        = __webpack_require__(36)
   , redefine       = __webpack_require__(9)
   , hide           = __webpack_require__(3)
   , has            = __webpack_require__(7)
   , Iterators      = __webpack_require__(8)
-  , $iterCreate    = __webpack_require__(80)
-  , setToStringTag = __webpack_require__(21)
-  , getPrototypeOf = __webpack_require__(86)
+  , $iterCreate    = __webpack_require__(85)
+  , setToStringTag = __webpack_require__(22)
+  , getPrototypeOf = __webpack_require__(91)
   , ITERATOR       = __webpack_require__(0)('iterator')
   , BUGGY          = !([].keys && 'next' in [].keys()) // Safari has buggy iterators w/o `next`
   , FF_ITERATOR    = '@@iterator'
@@ -692,13 +778,13 @@ module.exports = function(Base, NAME, Constructor, next, DEFAULT, IS_SET, FORCED
 };
 
 /***/ }),
-/* 38 */
+/* 40 */
 /***/ (function(module, exports) {
 
 module.exports = false;
 
 /***/ }),
-/* 39 */
+/* 41 */
 /***/ (function(module, exports) {
 
 module.exports = function(bitmap, value){
@@ -711,7 +797,7 @@ module.exports = function(bitmap, value){
 };
 
 /***/ }),
-/* 40 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var global = __webpack_require__(1)
@@ -722,13 +808,13 @@ module.exports = function(key){
 };
 
 /***/ }),
-/* 41 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var ctx                = __webpack_require__(12)
-  , invoke             = __webpack_require__(76)
-  , html               = __webpack_require__(36)
-  , cel                = __webpack_require__(20)
+  , invoke             = __webpack_require__(81)
+  , html               = __webpack_require__(38)
+  , cel                = __webpack_require__(21)
   , global             = __webpack_require__(1)
   , process            = global.process
   , setTask            = global.setImmediate
@@ -802,64 +888,206 @@ module.exports = {
 };
 
 /***/ }),
-/* 42 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // 7.1.15 ToLength
-var toInteger = __webpack_require__(23)
+var toInteger = __webpack_require__(24)
   , min       = Math.min;
 module.exports = function(it){
   return it > 0 ? min(toInteger(it), 0x1fffffffffffff) : 0; // pow(2, 53) - 1 == 9007199254740991
 };
 
 /***/ }),
-/* 43 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-__webpack_require__(54);
+module.exports = function (PromiseArgument) {
+  var Promise;
+  function throat(size, fn) {
+    var queue = []
+    function run(fn, self, args) {
+      if (size) {
+        size--
+        var result = new Promise(function (resolve) {
+          resolve(fn.apply(self, args))
+        })
+        result.then(release, release)
+        return result
+      } else {
+        return new Promise(function (resolve) {
+          queue.push(new Delayed(resolve, fn, self, args))
+        })
+      }
+    }
+    function release() {
+      size++
+      if (queue.length) {
+        var next = queue.shift()
+        next.resolve(run(next.fn, next.self, next.args))
+      }
+    }
+    if (typeof size === 'function') {
+      var temp = fn;
+      fn = size;
+      size = temp;
+    }
+    if (typeof size !== 'number') {
+      throw new TypeError(
+        'Expected throat size to be a number but got ' + typeof size
+      );
+    }
+    if (fn !== undefined && typeof fn !== 'function') {
+      throw new TypeError(
+        'Expected throat fn to be a function but got ' + typeof fn
+      );
+    }
+    if (typeof fn === 'function') {
+      return function () {
+        var args = [];
+        for (var i = 0; i < arguments.length; i++) {
+          args.push(arguments[i]);
+        }
+        return run(fn, this, args);
+      }
+    } else {
+      return function (fn) {
+        if (typeof fn !== 'function') {
+          throw new TypeError(
+            'Expected throat fn to be a function but got ' + typeof fn
+          );
+        }
+        var args = [];
+        for (var i = 1; i < arguments.length; i++) {
+          args.push(arguments[i]);
+        }
+        return run(fn, this, args);
+      }
+    }
+  }
+  if (arguments.length === 1 && typeof PromiseArgument === 'function') {
+    Promise = PromiseArgument;
+    return throat;
+  } else {
+    Promise = module.exports.Promise;
+    if (typeof Promise !== 'function') {
+      throw new Error(
+        'You must provide a Promise polyfill for this library to work in older environments'
+      );
+    }
+    return throat(arguments[0], arguments[1]);
+  }
+}
 
-__webpack_require__(102);
+/* istanbul ignore next */
+if (typeof Promise === 'function') {
+  module.exports.Promise = Promise;
+}
 
-var _loader = __webpack_require__(48);
+function Delayed(resolve, fn, self, args) {
+  this.resolve = resolve
+  this.fn = fn
+  this.self = self || null
+  this.args = args
+}
 
-var _loader2 = _interopRequireDefault(_loader);
 
-var _customSplash = __webpack_require__(46);
+/***/ }),
+/* 46 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+__webpack_require__(56);
+
+__webpack_require__(107);
+
+var _Loader = __webpack_require__(48);
+
+var _Loader2 = _interopRequireDefault(_Loader);
+
+var _customSplash = __webpack_require__(51);
 
 var _customSplash2 = _interopRequireDefault(_customSplash);
 
+var _isCordova = __webpack_require__(15);
+
+var _isCordova2 = _interopRequireDefault(_isCordova);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var isCordova = typeof window !== 'undefined' && typeof window.cordova !== 'undefined';
+var UNKNOWN_ERROR = 'An unknown error occurred';
 
-var deviceReady = !isCordova;
+var deviceReady = !_isCordova2.default;
 var loaded = false;
 var loading = false;
+var config = void 0;
 
-function getDiv(id) {
-  var loaderError = document.getElementById(id);
+function createElement(id, type) {
+  var element = document.createElement(type || 'DIV');
+  element.id = id;
+  return element;
+}
+
+function getErrorLoaderDiv() {
+  var loaderId = 'loader-error';
+  var loaderMessageId = 'loader-error-message';
+  var loaderError = document.getElementById(loaderId);
+  var loaderMessage = document.getElementById(loaderMessageId);
+
+  var api = {
+    setMessage: function setMessage(message) {
+      loaderMessage.innerHTML = message + ', please try again.';
+    },
+    show: function show() {
+      loaderError.style.display = 'block';
+    },
+    hide: function hide() {
+      loaderError.style.display = 'none';
+    }
+  };
 
   if (!loaderError) {
-    loaderError = document.createElement('DIV');
-    loaderError.id = id;
+    loaderError = createElement(loaderId);
+    loaderMessage = createElement(loaderMessageId);
+    var reloadButton = createElement('error-reload-button', 'button');
+
+    reloadButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 25" style="fill: currentColor;"><g id="budicon-reload-ui"><path d="M25,12.5A12.4961,12.4961,0,0,0,1,7.6162V1.5a.5.5,0,0,0-1,0v7A.5.5,0,0,0,.5,9h7a.5.5,0,0,0,0-1H1.9285A11.4931,11.4931,0,0,1,24,12.5l0,0,0,0V13.5a.5.5,0,0,0,1,0v-.9985l0-.001Z"/><path d="M24.5,16h-7a.5.5,0,0,0,0,1h5.5715A11.4931,11.4931,0,0,1,1,12.5l0,0,0,0V11.5a.5.5,0,0,0-1,0v.9985L0,12.5l0,0a12.4961,12.4961,0,0,0,24,4.8838V23.5a.5.5,0,0,0,1,0v-7A.5.5,0,0,0,24.5,16Z"/></g></svg>';
+    loaderMessage.innerHTML = 'An unexpected error occurred, please try again.';
+
+    reloadButton.onclick = function () {
+      api.hide();
+      // It's in a callback so it will be defined when it's called
+      // eslint-disable-next-line no-use-before-define
+      startLoading({ forceReload: true });
+    };
+
+    loaderError.appendChild(loaderMessage);
+    loaderError.appendChild(reloadButton);
     document.body.appendChild(loaderError);
   }
 
-  return loaderError;
+  return api;
 }
 
 function showErrorMessage(message) {
+  loading = false;
   if (loaded) {
     return;
   }
 
-  var loaderError = getDiv('loader-error');
-
-  loaderError.innerHTML = 'Error: ' + message;
-  loaderError.style.display = 'block';
+  var loaderError = getErrorLoaderDiv();
+  console.error(message);
+  if (typeof message === 'string') {
+    loaderError.setMessage(message);
+  } else {
+    loaderError.setMessage(UNKNOWN_ERROR);
+  }
+  loaderError.show();
 
   window.setTimeout(function () {
     _customSplash2.default.hideLoader();
@@ -878,12 +1106,11 @@ function parseDataAttribute(dataAttribute) {
 function getConfig() {
   var scriptNodes = document.getElementsByTagName('script');
   var currentlyLoadedScript = scriptNodes[scriptNodes.length - 1];
-  var dataset = Object.keys(currentlyLoadedScript.dataset || {}).reduce(function (values, key) {
+  return Object.keys(currentlyLoadedScript.dataset || {}).reduce(function (values, key) {
     var value = currentlyLoadedScript.dataset[key];
     values[key] = parseDataAttribute(value);
     return values;
   }, {});
-  return dataset;
 }
 
 function startLoading(event) {
@@ -895,9 +1122,14 @@ function startLoading(event) {
     return;
   }
 
+  if (navigator.connection && window.Connection && navigator.connection.type === window.Connection.NONE) {
+    showErrorMessage('Please check your internet connection');
+    return;
+  }
+
   loading = true;
 
-  var config = getConfig();
+  var loader = new _Loader2.default(config, event.forceReload);
 
   if (typeof window !== 'undefined' && typeof window.StatusBar !== 'undefined') {
     var statusBarBackgroundColor = config.statusBarBackgroundColor || '#282828';
@@ -920,7 +1152,7 @@ function startLoading(event) {
     }
   }, 200);
 
-  _loader2.default.on('loaded', function () {
+  loader.on('loaded', function () {
     window.clearTimeout(statusBarTimeout);
     window.clearTimeout(splashscreenTimeout);
 
@@ -940,27 +1172,28 @@ function startLoading(event) {
       _customSplash2.default.hide();
     }, 200);
 
-    _loader2.default.removeAllListeners();
+    loader.removeAllListeners();
     loaded = true;
+    loading = false;
   });
 
-  _loader2.default.on('error', showErrorMessage);
+  loader.on('error', function () {
+    showErrorMessage(UNKNOWN_ERROR);
+  });
 
-  _loader2.default.on('progress', function (current, total) {
-    var progress = Math.max(Math.min(Math.round(100 * current / total), 100), 0);
+  loader.on('progress', function (current, total) {
+    var progress = Math.max(Math.min(Math.round(100 * Number(current) / Number(total)), 100), 0);
     _customSplash2.default.setProgress(progress + '%');
   });
-
-  if (navigator.connection && window.Connection && navigator.connection.type === window.Connection.NONE) {
-    showErrorMessage('Please check your internet connection.');
-    return;
-  }
-
-  _loader2.default.load(config);
 }
 
-document.addEventListener('deviceready', startLoading, false);
-document.addEventListener('DOMContentLoaded', startLoading, false);
+function firstLoad(event) {
+  config = getConfig();
+  startLoading(event);
+}
+
+document.addEventListener('deviceready', firstLoad, false);
+document.addEventListener('DOMContentLoaded', firstLoad, false);
 
 window.onerror = function (message) {
   showErrorMessage(message);
@@ -969,631 +1202,301 @@ window.onerror = function (message) {
 _customSplash2.default.create();
 
 /***/ }),
-/* 44 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(98);
-__webpack_require__(100);
-__webpack_require__(101);
-__webpack_require__(99);
+__webpack_require__(103);
+__webpack_require__(105);
+__webpack_require__(106);
+__webpack_require__(104);
 module.exports = __webpack_require__(5).Promise;
 
 /***/ }),
-/* 45 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-/* eslint-disable */
-// 3rd party libary
-/**
- * Static Private functions
- */
+var _events = __webpack_require__(108);
 
-/* createDir, recursively */
-function __createDir(rootDirEntry, folders, success, error) {
-  rootDirEntry.getDirectory(folders[0], { create: true }, function (dirEntry) {
-    // Recursively add the new subfolder (if we still have another to create).
-    if (folders.length > 1) {
-      __createDir(dirEntry, folders.slice(1), success, error);
-    } else {
-      success(dirEntry);
-    }
-  }, error);
-}
+var _semver = __webpack_require__(110);
 
-function dirname(str) {
-  str = str.substr(0, str.lastIndexOf('/') + 1);
-  if (str[0] === '/') str = str.substr(1);
-  return str;
-}
+var _semver2 = _interopRequireDefault(_semver);
 
-function filename(str) {
-  return str.substr(str.lastIndexOf('/') + 1);
-}
+var _objectAssign = __webpack_require__(52);
 
-function normalize(str) {
-  str = str || '';
-  if (str[0] === '/') str = str.substr(1);
+var _objectAssign2 = _interopRequireDefault(_objectAssign);
 
-  var tokens = str.split('/'),
-      last = tokens[0];
+var _xhrPromise = __webpack_require__(53);
 
-  // check tokens for instances of .. and .
-  for (var i = 1; i < tokens.length; i++) {
-    last = tokens[i];
-    if (tokens[i] === '..') {
-      // remove the .. and the previous token
-      tokens.splice(i - 1, 2);
-      // rewind 'cursor' 2 tokens
-      i = i - 2;
-    } else if (tokens[i] === '.') {
-      // remove the .. and the previous token
-      tokens.splice(i, 1);
-      // rewind 'cursor' 1 token
-      i--;
-    }
-  }
+var _xhrPromise2 = _interopRequireDefault(_xhrPromise);
 
-  str = tokens.join('/');
-  if (str === './') {
-    str = '';
-  } else if (last && last.indexOf('.') < 0 && str[str.length - 1] != '/') {
-    str += '/';
-  }
-  return str;
-}
+var _isCordova = __webpack_require__(15);
 
-var transferQueue = []; // queued fileTransfers
-var inprogress = 0; // currently active filetransfers
+var _isCordova2 = _interopRequireDefault(_isCordova);
 
-/**
- * Factory function: Create a single instance (based on single FileSystem)
- */
-module.exports = function (options) {
-  /* Promise implementation */
-  var Promise = options.Promise || typeof window !== 'undefined' && window.Promise;
-  if (!Promise) {
-    throw new Error('No Promise library given in options.Promise');
-  }
+var _cordovaLoad = __webpack_require__(50);
 
-  /* default options */
-  options = options || {};
-  options.persistent = options.persistent !== undefined ? options.persistent : true;
-  options.storageSize = options.storageSize || 20 * 1024 * 1024;
-  options.concurrency = options.concurrency || 3;
-  options.retry = options.retry || [];
-  options.debug = !!options.debug;
+var _cordovaLoad2 = _interopRequireDefault(_cordovaLoad);
 
-  /* Cordova deviceready promise */
-  var deviceready,
-      isCordova = typeof cordova !== 'undefined';
+var _browserLoad = __webpack_require__(49);
 
-  if (isCordova) {
-    deviceready = new Promise(function (resolve, reject) {
-      document.addEventListener('deviceready', resolve, false);
-      setTimeout(function () {
-        reject(new Error('deviceready has not fired after 5 seconds.'));
-      }, 5100);
-    });
-  } else {
-    /* FileTransfer implementation for Chrome */
-    deviceready = ResolvedPromise(true);
+var _browserLoad2 = _interopRequireDefault(_browserLoad);
 
-    if (typeof webkitRequestFileSystem !== 'undefined' && typeof window !== 'undefined') {
-      window.requestFileSystem = webkitRequestFileSystem; // eslint-disable-line no-undef
-      window.FileTransfer = function FileTransfer() {};
-      window.FileTransfer.prototype.download = function download(url, file, win, fail) {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', url);
-        xhr.responseType = 'blob';
-        xhr.onreadystatechange = function () {
-          if (xhr.readyState == 4) {
-            if (xhr.status === 200 && !this._aborted) {
-              write(file, xhr.response).then(win, fail);
-            } else {
-              fail(xhr.status);
-            }
-          }
-        };
-        xhr.send();
-        return xhr;
-      };
-      window.FileTransfer.prototype.abort = function () {
-        this._aborted = true;
-      };
-      window.ProgressEvent = function ProgressEvent() {};
-      window.FileEntry = function FileEntry() {};
-    } else if (typeof window !== 'undefined') {
-      window.requestFileSystem = function (x, y, z, fail) {
-        fail(new Error('requestFileSystem not supported!'));
-      };
-    }
-  }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-  /* Promise resolve helper */
-  function ResolvedPromise(value) {
-    return new Promise(function (resolve) {
-      return resolve(value);
-    });
-  }
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-  /* the filesystem! */
-  var fs = new Promise(function (resolve, reject) {
-    deviceready.then(function () {
-      if (typeof window == 'undefined') {
-        return reject(new Error('cordova-promise-fs must run in a browser'));
-      }
+var Loader = function Loader(runtimeConfig) {
+  var _this = this;
 
-      var type = options.persistent ? 1 : 0;
-      if (options.fileSystem && isCordova) {
-        type = options.fileSystem;
-      }
-      // On chrome, request quota to store persistent files
-      if (!isCordova && type === 1 && navigator.webkitPersistentStorage) {
-        navigator.webkitPersistentStorage.requestQuota(options.storageSize, function (grantedBytes) {
-          window.requestFileSystem(type, grantedBytes, resolve, reject);
-        }, reject);
-      } else {
-        // Exotic Cordova Directories (options.fileSystem = string)
-        if (isNaN(type)) {
-          window.resolveLocalFileSystemURL(type, function (directory) {
-            resolve(directory.filesystem);
-          }, reject);
-          // Normal browser usage
-        } else {
-          window.requestFileSystem(type, options.storageSize, resolve, reject);
-        }
-      }
+  var forceReload = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
-      setTimeout(function () {
-        reject(new Error('Could not retrieve FileSystem after 5 seconds.'));
-      }, 5100);
-    }, reject);
-  });
+  _classCallCheck(this, Loader);
 
-  /* debug */
-  fs.then(function (fs) {
-    window.CDV_URL_ROOT = fs.root.toURL();
-    window.CDV_INTERNAL_URL_ROOT = isCordova ? fs.root.toInternalURL() : window.CDV_URL_ROOT;
-    window.__fs = fs;
-  }, function (err) {
-    console.error('Could not get Cordova FileSystem:', err);
-  });
+  _initialiseProps.call(this);
 
-  /* ensure directory exists */
-  function ensure(folders) {
-    return new Promise(function (resolve, reject) {
-      return fs.then(function (fs) {
-        if (!folders) {
-          resolve(fs.root);
-        } else {
-          folders = folders.split('/').filter(function (folder) {
-            return folder && folder.length > 0 && folder !== '.' && folder !== '..';
-          });
-          __createDir(fs.root, folders, resolve, reject);
-        }
-      }, reject);
-    });
-  }
+  this.emitter = new _events.EventEmitter();
+  this.localHashes = {};
 
-  /* get file file */
-  function file(path, options) {
-    return new Promise(function (resolve, reject) {
-      if ((typeof path === 'undefined' ? 'undefined' : _typeof(path)) === 'object') {
-        return resolve(path);
-      }
-      path = normalize(path);
-      options = options || {};
-      return fs.then(function (fs) {
-        fs.root.getFile(path, options, resolve, reject);
-      }, reject);
-    });
-  }
-
-  /* get directory entry */
-  function dir(path, options) {
-    path = normalize(path);
-    options = options || {};
-    return new Promise(function (resolve, reject) {
-      return fs.then(function (fs) {
-        if (!path || path === '/') {
-          resolve(fs.root);
-        } else {
-          fs.root.getDirectory(path, options, resolve, reject);
-        }
-      }, reject);
-    });
-  }
-
-  /* list contents of a directory */
-  function list(path, mode) {
-    mode = mode || '';
-    var recursive = mode.indexOf('r') > -1;
-    var getAsEntries = mode.indexOf('e') > -1;
-    var onlyFiles = mode.indexOf('f') > -1;
-    var onlyDirs = mode.indexOf('d') > -1;
-    if (onlyFiles && onlyDirs) {
-      onlyFiles = false;
-      onlyDirs = false;
-    }
-
-    return new Promise(function (resolve, reject) {
-      return dir(path).then(function (dirEntry) {
-        var dirReader = dirEntry.createReader();
-        dirReader.readEntries(function (entries) {
-          var promises = [ResolvedPromise(entries)];
-          if (recursive) {
-            entries.filter(function (entry) {
-              return entry.isDirectory;
-            }).forEach(function (entry) {
-              promises.push(list(entry.fullPath, 're'));
-            });
-          }
-          Promise.all(promises).then(function (values) {
-            var entries = [];
-            entries = entries.concat.apply(entries, values);
-            if (onlyFiles) entries = entries.filter(function (entry) {
-              return entry.isFile;
-            });
-            if (onlyDirs) entries = entries.filter(function (entry) {
-              return entry.isDirectory;
-            });
-            if (!getAsEntries) entries = entries.map(function (entry) {
-              return entry.fullPath;
-            });
-            resolve(entries);
-          }, reject);
-        }, reject);
-      }, reject);
-    });
-  }
-
-  /* does file exist? If so, resolve with fileEntry, if not, resolve with false. */
-  function exists(path) {
-    return new Promise(function (resolve, reject) {
-      file(path).then(function (fileEntry) {
-        resolve(fileEntry);
-      }, function (err) {
-        if (err.code === 1) {
-          resolve(false);
-        } else {
-          reject(err);
-        }
-      });
-    });
-  }
-
-  /* does dir exist? If so, resolve with fileEntry, if not, resolve with false. */
-  function existsDir(path) {
-    return new Promise(function (resolve, reject) {
-      dir(path).then(function (dirEntry) {
-        resolve(dirEntry);
-      }, function (err) {
-        if (err.code === 1) {
-          resolve(false);
-        } else {
-          reject(err);
-        }
-      });
-    });
-  }
-
-  function create(path) {
-    return ensure(dirname(path)).then(function () {
-      return file(path, { create: true });
-    });
-  }
-
-  /* convert path to URL to be used in JS/CSS/HTML */
-  function toURL(path) {
-    return file(path).then(function (fileEntry) {
-      return fileEntry.toURL();
-    });
-  }
-
-  /* convert path to URL to be used in JS/CSS/HTML */
-  var toInternalURL, toInternalURLSync, toURLSync;
-  window.CDV_INTERNAL_URL_ROOT = 'cdvfile://localhost/' + (options.persistent ? 'persistent/' : 'temporary/');
-  window.CDV_URL_ROOT = '';
-  if (isCordova) {
-    /* synchronous helper to get internal URL. */
-    toInternalURLSync = function toInternalURLSync(path) {
-      path = normalize(path);
-      return path.indexOf('://') < 0 ? window.CDV_INTERNAL_URL_ROOT + path : path;
-    };
-    /* synchronous helper to get native URL. */
-    toURLSync = function toURLSync(path) {
-      path = normalize(path);
-      return path.indexOf('://') < 0 ? window.CDV_URL_ROOT + path : path;
-    };
-
-    toInternalURL = function toInternalURL(path) {
-      return file(path).then(function (fileEntry) {
-        return fileEntry.toInternalURL();
-      });
-    };
-  } else {
-    /* synchronous helper to get internal URL. */
-    toInternalURLSync = function toInternalURLSync(path) {
-      path = normalize(path);
-      return 'filesystem:' + location.origin + (options.persistent ? '/persistent/' : '/temporary/') + path;
-    };
-
-    toInternalURL = function toInternalURL(path) {
-      return file(path).then(function (fileEntry) {
-        return fileEntry.toURL();
-      });
-    };
-    toURLSync = toInternalURLSync;
-  }
-
-  /* return contents of a file */
-  function read(path, method) {
-    method = method || 'readAsText';
-    return file(path).then(function (fileEntry) {
-      return new Promise(function (resolve, reject) {
-        fileEntry.file(function (fileObject) {
-          var reader = new FileReader();
-          reader.onload = function (evt) {
-            resolve(evt.target.result);
-          };
-          reader.onerror = reject;
-          reader[method](fileObject);
-        }, reject);
-      });
-    });
-  }
-
-  /* convert path to base64 date URI */
-  function toDataURL(path) {
-    return read(path, 'readAsDataURL');
-  }
-
-  function readJSON(path) {
-    return read(path).then(JSON.parse);
-  }
-
-  /* write contents to a file */
-  function write(path, blob, mimeType) {
-    return create(path).then(function (fileEntry) {
-      return new Promise(function (resolve, reject) {
-        fileEntry.createWriter(function (writer) {
-          writer.onwriteend = resolve;
-          writer.onerror = reject;
-          if (typeof blob === 'string') {
-            blob = createBlob([blob], mimeType || 'text/plain');
-          } else if (blob instanceof Blob !== true) {
-            blob = createBlob([JSON.stringify(blob, null, 4)], mimeType || 'application/json');
-          }
-          writer.write(blob);
-        }, reject);
-      });
-    });
-  }
-
-  function createBlob(parts, type) {
-    var BlobBuilder, bb;
+  var content = window.localStorage.getItem('localHashes');
+  if (content) {
     try {
-      return new Blob(parts, { type: type });
+      this.localHashes = JSON.parse(content);
     } catch (e) {
-      BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder || window.MSBlobBuilder;
-      if (BlobBuilder) {
-        bb = new BlobBuilder();
-        bb.append(parts);
-        return bb.getBlob(type);
-      } else {
-        throw new Error('Unable to create blob');
+      console.warn('Error reading localHashes from localStorage', e);
+    }
+  }
+
+  // We're passing in a dataSet as runtimeConfig and Safari's Object.assign doesn't work with it
+  // so we use our own objectAssign that doesn't mutate data.
+  this.config = (0, _objectAssign2.default)({
+    manifestFile: 'app-manifest.json',
+    supportedManifestVersion: '^2.0.0'
+  }, runtimeConfig);
+
+  window.cordovaFileCache = undefined;
+
+  this.getAppHost(this.config).then(function (returnedAppConfig) {
+    _this.config.appHost = returnedAppConfig.appHost || _this.config.appHost || '';
+
+    if (!_this.config.publicPath && _this.config.appHost) {
+      _this.config.publicPath = _this.config.appHost + '/';
+    }
+
+    if (!_isCordova2.default || !_this.config.useLocalCache) {
+      return _this.normalLoad();
+    }
+
+    return _this.cacheLoad(forceReload);
+  }).then(function () {
+    _this.emitter.emit('loaded');
+  }).catch(function (e) {
+    console.error('loader error', e);
+    if (window.Bugsnag) {
+      window.Bugsnag.notifyException(e);
+    }
+    _this.emitter.emit('error', e.message || JSON.stringify(e, null, 2));
+  });
+
+  return this.emitter;
+};
+
+var _initialiseProps = function _initialiseProps() {
+  var _this2 = this;
+
+  this.onProgress = function (_ref) {
+    var queueIndex = _ref.queueIndex,
+        queueSize = _ref.queueSize;
+
+    _this2.emitter.emit('progress', queueIndex, queueSize);
+  };
+
+  this.cacheLoad = function (forceReload) {
+    return _this2.getAppManifest().then(function (manifest) {
+      return (0, _cordovaLoad2.default)(_this2.config.publicPath, forceReload, manifest, _this2.onProgress);
+    });
+  };
+
+  this.normalLoad = function () {
+    return _this2.getAppManifest().then(function (manifest) {
+      return (0, _browserLoad2.default)(_this2.config.publicPath, manifest, _this2.onProgress);
+    });
+  };
+
+  this.getAppHost = function (config) {
+    if (!_isCordova2.default || config.ignoreAppSettings || typeof window.plugins === 'undefined' || !window.plugins.appPreferences) {
+      return Promise.resolve('');
+    }
+    return Promise.resolve(window.plugins.appPreferences.fetch('appHost'));
+  };
+
+  this.validateAppManifest = function (manifest) {
+    if (!manifest) {
+      throw new Error('Could not load manifest. Please check your connection and try again.');
+    }
+
+    if (!_semver2.default.satisfies(manifest.manifestVersion, _this2.config.supportedManifestVersion)) {
+      throw new Error('Your application version is too low. Please visit the App Store and update your application.');
+    }
+
+    if (_typeof(manifest.files) !== 'object') {
+      throw new Error('Expected appManifest.files to be an object');
+    }
+    if (!Array.isArray(manifest.domNodes)) {
+      throw new Error('Expected appManifest.domNodes to be an array');
+    }
+  };
+
+  this.getAppManifest = function () {
+    var manifest = void 0;
+    var url = (_this2.config.appHost || '') + '/' + _this2.config.manifestFile;
+
+    return (0, _xhrPromise2.default)(url, { responseType: 'text' }).then(function (xhr) {
+      try {
+        manifest = JSON.parse(xhr.response);
+      } catch (e) {
+        throw new Error('Failed to parse manifest.');
       }
-    }
-  }
 
-  /* move a file */
-  function move(src, dest) {
-    return ensure(dirname(dest)).then(function (dir) {
-      return file(src).then(function (fileEntry) {
-        return new Promise(function (resolve, reject) {
-          fileEntry.moveTo(dir, filename(dest), resolve, reject);
-        });
-      });
+      _this2.validateAppManifest(manifest);
+
+      return manifest;
     });
-  }
-
-  /* move a dir */
-  function moveDir(src, dest) {
-    src = src.replace(/\/$/, '');
-    dest = dest.replace(/\/$/, '');
-    return ensure(dirname(dest)).then(function (destDir) {
-      return dir(src).then(function (dirEntry) {
-        return new Promise(function (resolve, reject) {
-          dirEntry.moveTo(destDir, filename(dest), resolve, reject);
-        });
-      });
-    });
-  }
-
-  /* copy a file */
-  function copy(src, dest) {
-    return ensure(dirname(dest)).then(function (dir) {
-      return file(src).then(function (fileEntry) {
-        return new Promise(function (resolve, reject) {
-          fileEntry.copyTo(dir, filename(dest), resolve, reject);
-        });
-      });
-    });
-  }
-
-  /* delete a file */
-  function remove(path, mustExist) {
-    var method = mustExist ? file : exists;
-    return new Promise(function (resolve, reject) {
-      method(path).then(function (fileEntry) {
-        if (fileEntry !== false) {
-          fileEntry.remove(resolve, reject);
-        } else {
-          resolve(1);
-        }
-      }, reject);
-    }).then(function (val) {
-      return val === 1 ? false : true;
-    });
-  }
-
-  /* delete a directory */
-  function removeDir(path) {
-    return dir(path).then(function (dirEntry) {
-      return new Promise(function (resolve, reject) {
-        dirEntry.removeRecursively(resolve, reject);
-      });
-    });
-  }
-
-  // Whenever we want to start a transfer, we call popTransferQueue
-  function popTransferQueue() {
-    // while we are not at max concurrency
-    while (transferQueue.length > 0 && inprogress < options.concurrency) {
-      // increment activity counter
-      inprogress++;
-
-      // fetch filetranfer, method-type (isDownload) and arguments
-      var args = transferQueue.pop();
-      var ft = args.fileTransfer,
-          isDownload = args.isDownload,
-          serverUrl = args.serverUrl,
-          localPath = args.localPath,
-          trustAllHosts = args.trustAllHosts,
-          transferOptions = args.transferOptions,
-          win = args.win,
-          fail = args.fail;
-
-      if (ft._aborted) {
-        inprogress--;
-      } else if (isDownload) {
-        ft.download.call(ft, serverUrl, localPath, win, fail, trustAllHosts, transferOptions);
-        if (ft.onprogress) ft.onprogress(new ProgressEvent());
-      } else {
-        ft.upload.call(ft, localPath, serverUrl, win, fail, transferOptions, trustAllHosts);
-      }
-    }
-    // if we are at max concurrency, popTransferQueue() will be called whenever
-    // the transfer is ready and there is space avaialable.
-  }
-
-  // Promise callback to check if there are any more queued transfers
-  function nextTransfer(result) {
-    inprogress--; // decrement counter to free up one space to start transfers again!
-    popTransferQueue(); // check if there are any queued transfers
-    return result;
-  }
-
-  function filetransfer(isDownload, serverUrl, localPath, transferOptions, onprogress) {
-    if (typeof transferOptions === 'function') {
-      onprogress = transferOptions;
-      transferOptions = {};
-    }
-    if (isCordova && localPath.indexOf('://') < 0) localPath = toURLSync(localPath);
-
-    transferOptions = transferOptions || {};
-    if (!transferOptions.retry || !transferOptions.retry.length) {
-      transferOptions.retry = options.retry;
-    }
-    transferOptions.retry = transferOptions.retry.concat();
-    if (!transferOptions.file && !isDownload) {
-      transferOptions.fileName = filename(localPath);
-    }
-
-    var ft = new window.FileTransfer();
-    onprogress = onprogress || transferOptions.onprogress;
-    if (typeof onprogress === 'function') ft.onprogress = onprogress;
-    var promise = new Promise(function (resolve, reject) {
-      var attempt = function attempt(err) {
-        if (transferOptions.retry.length === 0) {
-          if (options.debug) console.log('FileTransfer Error: ' + serverUrl, err);
-          reject(err);
-        } else {
-
-          var transferJob = {
-            fileTransfer: ft,
-            isDownload: isDownload,
-            serverUrl: serverUrl,
-            localPath: localPath,
-            trustAllHosts: transferOptions.trustAllHosts || false,
-            transferOptions: transferOptions,
-            win: resolve,
-            fail: attempt
-          };
-          transferQueue.unshift(transferJob);
-          var timeout = transferOptions.retry.shift();
-          if (timeout > 0) {
-            setTimeout(nextTransfer, timeout);
-          } else {
-            nextTransfer();
-          }
-        }
-      };
-      transferOptions.retry.unshift(0);
-      inprogress++;
-      attempt();
-    });
-    promise.then(nextTransfer, nextTransfer);
-    promise.progress = function (onprogress) {
-      ft.onprogress = onprogress;
-      return promise;
-    };
-    promise.abort = function () {
-      ft._aborted = true;
-      ft.abort();
-      return promise;
-    };
-    return promise;
-  }
-
-  function download(url, dest, options, onprogress) {
-    return filetransfer(true, url, dest, options, onprogress);
-  }
-
-  function upload(source, dest, options, onprogress) {
-    return filetransfer(false, dest, source, options, onprogress);
-  }
-
-  return {
-    fs: fs,
-    normalize: normalize,
-    file: file,
-    filename: filename,
-    dir: dir,
-    dirname: dirname,
-    create: create,
-    read: read,
-    readJSON: readJSON,
-    write: write,
-    move: move,
-    moveDir: moveDir,
-    copy: copy,
-    remove: remove,
-    removeDir: removeDir,
-    list: list,
-    ensure: ensure,
-    exists: exists,
-    existsDir: existsDir,
-    download: download,
-    upload: upload,
-    toURL: toURL,
-    isCordova: isCordova,
-    toInternalURLSync: toInternalURLSync,
-    toInternalURL: toInternalURL,
-    toDataURL: toDataURL,
-    deviceready: deviceready,
-    options: options,
-    Promise: Promise
   };
 };
 
+exports.default = Loader;
+
 /***/ }),
-/* 46 */
+/* 49 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = browserLoad;
+
+var _throat = __webpack_require__(45);
+
+var _throat2 = _interopRequireDefault(_throat);
+
+var _DomNode = __webpack_require__(27);
+
+var _DomNode2 = _interopRequireDefault(_DomNode);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var throat = (0, _throat2.default)(Promise);
+
+function browserLoad() {
+  var serverRoot = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+  var manifest = arguments[1];
+  var onProgress = arguments[2];
+
+  var completedCount = 0;
+  return Promise.all(manifest.domNodes.map(throat(1, function (_ref) {
+    var path = _ref.path;
+
+    var nodeInfo = manifest.files[path];
+    nodeInfo.path = '' + serverRoot + path;
+    return new _DomNode2.default(nodeInfo).then(function () {
+      completedCount += 1;
+      onProgress({ queueIndex: completedCount, queueSize: manifest.domNodes.length });
+    });
+  })));
+}
+
+/***/ }),
+/* 50 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = cordovaLoad;
+
+var _cordovaPromiseFs = __webpack_require__(59);
+
+var _cordovaPromiseFs2 = _interopRequireDefault(_cordovaPromiseFs);
+
+var _cordovaFileCache = __webpack_require__(57);
+
+var _cordovaFileCache2 = _interopRequireDefault(_cordovaFileCache);
+
+var _throat = __webpack_require__(45);
+
+var _throat2 = _interopRequireDefault(_throat);
+
+var _isCordova = __webpack_require__(15);
+
+var _isCordova2 = _interopRequireDefault(_isCordova);
+
+var _DomNode = __webpack_require__(27);
+
+var _DomNode2 = _interopRequireDefault(_DomNode);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var throat = (0, _throat2.default)(Promise);
+
+function cordovaLoad(serverRoot, forceReload, manifest, onProgress) {
+  var files = Object.keys(manifest.files).map(function (fileName) {
+    return manifest.files[fileName];
+  }).filter(function (file) {
+    return file;
+  }).map(function (_ref) {
+    var path = _ref.path;
+    return path;
+  });
+
+  var cache = new _cordovaFileCache2.default({
+    fs: new _cordovaPromiseFs2.default({
+      Promise: Promise
+    }),
+    mode: 'mirror',
+    serverRoot: serverRoot
+  });
+  window.cordovaFileCache = cache;
+
+  return cache.ready.then(function () {
+    if (forceReload) {
+      return cache.clear();
+    }
+    return Promise.resolve();
+  }).then(function () {
+    cache.add(files);
+
+    if (cache.isDirty()) {
+      return cache.download(onProgress);
+    }
+    return Promise.resolve();
+  }).then(function () {
+    return Promise.all(manifest.domNodes.map(throat(1, function (_ref2) {
+      var path = _ref2.path;
+
+      var nodeInfo = manifest.files[path];
+      nodeInfo.path = cache.get(nodeInfo.path);
+      return new _DomNode2.default(nodeInfo);
+    })));
+  });
+}
+
+/***/ }),
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1711,840 +1614,7 @@ exports.default = {
 };
 
 /***/ }),
-/* 47 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-function hasBlob() {
-  try {
-    return !!new Blob();
-  } catch (e) {
-    return false;
-  }
-}
-
-function hasFileReader() {
-  try {
-    return !!new FileReader();
-  } catch (e) {
-    return false;
-  }
-}
-
-var hasBrowserFeatures = hasBlob() && hasFileReader();
-
-exports.default = hasBrowserFeatures;
-
-/***/ }),
-/* 48 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-var _events = __webpack_require__(103);
-
-var _semver = __webpack_require__(106);
-
-var _semver2 = _interopRequireDefault(_semver);
-
-var _sparkMd = __webpack_require__(107);
-
-var _sparkMd2 = _interopRequireDefault(_sparkMd);
-
-var _throat = __webpack_require__(108);
-
-var _throat2 = _interopRequireDefault(_throat);
-
-var _cordovaPromiseFs = __webpack_require__(45);
-
-var _cordovaPromiseFs2 = _interopRequireDefault(_cordovaPromiseFs);
-
-var _localStoragePromiseFs = __webpack_require__(49);
-
-var _localStoragePromiseFs2 = _interopRequireDefault(_localStoragePromiseFs);
-
-var _objectAssign = __webpack_require__(50);
-
-var _objectAssign2 = _interopRequireDefault(_objectAssign);
-
-var _xhrPromise = __webpack_require__(51);
-
-var _xhrPromise2 = _interopRequireDefault(_xhrPromise);
-
-var _hasBrowserFeatures = __webpack_require__(47);
-
-var _hasBrowserFeatures2 = _interopRequireDefault(_hasBrowserFeatures);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var throat = (0, _throat2.default)(Promise);
-
-var isCordova = typeof window !== 'undefined' && typeof window.cordova !== 'undefined';
-
-var loader = new _events.EventEmitter();
-
-var fs = void 0;
-if (isCordova) {
-  fs = (0, _cordovaPromiseFs2.default)({
-    persistent: true,
-    concurrency: 3,
-    Promise: Promise
-  });
-} else {
-  fs = _localStoragePromiseFs2.default;
-}
-
-var NOT_FOUND_ERR = 1;
-
-var loaderConfig = {
-  manifestFile: 'app-manifest.json',
-  supportedManifestVersion: '^2.0.0'
-};
-
-function getLocalHashes() {
-  var content = window.localStorage.getItem('localHashes');
-
-  if (!content) {
-    return {};
-  }
-
-  try {
-    return JSON.parse(content);
-  } catch (e) {
-    console.warn('Error reading localHashes from localStorage', e);
-    return {};
-  }
-}
-
-var localHashes = getLocalHashes();
-
-function updateLocalHash(file) {
-  localHashes[file.manifestEntry.path] = file.md5;
-
-  var stringified = JSON.stringify(localHashes);
-
-  window.localStorage.setItem('localHashes', stringified);
-}
-
-function writeFile(file, config) {
-  if (!config.useLocalCache) {
-    return Promise.resolve(file);
-  }
-  var path = file.manifestEntry.path;
-
-  var blob = file.blob || new Blob([file.fileBuffer], { type: file.contentType });
-  return fs.write(path, blob, file.contentType).then(function () {
-    updateLocalHash(file);
-    return file;
-  });
-}
-
-function getMD5(fileEntry) {
-  return new Promise(function (resolve, reject) {
-    if (window.md5chksum) {
-      window.md5chksum.file(fileEntry, resolve, reject);
-    } else {
-      resolve(_sparkMd2.default.ArrayBuffer.hash(fileEntry));
-    }
-  });
-}
-
-function getBasicInfo(config) {
-  function getAppHost() {
-    if (!isCordova || config.ignoreAppSettings || typeof window.plugins === 'undefined' || !window.plugins.appPreferences) {
-      return '';
-    }
-    return window.plugins.appPreferences.fetch('appHost');
-  }
-
-  function publicPath() {
-    return fs.dir().then(function (directoryEntry) {
-      return directoryEntry.nativeURL;
-    });
-  }
-
-  return Promise.all([getAppHost(), publicPath()]).then(function (moreConfig) {
-    return {
-      appHost: moreConfig[0],
-      publicPath: moreConfig[1]
-    };
-  });
-}
-
-function getLocalFile(path) {
-  return fs.readJSON(path).catch(function (error) {
-    if (error && error.code !== NOT_FOUND_ERR) {
-      throw error;
-    }
-  }).then(function (content) {
-    if (!content) {
-      return null;
-    }
-
-    var md5 = localHashes[path];
-
-    var file = {
-      content: content,
-      manifestEntry: {
-        path: path
-      },
-      md5: md5
-    };
-
-    return file;
-  });
-}
-
-function getRemoteFile(path, config) {
-  var url = (config.appHost || '') + '/' + path;
-
-  return (0, _xhrPromise2.default)(url).catch(function (error) {
-    console.error(error);
-  }).then(function (xhr) {
-    if (!xhr) {
-      return null;
-    }
-
-    var file = {
-      content: null,
-      contentType: xhr.contentType,
-      fileBuffer: xhr.response,
-      manifestEntry: {
-        path: path
-      }
-    };
-
-    if (!config.performHash) {
-      return file;
-    }
-
-    return getMD5(file.fileBuffer).then(function (md5) {
-      file.md5 = md5;
-      return file;
-    });
-  });
-}
-
-function validateAppManifest(manifest, config) {
-  if (!manifest) {
-    throw new Error('Could not load manifest. Please check your connection and try again.');
-  }
-
-  if (!_semver2.default.satisfies(manifest.manifestVersion, config.supportedManifestVersion)) {
-    throw new Error('Your application version is too low. Please visit the App Store and update your application.');
-  }
-
-  if (_typeof(manifest.files) !== 'object') {
-    throw new Error('Expected appManifest.files to be an object');
-  }
-  if (!Array.isArray(manifest.domNodes)) {
-    throw new Error('Expected appManifest.domNodes to be an array');
-  }
-}
-
-function getAppManifest(config) {
-  var path = config.manifestFile;
-
-  return Promise.all([getLocalFile(path), getRemoteFile(path, config)]).then(function (files) {
-    var localFile = files[0];
-    var remoteFile = files[1];
-
-    if (localFile && remoteFile) {
-      if (remoteFile.md5 && remoteFile.md5 === localFile.md5) {
-        return localFile;
-      }
-    }
-
-    return remoteFile || localFile;
-  }).then(function (file) {
-    if (!file || !file.fileBuffer || !file.contentType || file.content) {
-      return file; // Nothing to write
-    }
-
-    file.blob = new Blob([file.fileBuffer], { type: file.contentType });
-
-    return writeFile(file, config).then(function () {
-      return new Promise(function (resolve, reject) {
-        var blob = file.blob;
-        var fileReader = new FileReader();
-
-        fileReader.onload = function (event) {
-          file.content = JSON.parse(event.target.result);
-          resolve(file);
-        };
-
-        fileReader.onerror = reject;
-
-        fileReader.readAsText(blob);
-      });
-    });
-  }).then(function (file) {
-    var manifest = file && file.content;
-    validateAppManifest(manifest, config);
-
-    return file;
-  });
-}
-
-function getFilesToLoad(manifest, config) {
-  var fileNames = Object.keys(manifest.files);
-  if (!isCordova) {
-    // Get only files needed as dom node
-    fileNames = manifest.domNodes.map(function (domNode) {
-      return domNode.path;
-    });
-  }
-  var filesToLoad = fileNames.map(function (fileName) {
-    return manifest.files[fileName];
-  }).filter(function (file) {
-    return file && (!config.useLocalCache || file.hash !== localHashes[file.path]);
-  });
-
-  return filesToLoad;
-}
-
-function downloadFile(config, file, progress) {
-  var appHost = config.appHost;
-  var url = appHost + '/' + file.path;
-
-  var fileBuffer = null;
-  var contentType = null;
-
-  return (0, _xhrPromise2.default)(url, { progress: progress }).then(function (xhr) {
-    fileBuffer = xhr.response;
-    contentType = xhr.contentType;
-
-    if (!config.performHash) {
-      return file.hash;
-    }
-
-    if (!fileBuffer) {
-      console.warn(file.path + ' file was empty');
-      return file.hash;
-    }
-    return getMD5(fileBuffer);
-  }).then(function (md5) {
-    if (md5 !== file.hash) {
-      throw new Error('md5 mismatch: ' + file.path + ' ' + file.hash + ' computed: ' + md5);
-    }
-    return { manifestEntry: file, fileBuffer: fileBuffer, contentType: contentType, md5: md5 };
-  });
-}
-
-function onProgress(fileStatus, _ref) {
-  var loaded = _ref.loaded,
-      total = _ref.total;
-
-  var bytes = loaded - fileStatus.previousBytes;
-  fileStatus.previousBytes = loaded;
-
-  // Firefox reports compressed bytes loaded, so we have to estimate how many uncompressed
-  // bytes have been loaded.
-  var estimatedBytes = bytes;
-
-  if (total && total < fileStatus.size) {
-    estimatedBytes = Math.floor(fileStatus.size * loaded / total);
-  }
-
-  loader.loadedBytes += estimatedBytes;
-  loader.emit('progress', loader.loadedBytes, loader.totalBytes);
-}
-
-function downloadFiles(config, files) {
-  loader.loadedBytes = 0;
-  loader.totalBytes = files.filter(function (file) {
-    return file;
-  }).reduce(function (total, file) {
-    return total + file.size;
-  }, 0);
-
-  var promises = files.map(throat(5, function (file) {
-    var fileStatus = {
-      previousBytes: 0,
-      size: file.size
-    };
-    return downloadFile(config, file, onProgress.bind(null, fileStatus));
-  }));
-
-  return Promise.all(promises);
-}
-
-function updateNodeAttributes(node, nodeInfo) {
-  if (nodeInfo.attributes) {
-    Object.keys(nodeInfo.attributes).forEach(function (key) {
-      node.setAttribute(key, nodeInfo.attributes[key]);
-    });
-  }
-}
-
-function createLocalScriptNode(fileCache, nodeInfo, config) {
-  var node = document.createElement('script');
-  node.setAttribute('type', 'text/javascript');
-
-  if (config.publicPath) {
-    node.setAttribute('data-public-path', config.publicPath);
-  }
-
-  updateNodeAttributes(node, nodeInfo);
-
-  document.body.appendChild(node);
-
-  if (fileCache[nodeInfo.path].content) {
-    node.text = fileCache[nodeInfo.path].content;
-    node.id = nodeInfo.path;
-    return Promise.resolve(node);
-  }
-
-  return new Promise(function (resolve, reject) {
-    var fileBuffer = fileCache[nodeInfo.path].fileBuffer;
-    var blob = new Blob([fileBuffer], { type: 'text/javascript' });
-    var fileReader = new FileReader();
-
-    fileReader.onload = function (e) {
-      var text = e.target.result;
-
-      if (config.rewriteSourcemaps) {
-        var sourceIndex = text.lastIndexOf('\n//# sourceMappingURL=');
-
-        if (sourceIndex === -1) {
-          sourceIndex = text.length;
-        }
-        var newSource = '\n//# sourceMappingURL=' + nodeInfo.path.replace('.js', '.map');
-
-        text = text.substring(0, sourceIndex).concat(newSource);
-      }
-
-      node.text = text;
-      node.id = nodeInfo.path;
-
-      resolve(node);
-    };
-
-    fileReader.onerror = function (e) {
-      if (nodeInfo.optional) {
-        return resolve(node);
-      }
-      console.error('error reading:', nodeInfo, e);
-      return reject(e);
-    };
-
-    fileReader.readAsText(blob);
-  });
-}
-
-function createRemoteScriptNode(nodeInfo) {
-  return new Promise(function (resolve, reject) {
-    var node = document.createElement('script');
-    node.setAttribute('type', 'text/javascript');
-
-    updateNodeAttributes(node, nodeInfo);
-
-    node.onload = function () {
-      return resolve(node);
-    };
-
-    node.onerror = function (error) {
-      if (nodeInfo.optional) {
-        return resolve(node);
-      }
-      console.error('error loading: ', nodeInfo, error);
-      return reject(error);
-    };
-
-    node.setAttribute('src', nodeInfo.path);
-
-    document.body.appendChild(node);
-  });
-}
-
-function createLocalStyleSheetNode(fileCache, nodeInfo, config) {
-  var node = document.createElement('style');
-  node.setAttribute('type', 'text/css');
-
-  updateNodeAttributes(node, nodeInfo);
-
-  document.body.appendChild(node);
-
-  if (fileCache[nodeInfo.path].content) {
-    node.innerHTML = fileCache[nodeInfo.path].content;
-    node.id = nodeInfo.path;
-    return Promise.resolve(node);
-  }
-
-  return new Promise(function (resolve, reject) {
-    var fileBuffer = fileCache[nodeInfo.path].fileBuffer;
-    var blob = new Blob([fileBuffer], { type: 'text/css' });
-
-    var fileReader = new FileReader();
-
-    fileReader.onload = function (e) {
-      var text = e.target.result;
-
-      if (config.rewriteSourcemaps) {
-        var sourceIndex = text.lastIndexOf('\n/*# sourceMappingURL=');
-
-        if (sourceIndex === -1) {
-          sourceIndex = text.length;
-        }
-
-        var newSource = '\n/*# sourceURL=' + location.origin + '/' + nodeInfo.path + ' */';
-        newSource += '\n/*# sourceMappingURL=../' + nodeInfo.path + '.map */';
-
-        text = text.substring(0, sourceIndex).concat(newSource);
-      }
-
-      try {
-        node.innerHTML = text;
-      } catch (err) {
-        console.error(err);
-        return reject(err);
-      }
-      node.id = nodeInfo.path;
-      return resolve(node);
-    };
-
-    fileReader.onerror = function (e) {
-      if (nodeInfo.optional) {
-        return resolve(node);
-      }
-      console.error('error reading: ', nodeInfo, e);
-      return reject(e);
-    };
-
-    fileReader.readAsText(blob);
-  });
-}
-
-function createStyleSheetNode(nodeInfo) {
-  return fs.toURL(nodeInfo.path).then(function (filePath) {
-    return new Promise(function (resolve, reject) {
-      var node = document.createElement('link');
-
-      node.setAttribute('type', 'text/css');
-      node.setAttribute('rel', 'stylesheet');
-
-      updateNodeAttributes(node, nodeInfo);
-
-      node.onload = resolve;
-
-      node.onerror = function (error) {
-        if (nodeInfo.optional) {
-          return resolve();
-        }
-        console.error('error loading: ', nodeInfo, error);
-        return reject(error);
-      };
-
-      node.setAttribute('href', filePath);
-
-      document.body.appendChild(node);
-    });
-  });
-}
-
-function createRemoteStyleSheetNode(nodeInfo) {
-  return new Promise(function (resolve, reject) {
-    var node = document.createElement('link');
-
-    node.setAttribute('type', 'text/css');
-    node.setAttribute('rel', 'stylesheet');
-
-    updateNodeAttributes(node, nodeInfo);
-
-    node.onload = resolve;
-
-    node.onerror = function (error) {
-      if (nodeInfo.optional) {
-        return resolve();
-      }
-      console.error('error loading: ', nodeInfo, error);
-      return reject(error);
-    };
-
-    node.setAttribute('href', nodeInfo.path);
-
-    document.body.appendChild(node);
-  });
-}
-
-function createNode(fileCache, nodeInfo, config) {
-  var isCached = !!fileCache[nodeInfo.path];
-  var type = isCached ? fileCache[nodeInfo.path].manifestEntry.type : nodeInfo.type;
-
-  if (type === 'js') {
-    if (isCached) {
-      return createLocalScriptNode(fileCache, nodeInfo, config);
-    }
-    return createRemoteScriptNode(nodeInfo);
-  }
-
-  if (type === 'css') {
-    if (isCordova) {
-      return createStyleSheetNode(nodeInfo);
-    }
-    if (isCached) {
-      return createLocalStyleSheetNode(fileCache, nodeInfo, config);
-    }
-    return createRemoteStyleSheetNode(nodeInfo);
-  }
-
-  throw new Error('Unknown node type: ' + type);
-}
-
-function loadFilesFromCache(manifest, fileCache, files) {
-  var filesToLoad = [];
-
-  files.forEach(function (file) {
-    fileCache[file.manifestEntry.path] = file;
-  });
-
-  manifest.domNodes.forEach(function (nodeInfo) {
-    if (!fileCache[nodeInfo.path] && manifest.files[nodeInfo.path]) {
-      filesToLoad.push(manifest.files[nodeInfo.path]);
-    }
-  });
-
-  return Promise.all(filesToLoad.map(function (file) {
-    return fs.read(file.path, 'readAsArrayBuffer').then(function (fileBuffer) {
-      fileCache[file.path] = { manifestEntry: file, fileBuffer: fileBuffer };
-    }).catch(function (error) {
-      console.error(error);
-      throw error;
-    });
-  }));
-}
-
-loader.unsupportedBrowserLoad = function (config) {
-  var manifest = void 0;
-  var url = (config.appHost || '') + '/' + config.manifestFile;
-
-  return (0, _xhrPromise2.default)(url, { responseType: 'text' }).then(function (xhr) {
-    try {
-      manifest = JSON.parse(xhr.response);
-    } catch (e) {
-      throw new Error('Failed to parse manifest.');
-    }
-
-    validateAppManifest(manifest, config);
-
-    return Promise.all(manifest.domNodes.map(throat(1, function (nodeInfo) {
-      return createNode(loader.fileCache, nodeInfo, config);
-    })));
-  });
-};
-
-loader.normalLoad = function (config) {
-  var manifest = void 0;
-  var fileCache = loader.fileCache;
-
-  return getAppManifest(config).then(function (appManifest) {
-    fileCache[config.manifestFile] = appManifest;
-    manifest = appManifest.content;
-    return getFilesToLoad(manifest, config);
-  }).then(function (files) {
-    return downloadFiles(config, files);
-  }).then(function (files) {
-    return Promise.all(files.map(function (file) {
-      return writeFile(file, config);
-    }));
-  }).then(function (files) {
-    return loadFilesFromCache(manifest, fileCache, files);
-  }).then(function () {
-    return Promise.all(manifest.domNodes.map(throat(1, function (nodeInfo) {
-      return createNode(fileCache, nodeInfo, config);
-    })));
-  });
-};
-
-loader.load = function (runtimeConfig) {
-  // We're passing in a dataSet as runtimeConfig and Safari's Object.assign doesn't work with it
-  // so we use our own objectAssign that doesn't mutate data.
-
-  loader.config = (0, _objectAssign2.default)(loaderConfig, runtimeConfig);
-  var config = loader.config;
-
-  loader.fileCache = {};
-
-  getBasicInfo(config).then(function (returnedAppConfig) {
-    config.appHost = returnedAppConfig.appHost || config.appHost || '';
-
-    if (!config.publicPath && config.appHost) {
-      config.publicPath = config.appHost + '/';
-    }
-
-    // add fallback for browsers with unsupported features
-    if (!isCordova && !_hasBrowserFeatures2.default) {
-      return loader.unsupportedBrowserLoad(config);
-    }
-
-    return loader.normalLoad(config);
-  }).then(function () {
-    loader.emit('loaded');
-  }).catch(function (e) {
-    console.error('loader error', e);
-    if (window.Bugsnag) {
-      window.Bugsnag.notifyException(e);
-    }
-    loader.emit('error', e.message || JSON.stringify(e, null, 2));
-  });
-};
-
-exports.default = loader;
-
-/***/ }),
-/* 49 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _lzString = __webpack_require__(104);
-
-var _lzString2 = _interopRequireDefault(_lzString);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var ls = typeof window !== 'undefined' ? window.localStorage : {
-  getItem: function getItem() {
-    throw new Error('lspfs not available');
-  },
-  setItem: function setItem() {
-    throw new Error('lspfs not available');
-  }
-};
-
-var prefix = 'lspfs:';
-
-var NOT_FOUND_ERR = 1;
-
-function Writer(path, onerror) {
-  var _this = this;
-
-  this.onwriteend = function () {
-    return undefined;
-  };
-  this.onerror = onerror;
-  this.write = function (blob) {
-    var fileReader = new FileReader();
-
-    fileReader.onload = function (e) {
-      var compressed = _lzString2.default.compressToUTF16(e.target.result);
-
-      try {
-        ls.setItem(prefix + path, compressed);
-      } catch (err) {
-        _this.onerror(err);
-      }
-
-      _this.onwriteend();
-    };
-
-    fileReader.onerror = _this.onerror;
-
-    fileReader.readAsText(blob);
-  };
-}
-
-function File(path) {
-  this.createWriter = function (cb, onerror) {
-    cb(new Writer(path, onerror));
-  };
-}
-
-function dir(path) {
-  return Promise.resolve({ nativeURL: path });
-}
-
-function dirname() {
-  return Promise.resolve();
-}
-
-function ensure() {
-  return Promise.resolve();
-}
-
-function exists(path) {
-  return Promise.resolve(ls[prefix + path]);
-}
-
-function file(path) {
-  return Promise.resolve(new File(path));
-}
-
-function toURL(path) {
-  return Promise.resolve('/' + path);
-}
-
-function read(path) {
-  var compressed = ls.getItem(prefix + path);
-
-  if (compressed === null) {
-    var error = new Error('no such file or directory \'' + path + '\'');
-    error.code = NOT_FOUND_ERR;
-
-    return Promise.reject(error);
-  }
-
-  var decompressed = _lzString2.default.decompressFromUTF16(compressed);
-
-  return Promise.resolve(decompressed);
-}
-
-function write(path, blob) {
-  return ensure(dirname(path)).then(function () {
-    return file(path, { create: true });
-  }).then(function (fileEntry) {
-    return new Promise(function (resolve, reject) {
-      fileEntry.createWriter(function (writer) {
-        writer.onwriteend = resolve;
-        writer.onerror = reject;
-        writer.write(blob);
-      }, reject);
-    });
-  });
-}
-
-function readJSON(path) {
-  return read(path).then(function (content) {
-    return JSON.parse(content);
-  });
-}
-
-function remove() {
-  return Promise.resolve();
-}
-
-exports.default = {
-  dir: dir,
-  dirname: dirname,
-  ensure: ensure,
-  exists: exists,
-  file: file,
-  read: read,
-  write: write,
-  readJSON: readJSON,
-  remove: remove,
-  toURL: toURL
-};
-
-/***/ }),
-/* 50 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2575,7 +1645,7 @@ function objectAssign() {
 exports.default = objectAssign;
 
 /***/ }),
-/* 51 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2630,19 +1700,19 @@ function xhrPromise(url) {
 }
 
 /***/ }),
-/* 52 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = { "default": __webpack_require__(55), __esModule: true };
-
-/***/ }),
-/* 53 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = { "default": __webpack_require__(56), __esModule: true };
-
-/***/ }),
 /* 54 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = { "default": __webpack_require__(60), __esModule: true };
+
+/***/ }),
+/* 55 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = { "default": __webpack_require__(61), __esModule: true };
+
+/***/ }),
+/* 56 */
 /***/ (function(module, exports) {
 
 /*
@@ -2888,27 +1958,1019 @@ if (objCtr.defineProperty) {
 
 
 /***/ }),
-/* 55 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(69);
+var hash = __webpack_require__(58);
+var Promise = null;
+
+/* Cordova File Cache x */
+function FileCache(options){
+  var self = this;
+  // cordova-promise-fs
+  this._fs = options.fs;
+  if(!this._fs) {
+    throw new Error('Missing required option "fs". Add an instance of cordova-promise-fs.');
+  }
+  // Use Promises from fs.
+  Promise = this._fs.Promise;
+
+  // 'mirror' mirrors files structure from "serverRoot" to "localRoot"
+  // 'hash' creates a 1-deep filestructure, where the filenames are hashed server urls (with extension)
+  this._mirrorMode = options.mode !== 'hash';
+  this._retry = options.retry || [500,1500,8000];
+  this._cacheBuster = !!options.cacheBuster;
+
+  // normalize path
+  this.localRoot = this._fs.normalize(options.localRoot || 'data');
+  this.serverRoot = this._fs.normalize(options.serverRoot || '');
+
+  // set internal variables
+  this._downloading = [];    // download promises
+  this._added = [];          // added files
+  this._cached = {};         // cached files
+
+  // list existing cache contents
+  this.ready = this._fs.ensure(this.localRoot)
+  .then(function(entry){
+    self.localInternalURL = typeof entry.toInternalURL === 'function'? entry.toInternalURL(): entry.toURL();
+    self.localUrl = entry.toURL();
+    return self.list();
+  });
+}
+
+FileCache.hash = hash;
+
+/**
+ * Helper to cache all 'internalURL' and 'URL' for quick synchronous access
+ * to the cached files.
+ */
+FileCache.prototype.list = function list(){
+  var self = this;
+  return new Promise(function(resolve,reject){
+    self._fs.list(self.localRoot,'rfe').then(function(entries){
+      self._cached = {};
+      entries = entries.map(function(entry){
+        var fullPath = self._fs.normalize(entry.fullPath);
+        self._cached[fullPath] = {
+          toInternalURL: typeof entry.toInternalURL === 'function'? entry.toInternalURL(): entry.toURL(),
+          toURL: entry.toURL(),
+        };
+        return fullPath;
+      });
+      resolve(entries);
+    },function(){
+      resolve([]);
+    });
+  });
+};
+
+FileCache.prototype.add = function add(urls){
+  if(!urls) urls = [];
+  if(typeof urls === 'string') urls = [urls];
+  var self = this;
+  urls.forEach(function(url){
+    url = self.toServerURL(url);
+    if(self._added.indexOf(url) === -1) {
+      self._added.push(url);
+    }
+  });
+  return self.isDirty();
+};
+
+FileCache.prototype.remove = function remove(urls,returnPromises){
+  if(!urls) urls = [];
+  var promises = [];
+  if(typeof urls === 'string') urls = [urls];
+  var self = this;
+  urls.forEach(function(url){
+    var index = self._added.indexOf(self.toServerURL(url));
+    if(index >= 0) self._added.splice(index,1);
+    var path = self.toPath(url);
+    promises.push(self._fs.remove(path));
+    delete self._cached[path];
+  });
+  return returnPromises? Promise.all(promises): self.isDirty();
+};
+
+FileCache.prototype.getDownloadQueue = function(){
+  var self = this;
+  var queue = self._added.filter(function(url){
+    return !self.isCached(url);
+  });
+  return queue;
+};
+
+FileCache.prototype.getAdded = function() {
+  return this._added;
+};
+
+FileCache.prototype.isDirty = function isDirty(){
+  return this.getDownloadQueue().length > 0;
+};
+
+FileCache.prototype.download = function download(onprogress,includeFileProgressEvents){
+  var fs = this._fs;
+  var self = this;
+  includeFileProgressEvents = includeFileProgressEvents || false;
+  self.abort();
+
+  return new Promise(function(resolve,reject){
+    // make sure cache directory exists and that
+    // we have retrieved the latest cache contents
+    // to avoid downloading files we already have!
+    fs.ensure(self.localRoot).then(function(){
+      return self.list();
+    }).then(function(){
+      // no dowloads needed, resolve
+      if(!self.isDirty()) {
+        resolve(self);
+        return;
+      }
+
+      // keep track of number of downloads!
+      var queue = self.getDownloadQueue();
+      var done = self._downloading.length;
+      var total = self._downloading.length + queue.length;
+      var percentage = 0;
+      var errors = [];
+
+      // download every file in the queue (which is the diff from _added with _cached)
+      queue.forEach(function(url){
+        var path = self.toPath(url);
+        // augment progress event with done/total stats
+        var onSingleDownloadProgress;
+        if(typeof onprogress === 'function') {
+          onSingleDownloadProgress = function(ev){
+            ev.queueIndex = done;
+            ev.queueSize = total;
+            ev.url = url;
+            ev.path = path;
+            ev.percentage = done / total;
+            if(ev.loaded > 0 && ev.total > 0 && done !== total){
+               ev.percentage += (ev.loaded / ev.total) / total;
+            }
+            ev.percentage = Math.max(percentage,ev.percentage);
+            percentage = ev.percentage;
+            onprogress(ev);
+          };
+        }
+
+        // callback
+        var onDone = function(){
+          done++;
+          if(onSingleDownloadProgress) onSingleDownloadProgress(new ProgressEvent());
+
+          // when we're done
+          if(done === total) {
+            // reset downloads
+            self._downloading = [];
+            // check if we got everything
+            self.list().then(function(){
+              // final progress event!
+              if(onSingleDownloadProgress) onSingleDownloadProgress(new ProgressEvent());
+              // Yes, we're not dirty anymore!
+              if(errors.length === 0) {
+                resolve(self);
+              // Aye, some files got left behind!
+              } else {
+                reject(errors);
+              }
+            },reject);
+          }
+        };
+        var onErr = function(err){
+          if(err && err.target && err.target.error) err = err.target.error;
+          errors.push(err);
+          onDone();
+        };
+
+        var downloadUrl = url;
+        if(self._cacheBuster) downloadUrl += "?"+Date.now();
+        var download = fs.download(downloadUrl,path,{retry:self._retry},includeFileProgressEvents && onSingleDownloadProgress? onSingleDownloadProgress: undefined);
+        download.then(onDone,onErr);
+        self._downloading.push(download);
+      });
+    },reject);
+  });
+};
+
+FileCache.prototype.abort = function abort(){
+  this._downloading.forEach(function(download){
+    download.abort();
+  });
+  this._downloading = [];
+};
+
+FileCache.prototype.isCached = function isCached(url){
+  url = this.toPath(url);
+  return !!this._cached[url];
+};
+
+FileCache.prototype.clear = function clear(){
+  var self = this;
+  this._cached = {};
+  return this._fs.removeDir(this.localRoot).then(function(){
+    return self._fs.ensure(self.localRoot);
+  });
+};
+
+/**
+ * Helpers to output to various formats
+ */
+FileCache.prototype.toInternalURL = function toInternalURL(url){
+  var path = this.toPath(url);
+  if(this._cached[path]) return this._cached[path].toInternalURL;
+  return url;
+};
+
+FileCache.prototype.get = function get(url){
+  var path = this.toPath(url);
+  if(this._cached[path]) return this._cached[path].toURL;
+  return this.toServerURL(url);
+};
+
+FileCache.prototype.toDataURL = function toDataURL(url){
+  return this._fs.toDataURL(this.toPath(url));
+};
+
+FileCache.prototype.toURL = function toURL(url){
+  var path = this.toPath(url);
+  return this._cached[path]? this._cached[path].toURL: url;
+};
+
+FileCache.prototype.toServerURL = function toServerURL(path){
+  var path = this._fs.normalize(path);
+  return path.indexOf('://') < 0? this.serverRoot + path: path;
+};
+
+/**
+ * Helper to transform remote URL to a local path (for cordova-promise-fs)
+ */
+FileCache.prototype.toPath = function toPath(url){
+  if(this._mirrorMode) {
+    var query = url.indexOf('?');
+    if(query > -1){
+      url = url.substr(0,query);
+    }
+    url = this._fs.normalize(url || '');
+    var len = this.serverRoot.length;
+    if(url.substr(0,len) !== this.serverRoot) {
+      return this.localRoot + url;
+    } else {
+      return this.localRoot + url.substr(len);
+    }
+  } else {
+    var ext = url.match(/\.[a-z]{1,}/g);
+    if (ext) {
+      ext = ext[ext.length-1];
+    } else {
+      ext = '.txt';
+    }
+    return this.localRoot + hash(url) + ext;
+  }
+};
+
+module.exports = FileCache;
+
+
+/***/ }),
+/* 58 */
+/***/ (function(module, exports) {
+
+/**
+ * JS Implementation of MurmurHash3 (r136) (as of May 20, 2011)
+ * 
+ * @author <a href="mailto:gary.court@gmail.com">Gary Court</a>
+ * @see http://github.com/garycourt/murmurhash-js
+ * @author <a href="mailto:aappleby@gmail.com">Austin Appleby</a>
+ * @see http://sites.google.com/site/murmurhash/
+ * 
+ * @param {string} key ASCII only
+ * @param {number} seed Positive integer only
+ * @return {number} 32-bit positive integer hash 
+ */
+
+function murmurhash3_32_gc(key, seed) {
+  var remainder, bytes, h1, h1b, c1, c1b, c2, c2b, k1, i;
+  
+  remainder = key.length & 3; // key.length % 4
+  bytes = key.length - remainder;
+  h1 = seed;
+  c1 = 0xcc9e2d51;
+  c2 = 0x1b873593;
+  i = 0;
+  
+  while (i < bytes) {
+      k1 = 
+        ((key.charCodeAt(i) & 0xff)) |
+        ((key.charCodeAt(++i) & 0xff) << 8) |
+        ((key.charCodeAt(++i) & 0xff) << 16) |
+        ((key.charCodeAt(++i) & 0xff) << 24);
+    ++i;
+    
+    k1 = ((((k1 & 0xffff) * c1) + ((((k1 >>> 16) * c1) & 0xffff) << 16))) & 0xffffffff;
+    k1 = (k1 << 15) | (k1 >>> 17);
+    k1 = ((((k1 & 0xffff) * c2) + ((((k1 >>> 16) * c2) & 0xffff) << 16))) & 0xffffffff;
+
+    h1 ^= k1;
+        h1 = (h1 << 13) | (h1 >>> 19);
+    h1b = ((((h1 & 0xffff) * 5) + ((((h1 >>> 16) * 5) & 0xffff) << 16))) & 0xffffffff;
+    h1 = (((h1b & 0xffff) + 0x6b64) + ((((h1b >>> 16) + 0xe654) & 0xffff) << 16));
+  }
+  
+  k1 = 0;
+  
+  switch (remainder) {
+    case 3: k1 ^= (key.charCodeAt(i + 2) & 0xff) << 16;
+    case 2: k1 ^= (key.charCodeAt(i + 1) & 0xff) << 8;
+    case 1: k1 ^= (key.charCodeAt(i) & 0xff);
+    
+    k1 = (((k1 & 0xffff) * c1) + ((((k1 >>> 16) * c1) & 0xffff) << 16)) & 0xffffffff;
+    k1 = (k1 << 15) | (k1 >>> 17);
+    k1 = (((k1 & 0xffff) * c2) + ((((k1 >>> 16) * c2) & 0xffff) << 16)) & 0xffffffff;
+    h1 ^= k1;
+  }
+  
+  h1 ^= key.length;
+
+  h1 ^= h1 >>> 16;
+  h1 = (((h1 & 0xffff) * 0x85ebca6b) + ((((h1 >>> 16) * 0x85ebca6b) & 0xffff) << 16)) & 0xffffffff;
+  h1 ^= h1 >>> 13;
+  h1 = ((((h1 & 0xffff) * 0xc2b2ae35) + ((((h1 >>> 16) * 0xc2b2ae35) & 0xffff) << 16))) & 0xffffffff;
+  h1 ^= h1 >>> 16;
+
+  return h1 >>> 0;
+}
+
+module.exports = murmurhash3_32_gc;
+
+/***/ }),
+/* 59 */
+/***/ (function(module, exports) {
+
+/**
+ * Static Private functions
+ */
+
+/* createDir, recursively */
+function __createDir(rootDirEntry, folders, success,error) {
+  rootDirEntry.getDirectory(folders[0], {create: true}, function(dirEntry) {
+    // Recursively add the new subfolder (if we still have another to create).
+    if (folders.length > 1) {
+      __createDir(dirEntry, folders.slice(1),success,error);
+    } else {
+      success(dirEntry);
+    }
+  }, error);
+}
+
+function dirname(str) {
+  str = str.substr(0,str.lastIndexOf('/')+1);
+  if(str[0] === '/') str = str.substr(1);
+  return str;
+}
+
+function filename(str) {
+  return str.substr(str.lastIndexOf('/')+1);
+}
+
+function normalize(str){
+  str = str || '';
+  if(str[0] === '/') str = str.substr(1);
+
+  var tokens = str.split('/'), last = tokens[0];
+
+  // check tokens for instances of .. and .
+  for(var i=1;i < tokens.length;i++) {
+    last = tokens[i];
+    if (tokens[i] === '..') {
+      // remove the .. and the previous token
+      tokens.splice(i-1,2);
+      // rewind 'cursor' 2 tokens
+      i = i - 2;
+    } else if (tokens[i] === '.') {
+      // remove the .. and the previous token
+      tokens.splice(i,1);
+      // rewind 'cursor' 1 token
+      i--;
+    }
+  }
+
+  str = tokens.join('/');
+  if(str === './') {
+    str = '';
+  } else if(last && last.indexOf('.') < 0 && str[str.length - 1] != '/'){
+    str += '/';
+  }
+  return str;
+}
+
+var transferQueue = [], // queued fileTransfers
+    inprogress = 0;     // currently active filetransfers
+
+/**
+ * Factory function: Create a single instance (based on single FileSystem)
+ */
+module.exports = function(options){
+  /* Promise implementation */
+  var Promise = options.Promise || window.Promise;
+  var CDV_INTERNAL_URL_ROOT = 'cdvfile://localhost/'+(options.persistent? 'persistent/':'temporary/');
+  var CDV_URL_ROOT = '';
+  if(!Promise) { throw new Error("No Promise library given in options.Promise"); }
+
+  /* default options */
+  options = options || {};
+  options.crosswalk = !!options.crosswalk;
+  options.persistent = options.persistent !== undefined? options.persistent: true;
+  options.storageSize = options.storageSize || 20*1024*1024;
+  options.concurrency = options.concurrency || 3;
+  options.retry = options.retry || [];
+  options.debug = !!options.debug;
+
+  /* Cordova deviceready promise */
+  var deviceready,
+      isCordova = typeof cordova !== 'undefined' && !options.crosswalk,
+      isCrosswalk = options.crosswalk;
+  if(isCordova){
+    deviceready = new Promise(function(resolve,reject){
+      document.addEventListener("deviceready", resolve, false);
+      setTimeout(function(){ reject(new Error('deviceready has not fired after 5 seconds.')); },5100);
+    });
+  } else if(isCrosswalk) {
+    deviceready = ResolvedPromise(true);
+  } else {
+    /* FileTransfer implementation for Chrome */
+    deviceready = ResolvedPromise(true);
+    if(typeof webkitRequestFileSystem !== 'undefined'){
+      window.requestFileSystem = webkitRequestFileSystem;
+    } else {
+      window.requestFileSystem = function(x,y,z,fail){
+        fail(new Error('requestFileSystem not supported!'));
+      };
+    }
+  }
+
+  // Polyfill Filetransfer
+  if(!isCordova){
+    window.FileTransfer = function FileTransfer(){};
+    FileTransfer.prototype.download = function download(url,file,win,fail) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', url);
+      xhr.responseType = "blob";
+      xhr.onreadystatechange = function(onSuccess, onError, cb) {
+        if (xhr.readyState == 4) {
+          if(xhr.status === 200 && !this._aborted){
+            write(file,xhr.response).then(win,fail);
+          } else {
+            fail(xhr.status);
+          }
+        }
+      };
+      xhr.send();
+      return xhr;
+    };
+    FileTransfer.prototype.abort = function(){
+      this._aborted = true;
+    };
+    window.ProgressEvent = function ProgressEvent(){};
+    window.FileEntry = function FileEntry(){};
+  }
+
+  /* Promise resolve helper */
+  function ResolvedPromise(value){
+    return new Promise(function(resolve){
+      return resolve(value);
+    });
+  }
+
+  /* the filesystem! */
+  var fs = new Promise(function(resolve,reject){
+    deviceready.then(function(){
+      var type = options.persistent? 1: 0;
+      if(options.fileSystem && isCordova){
+        type = options.fileSystem;
+      }
+      // Crosswalk
+      if(isCrosswalk){
+        var system = options.fileSystem || 'cachedir';
+        xwalk.experimental.native_file_system.requestNativeFileSystem(system,resolve,reject);
+      // On chrome, request quota to store persistent files
+      } else if (!isCordova && type === 1 && navigator.webkitPersistentStorage) {
+        navigator.webkitPersistentStorage.requestQuota(options.storageSize, function(grantedBytes) {
+          window.requestFileSystem(type, grantedBytes, resolve, reject);
+        }, reject);
+
+      // Exotic Cordova Directories (options.fileSystem = string)
+      } else if(isNaN(type)) {
+        window.resolveLocalFileSystemURL(type,function(directory){
+            resolve(directory.filesystem);
+        },reject);
+      // Normal browser usage
+      } else {
+        window.requestFileSystem(type, options.storageSize, resolve, reject);
+      }
+
+      setTimeout(function(){ reject(new Error('Could not retrieve FileSystem after 5 seconds.')); },5100);
+    },reject);
+  });
+
+  /* debug */
+  fs.then(function(fs){
+    CDV_URL_ROOT = fs.root.toURL();
+    CDV_INTERNAL_URL_ROOT = isCordova? fs.root.toInternalURL(): CDV_URL_ROOT;
+    window.__fs = fs;
+  },function(err){
+    console.error('Could not get Cordova FileSystem:',err);
+  });
+
+  /* ensure directory exists */
+  function ensure(folders) {
+    return new Promise(function(resolve,reject){
+      return fs.then(function(fs){
+          if(!folders) {
+            resolve(fs.root);
+          } else {
+            folders = folders.split('/').filter(function(folder) {
+              return folder && folder.length > 0 && folder !== '.' && folder !== '..';
+            });
+            __createDir(fs.root,folders,resolve,reject);
+          }
+        },reject);
+    });
+  }
+
+    /* get file file */
+  function file(path,options){
+    return new Promise(function(resolve,reject){
+      if(typeof path === 'object') {
+        return resolve(path);
+      }
+      path = normalize(path);
+      options = options || {};
+      return fs.then(function(fs){
+        fs.root.getFile(path,options,resolve,reject);
+      },reject);
+    });
+  }
+
+  /* get directory entry */
+  function dir(path,options){
+    path = normalize(path);
+    options = options || {};
+    return new Promise(function(resolve,reject){
+      return fs.then(function(fs){
+        if(!path || path === '/') {
+          resolve(fs.root);
+        } else {
+          fs.root.getDirectory(path,options,resolve,reject);
+        }
+      },reject);
+    });
+  }
+
+  /* list contents of a directory */
+  function list(path,mode) {
+    mode = mode || '';
+    var recursive = mode.indexOf('r') > -1;
+    var getAsEntries = mode.indexOf('e') > -1;
+    var onlyFiles = mode.indexOf('f') > -1;
+    var onlyDirs = mode.indexOf('d') > -1;
+    if(onlyFiles && onlyDirs) {
+      onlyFiles = false;
+      onlyDirs = false;
+    }
+
+    return dir(path)
+      .then(function(dirEntry){
+        return new Promise(function(resolve, reject){
+          var entries = [];
+          var dirReader = dirEntry.createReader();
+          var fetchEntries = function(){
+            dirReader.readEntries(function(newEntries){
+              if(newEntries.length === 0) {
+                resolve(entries);
+              } else {
+                var args = [0,0].concat(newEntries);
+                entries.splice.apply(entries,args);
+                fetchEntries();
+              }
+            });
+          }
+          fetchEntries();
+        });
+      })
+      .then(function(entries){
+        var promises = [ResolvedPromise(entries)];
+        if(recursive) {
+          entries
+            .filter(function(entry){return entry.isDirectory; })
+            .forEach(function(entry){
+              promises.push(list(entry.fullPath,'re'));
+            });
+        }
+        return Promise.all(promises);
+      })
+      .then(function(values){
+        var entries = [];
+        entries = entries.concat.apply(entries,values);
+        if(onlyFiles) entries = entries.filter(function(entry) { return entry.isFile; });
+        if(onlyDirs) entries = entries.filter(function(entry) { return entry.isDirectory; });
+        if(!getAsEntries) entries = entries.map(function(entry) { return entry.fullPath; });
+        return entries;
+      });
+  }
+
+  /* does file exist? If so, resolve with fileEntry, if not, resolve with false. */
+  function exists(path){
+    return new Promise(function(resolve,reject){
+      file(path).then(
+        function(fileEntry){
+          resolve(fileEntry);
+        },
+        function(err){
+          if(err.code === 1) {
+            resolve(false);
+          } else {
+            reject(err);
+          }
+        }
+      );
+    });
+  }
+
+  /* does dir exist? If so, resolve with fileEntry, if not, resolve with false. */
+  function existsDir(path){
+    return new Promise(function(resolve,reject){
+      dir(path).then(
+        function(dirEntry){
+          resolve(dirEntry);
+        },
+        function(err){
+          if(err.code === 1) {
+            resolve(false);
+          } else {
+            reject(err);
+          }
+        }
+      );
+    });
+  }
+
+  function create(path){
+    return ensure(dirname(path)).then(function(){
+      return file(path,{create:true});
+    });
+  }
+
+  /* convert path to URL to be used in JS/CSS/HTML */
+  function toURL(path) {
+    return file(path).then(function(fileEntry) {
+      return fileEntry.toURL();
+    });
+  }
+
+  /* convert path to URL to be used in JS/CSS/HTML */
+  var toInternalURL,toInternalURLSync,toURLSync;
+  if(isCordova) {
+    /* synchronous helper to get internal URL. */
+    toInternalURLSync = function(path){
+      path = normalize(path);
+      return path.indexOf('://') < 0? CDV_INTERNAL_URL_ROOT + path: path;
+    };
+    /* synchronous helper to get native URL. */
+    toURLSync = function(path){
+      path = normalize(path);
+      return path.indexOf('://') < 0? CDV_URL_ROOT + path: path;
+    };
+
+    toInternalURL = function(path) {
+      return file(path).then(function(fileEntry) {
+        return fileEntry.toInternalURL();
+      });
+    };
+  } else if(isCrosswalk){
+    var system = options.fileSystem || 'cachedir';
+    /* synchronous helper to get internal URL. */
+    toInternalURLSync = function(path){
+      path = normalize(path);
+      return path.indexOf(system) < 0? '/'+system+'/' + path: path;
+    };
+    toInternalURL = function(path) {
+      return file(path).then(function(fileEntry) {
+        return fileEntry.toURL();
+      });
+    };
+    toURLSync = toInternalURLSync;
+  } else {
+    /* synchronous helper to get internal URL. */
+    toInternalURLSync = function(path){
+      path = normalize(path);
+      return 'filesystem:'+location.origin+(options.persistent? '/persistent/':'/temporary/') + path;
+    };
+
+    toInternalURL = function(path) {
+      return file(path).then(function(fileEntry) {
+        return fileEntry.toURL();
+      });
+    };
+    toURLSync = toInternalURLSync;
+  }
+
+  /* return contents of a file */
+  function read(path,method) {
+    method = method || 'readAsText';
+    return file(path).then(function(fileEntry) {
+      return new Promise(function(resolve,reject){
+        fileEntry.file(function(file){
+          var reader = new FileReader();
+          reader.onloadend = function(){
+            resolve(this.result);
+          };
+          reader[method](file);
+        },reject);
+      });
+    });
+  }
+
+  /* convert path to base64 date URI */
+  function toDataURL(path) {
+    return read(path,'readAsDataURL');
+  }
+
+
+  function readJSON(path){
+    return read(path).then(JSON.parse);
+  }
+
+  /* write contents to a file */
+  function write(path,blob,mimeType) {
+    return ensure(dirname(path))
+      .then(function() { return file(path,{create:true}); })
+      .then(function(fileEntry) {
+        return new Promise(function(resolve,reject){
+          fileEntry.createWriter(function(writer){
+            writer.onwriteend = resolve;
+            writer.onerror = reject;
+            if(typeof blob === 'string') {
+              blob = createBlob([blob], mimeType || 'text/plain');
+            } else if(blob instanceof Blob !== true){
+              blob = createBlob([JSON.stringify(blob,null,4)], mimeType || 'application/json');
+            }
+            writer.write(blob);
+          },reject);
+        });
+      });
+    }
+
+  function createBlob(parts, type) {
+    var BlobBuilder,
+        bb;
+    try {
+      return new Blob(parts, {type: type});
+    } catch(e) {
+      BlobBuilder = window.BlobBuilder ||
+        window.WebKitBlobBuilder ||
+        window.MozBlobBuilder ||
+        window.MSBlobBuilder;
+      if(BlobBuilder) {
+        bb = new BlobBuilder();
+        bb.append(parts);
+        return bb.getBlob(type);
+      } else {
+        throw new Error("Unable to create blob");
+      }
+    }
+  }
+
+  /* move a file */
+  function move(src,dest) {
+    return ensure(dirname(dest))
+      .then(function(dir) {
+        return file(src).then(function(fileEntry){
+          return new Promise(function(resolve,reject){
+            fileEntry.moveTo(dir,filename(dest),resolve,reject);
+          });
+        });
+      });
+  }
+
+  /* move a dir */
+  function moveDir(src,dest) {
+    src = src.replace(/\/$/, '');
+    dest = dest.replace(/\/$/, '');
+    return ensure(dirname(dest))
+      .then(function(destDir) {
+        return dir(src).then(function(dirEntry){
+          return new Promise(function(resolve,reject){
+            dirEntry.moveTo(destDir,filename(dest),resolve,reject);
+          });
+        });
+      });
+  }
+
+  /* copy a file */
+  function copy(src,dest) {
+    return ensure(dirname(dest))
+      .then(function(dir) {
+        return file(src).then(function(fileEntry){
+          return new Promise(function(resolve,reject){
+            fileEntry.copyTo(dir,filename(dest),resolve,reject);
+          });
+        });
+      });
+  }
+
+  /* delete a file */
+  function remove(path,mustExist) {
+    var method = mustExist? file:exists;
+    return new Promise(function(resolve,reject){
+        method(path).then(function(fileEntry){
+        if(fileEntry !== false) {
+          fileEntry.remove(resolve,reject);
+        } else {
+          resolve(1);
+        }
+      },reject);
+    }).then(function(val){
+      return val === 1? false: true;
+    });
+  }
+
+  /* delete a directory */
+  function removeDir(path) {
+    return dir(path).then(function(dirEntry){
+      return new Promise(function(resolve,reject) {
+        dirEntry.removeRecursively(resolve,reject);
+      });
+    });
+  }
+
+  // Whenever we want to start a transfer, we call popTransferQueue
+  function popTransferQueue(){
+    // while we are not at max concurrency
+    while(transferQueue.length > 0 && inprogress < options.concurrency){
+      // increment activity counter
+      inprogress++;
+
+      // fetch filetranfer, method-type (isDownload) and arguments
+      var args = transferQueue.pop();
+	  var ft = args.fileTransfer,
+	      isDownload = args.isDownload,
+	      serverUrl = args.serverUrl,
+	      localPath = args.localPath,
+	      trustAllHosts = args.trustAllHosts,
+	      transferOptions = args.transferOptions,
+	      win = args.win,
+	      fail = args.fail;
+
+      if(ft._aborted) {
+        inprogress--;
+      } else if(isDownload){
+        ft.download.call(ft,serverUrl,localPath,win,fail,trustAllHosts,transferOptions);
+        if(ft.onprogress) ft.onprogress(new ProgressEvent());
+      } else {
+        ft.upload.call(ft,localPath,serverUrl,win,fail,transferOptions,trustAllHosts);
+      }
+    }
+    // if we are at max concurrency, popTransferQueue() will be called whenever
+    // the transfer is ready and there is space avaialable.
+  }
+
+  // Promise callback to check if there are any more queued transfers
+  function nextTransfer(result){
+    inprogress--; // decrement counter to free up one space to start transfers again!
+    popTransferQueue(); // check if there are any queued transfers
+    return result;
+  }
+
+  function filetransfer(isDownload,serverUrl,localPath,transferOptions,onprogress){
+    if(typeof transferOptions === 'function') {
+      onprogress = transferOptions;
+      transferOptions = {};
+    }
+    if(isCordova && localPath.indexOf('://') < 0) localPath = toURLSync(localPath);
+
+    transferOptions = transferOptions || {};
+    if(!transferOptions.retry || !transferOptions.retry.length) {
+      transferOptions.retry = options.retry;
+    }
+    transferOptions.retry = transferOptions.retry.concat();
+    if(!transferOptions.file && !isDownload){
+      transferOptions.fileName = filename(localPath);
+    }
+
+    var ft = new FileTransfer();
+    onprogress = onprogress || transferOptions.onprogress;
+    if(typeof onprogress === 'function') ft.onprogress = onprogress;
+    var promise = new Promise(function(resolve,reject){
+      var attempt = function(err){
+        if(transferOptions.retry.length === 0) {
+          if(options.debug) console.log('FileTransfer Error: '+serverUrl,err);
+          reject(err);
+        } else {
+
+    		  var transferJob = {
+    		    fileTransfer:ft,
+    		    isDownload:isDownload,
+    		    serverUrl:serverUrl,
+    		    localPath:localPath,
+    		    trustAllHosts:transferOptions.trustAllHosts || false,
+    		    transferOptions:transferOptions,
+    		    win:resolve,
+    		    fail:attempt
+    		  };
+          transferQueue.unshift(transferJob);
+          var timeout = transferOptions.retry.shift();
+          if(timeout > 0) {
+            setTimeout(nextTransfer,timeout);
+          } else {
+            nextTransfer();
+          }
+        }
+      };
+      transferOptions.retry.unshift(0);
+      inprogress++;
+      attempt();
+    });
+    promise.then(nextTransfer,nextTransfer);
+    promise.progress = function(onprogress){
+      ft.onprogress = onprogress;
+      return promise;
+    };
+    promise.abort = function(){
+      ft._aborted = true;
+      ft.abort();
+      return promise;
+    };
+    return promise;
+  }
+
+  function download(url,dest,options,onprogress){
+    return filetransfer(true,url,dest,options,onprogress);
+  }
+
+  function upload(source,dest,options,onprogress){
+    return filetransfer(false,dest,source,options,onprogress);
+  }
+
+  return {
+    fs: fs,
+    normalize: normalize,
+    file: file,
+    filename: filename,
+    dir: dir,
+    dirname: dirname,
+    create:create,
+    read: read,
+    readJSON: readJSON,
+    write: write,
+    move: move,
+    moveDir: moveDir,
+    copy: copy,
+    remove: remove,
+    removeDir: removeDir,
+    list: list,
+    ensure: ensure,
+    exists: exists,
+    existsDir: existsDir,
+    download: download,
+    upload: upload,
+    toURL:toURL,
+    toURLSync: toURLSync,
+    isCordova:isCordova,
+    toInternalURLSync: toInternalURLSync,
+    toInternalURL:toInternalURL,
+    toDataURL:toDataURL,
+    deviceready: deviceready,
+    options: options,
+    Promise: Promise
+  };
+};
+
+
+/***/ }),
+/* 60 */
+/***/ (function(module, exports, __webpack_require__) {
+
+__webpack_require__(74);
 var $Object = __webpack_require__(10).Object;
 module.exports = function defineProperty(it, key, desc){
   return $Object.defineProperty(it, key, desc);
 };
 
 /***/ }),
-/* 56 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(70);
+__webpack_require__(75);
 var $Object = __webpack_require__(10).Object;
 module.exports = function getOwnPropertyDescriptor(it, key){
   return $Object.getOwnPropertyDescriptor(it, key);
 };
 
 /***/ }),
-/* 57 */
+/* 62 */
 /***/ (function(module, exports) {
 
 module.exports = function(it){
@@ -2917,17 +2979,17 @@ module.exports = function(it){
 };
 
 /***/ }),
-/* 58 */
+/* 63 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var isObject = __webpack_require__(16);
+var isObject = __webpack_require__(17);
 module.exports = function(it){
   if(!isObject(it))throw TypeError(it + ' is not an object!');
   return it;
 };
 
 /***/ }),
-/* 59 */
+/* 64 */
 /***/ (function(module, exports) {
 
 var toString = {}.toString;
@@ -2937,11 +2999,11 @@ module.exports = function(it){
 };
 
 /***/ }),
-/* 60 */
+/* 65 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // optional / simple context binding
-var aFunction = __webpack_require__(57);
+var aFunction = __webpack_require__(62);
 module.exports = function(fn, that, length){
   aFunction(fn);
   if(that === undefined)return fn;
@@ -2962,7 +3024,7 @@ module.exports = function(fn, that, length){
 };
 
 /***/ }),
-/* 61 */
+/* 66 */
 /***/ (function(module, exports) {
 
 // 7.2.1 RequireObjectCoercible(argument)
@@ -2972,11 +3034,11 @@ module.exports = function(it){
 };
 
 /***/ }),
-/* 62 */
+/* 67 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var isObject = __webpack_require__(16)
-  , document = __webpack_require__(27).document
+var isObject = __webpack_require__(17)
+  , document = __webpack_require__(29).document
   // in old IE typeof document.createElement is 'object'
   , is = isObject(document) && isObject(document.createElement);
 module.exports = function(it){
@@ -2984,7 +3046,7 @@ module.exports = function(it){
 };
 
 /***/ }),
-/* 63 */
+/* 68 */
 /***/ (function(module, exports) {
 
 var hasOwnProperty = {}.hasOwnProperty;
@@ -2993,11 +3055,11 @@ module.exports = function(it, key){
 };
 
 /***/ }),
-/* 64 */
+/* 69 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var dP         = __webpack_require__(29)
-  , createDesc = __webpack_require__(30);
+var dP         = __webpack_require__(31)
+  , createDesc = __webpack_require__(32);
 module.exports = __webpack_require__(4) ? function(object, key, value){
   return dP.f(object, key, createDesc(1, value));
 } : function(object, key, value){
@@ -3006,25 +3068,25 @@ module.exports = __webpack_require__(4) ? function(object, key, value){
 };
 
 /***/ }),
-/* 65 */
+/* 70 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // fallback for non-array-like ES3 and non-enumerable old V8 strings
-var cof = __webpack_require__(59);
+var cof = __webpack_require__(64);
 module.exports = Object('z').propertyIsEnumerable(0) ? Object : function(it){
   return cof(it) == 'String' ? it.split('') : Object(it);
 };
 
 /***/ }),
-/* 66 */
+/* 71 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var pIE            = __webpack_require__(67)
-  , createDesc     = __webpack_require__(30)
-  , toIObject      = __webpack_require__(31)
-  , toPrimitive    = __webpack_require__(32)
-  , has            = __webpack_require__(63)
-  , IE8_DOM_DEFINE = __webpack_require__(28)
+var pIE            = __webpack_require__(72)
+  , createDesc     = __webpack_require__(32)
+  , toIObject      = __webpack_require__(33)
+  , toPrimitive    = __webpack_require__(34)
+  , has            = __webpack_require__(68)
+  , IE8_DOM_DEFINE = __webpack_require__(30)
   , gOPD           = Object.getOwnPropertyDescriptor;
 
 exports.f = __webpack_require__(4) ? gOPD : function getOwnPropertyDescriptor(O, P){
@@ -3037,19 +3099,19 @@ exports.f = __webpack_require__(4) ? gOPD : function getOwnPropertyDescriptor(O,
 };
 
 /***/ }),
-/* 67 */
+/* 72 */
 /***/ (function(module, exports) {
 
 exports.f = {}.propertyIsEnumerable;
 
 /***/ }),
-/* 68 */
+/* 73 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // most Object methods by ES6 should accept primitives
-var $export = __webpack_require__(26)
+var $export = __webpack_require__(28)
   , core    = __webpack_require__(10)
-  , fails   = __webpack_require__(15);
+  , fails   = __webpack_require__(16);
 module.exports = function(KEY, exec){
   var fn  = (core.Object || {})[KEY] || Object[KEY]
     , exp = {};
@@ -3058,29 +3120,29 @@ module.exports = function(KEY, exec){
 };
 
 /***/ }),
-/* 69 */
+/* 74 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var $export = __webpack_require__(26);
+var $export = __webpack_require__(28);
 // 19.1.2.4 / 15.2.3.6 Object.defineProperty(O, P, Attributes)
-$export($export.S + $export.F * !__webpack_require__(4), 'Object', {defineProperty: __webpack_require__(29).f});
+$export($export.S + $export.F * !__webpack_require__(4), 'Object', {defineProperty: __webpack_require__(31).f});
 
 /***/ }),
-/* 70 */
+/* 75 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // 19.1.2.6 Object.getOwnPropertyDescriptor(O, P)
-var toIObject                 = __webpack_require__(31)
-  , $getOwnPropertyDescriptor = __webpack_require__(66).f;
+var toIObject                 = __webpack_require__(33)
+  , $getOwnPropertyDescriptor = __webpack_require__(71).f;
 
-__webpack_require__(68)('getOwnPropertyDescriptor', function(){
+__webpack_require__(73)('getOwnPropertyDescriptor', function(){
   return function getOwnPropertyDescriptor(it, key){
     return $getOwnPropertyDescriptor(toIObject(it), key);
   };
 });
 
 /***/ }),
-/* 71 */
+/* 76 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // 22.1.3.31 Array.prototype[@@unscopables]
@@ -3092,7 +3154,7 @@ module.exports = function(key){
 };
 
 /***/ }),
-/* 72 */
+/* 77 */
 /***/ (function(module, exports) {
 
 module.exports = function(it, Constructor, name, forbiddenField){
@@ -3102,14 +3164,14 @@ module.exports = function(it, Constructor, name, forbiddenField){
 };
 
 /***/ }),
-/* 73 */
+/* 78 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // false -> Array#indexOf
 // true  -> Array#includes
-var toIObject = __webpack_require__(24)
-  , toLength  = __webpack_require__(42)
-  , toIndex   = __webpack_require__(93);
+var toIObject = __webpack_require__(25)
+  , toLength  = __webpack_require__(44)
+  , toIndex   = __webpack_require__(98);
 module.exports = function(IS_INCLUDES){
   return function($this, el, fromIndex){
     var O      = toIObject($this)
@@ -3128,15 +3190,15 @@ module.exports = function(IS_INCLUDES){
 };
 
 /***/ }),
-/* 74 */
+/* 79 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var ctx         = __webpack_require__(12)
-  , call        = __webpack_require__(79)
-  , isArrayIter = __webpack_require__(78)
+  , call        = __webpack_require__(84)
+  , isArrayIter = __webpack_require__(83)
   , anObject    = __webpack_require__(2)
-  , toLength    = __webpack_require__(42)
-  , getIterFn   = __webpack_require__(96)
+  , toLength    = __webpack_require__(44)
+  , getIterFn   = __webpack_require__(101)
   , BREAK       = {}
   , RETURN      = {};
 var exports = module.exports = function(iterable, entries, fn, that, ITERATOR){
@@ -3158,15 +3220,15 @@ exports.BREAK  = BREAK;
 exports.RETURN = RETURN;
 
 /***/ }),
-/* 75 */
+/* 80 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = !__webpack_require__(6) && !__webpack_require__(35)(function(){
-  return Object.defineProperty(__webpack_require__(20)('div'), 'a', {get: function(){ return 7; }}).a != 7;
+module.exports = !__webpack_require__(6) && !__webpack_require__(37)(function(){
+  return Object.defineProperty(__webpack_require__(21)('div'), 'a', {get: function(){ return 7; }}).a != 7;
 });
 
 /***/ }),
-/* 76 */
+/* 81 */
 /***/ (function(module, exports) {
 
 // fast apply, http://jsperf.lnkit.com/fast-apply/5
@@ -3187,7 +3249,7 @@ module.exports = function(fn, args, that){
 };
 
 /***/ }),
-/* 77 */
+/* 82 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // fallback for non-array-like ES3 and non-enumerable old V8 strings
@@ -3197,7 +3259,7 @@ module.exports = Object('z').propertyIsEnumerable(0) ? Object : function(it){
 };
 
 /***/ }),
-/* 78 */
+/* 83 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // check on default Array iterator
@@ -3210,7 +3272,7 @@ module.exports = function(it){
 };
 
 /***/ }),
-/* 79 */
+/* 84 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // call something on iterator step with safe closing on error
@@ -3227,14 +3289,14 @@ module.exports = function(iterator, fn, value, entries){
 };
 
 /***/ }),
-/* 80 */
+/* 85 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var create         = __webpack_require__(84)
-  , descriptor     = __webpack_require__(39)
-  , setToStringTag = __webpack_require__(21)
+var create         = __webpack_require__(89)
+  , descriptor     = __webpack_require__(41)
+  , setToStringTag = __webpack_require__(22)
   , IteratorPrototype = {};
 
 // 25.1.2.1.1 %IteratorPrototype%[@@iterator]()
@@ -3246,7 +3308,7 @@ module.exports = function(Constructor, NAME, next){
 };
 
 /***/ }),
-/* 81 */
+/* 86 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var ITERATOR     = __webpack_require__(0)('iterator')
@@ -3272,7 +3334,7 @@ module.exports = function(exec, skipClosing){
 };
 
 /***/ }),
-/* 82 */
+/* 87 */
 /***/ (function(module, exports) {
 
 module.exports = function(done, value){
@@ -3280,11 +3342,11 @@ module.exports = function(done, value){
 };
 
 /***/ }),
-/* 83 */
+/* 88 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var global    = __webpack_require__(1)
-  , macrotask = __webpack_require__(41).set
+  , macrotask = __webpack_require__(43).set
   , Observer  = global.MutationObserver || global.WebKitMutationObserver
   , process   = global.process
   , Promise   = global.Promise
@@ -3353,27 +3415,27 @@ module.exports = function(){
 };
 
 /***/ }),
-/* 84 */
+/* 89 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // 19.1.2.2 / 15.2.3.5 Object.create(O [, Properties])
 var anObject    = __webpack_require__(2)
-  , dPs         = __webpack_require__(85)
-  , enumBugKeys = __webpack_require__(33)
-  , IE_PROTO    = __webpack_require__(22)('IE_PROTO')
+  , dPs         = __webpack_require__(90)
+  , enumBugKeys = __webpack_require__(35)
+  , IE_PROTO    = __webpack_require__(23)('IE_PROTO')
   , Empty       = function(){ /* empty */ }
   , PROTOTYPE   = 'prototype';
 
 // Create object with fake `null` prototype: use iframe Object with cleared prototype
 var createDict = function(){
   // Thrash, waste and sodomy: IE GC bug
-  var iframe = __webpack_require__(20)('iframe')
+  var iframe = __webpack_require__(21)('iframe')
     , i      = enumBugKeys.length
     , lt     = '<'
     , gt     = '>'
     , iframeDocument;
   iframe.style.display = 'none';
-  __webpack_require__(36).appendChild(iframe);
+  __webpack_require__(38).appendChild(iframe);
   iframe.src = 'javascript:'; // eslint-disable-line no-script-url
   // createDict = iframe.contentWindow.Object;
   // html.removeChild(iframe);
@@ -3400,12 +3462,12 @@ module.exports = Object.create || function create(O, Properties){
 
 
 /***/ }),
-/* 85 */
+/* 90 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var dP       = __webpack_require__(14)
   , anObject = __webpack_require__(2)
-  , getKeys  = __webpack_require__(88);
+  , getKeys  = __webpack_require__(93);
 
 module.exports = __webpack_require__(6) ? Object.defineProperties : function defineProperties(O, Properties){
   anObject(O);
@@ -3418,13 +3480,13 @@ module.exports = __webpack_require__(6) ? Object.defineProperties : function def
 };
 
 /***/ }),
-/* 86 */
+/* 91 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // 19.1.2.9 / 15.2.3.2 Object.getPrototypeOf(O)
 var has         = __webpack_require__(7)
-  , toObject    = __webpack_require__(94)
-  , IE_PROTO    = __webpack_require__(22)('IE_PROTO')
+  , toObject    = __webpack_require__(99)
+  , IE_PROTO    = __webpack_require__(23)('IE_PROTO')
   , ObjectProto = Object.prototype;
 
 module.exports = Object.getPrototypeOf || function(O){
@@ -3436,13 +3498,13 @@ module.exports = Object.getPrototypeOf || function(O){
 };
 
 /***/ }),
-/* 87 */
+/* 92 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var has          = __webpack_require__(7)
-  , toIObject    = __webpack_require__(24)
-  , arrayIndexOf = __webpack_require__(73)(false)
-  , IE_PROTO     = __webpack_require__(22)('IE_PROTO');
+  , toIObject    = __webpack_require__(25)
+  , arrayIndexOf = __webpack_require__(78)(false)
+  , IE_PROTO     = __webpack_require__(23)('IE_PROTO');
 
 module.exports = function(object, names){
   var O      = toIObject(object)
@@ -3458,19 +3520,19 @@ module.exports = function(object, names){
 };
 
 /***/ }),
-/* 88 */
+/* 93 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // 19.1.2.14 / 15.2.3.14 Object.keys(O)
-var $keys       = __webpack_require__(87)
-  , enumBugKeys = __webpack_require__(33);
+var $keys       = __webpack_require__(92)
+  , enumBugKeys = __webpack_require__(35);
 
 module.exports = Object.keys || function keys(O){
   return $keys(O, enumBugKeys);
 };
 
 /***/ }),
-/* 89 */
+/* 94 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var redefine = __webpack_require__(9);
@@ -3480,7 +3542,7 @@ module.exports = function(target, src, safe){
 };
 
 /***/ }),
-/* 90 */
+/* 95 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3499,12 +3561,12 @@ module.exports = function(KEY){
 };
 
 /***/ }),
-/* 91 */
+/* 96 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // 7.3.20 SpeciesConstructor(O, defaultConstructor)
 var anObject  = __webpack_require__(2)
-  , aFunction = __webpack_require__(17)
+  , aFunction = __webpack_require__(18)
   , SPECIES   = __webpack_require__(0)('species');
 module.exports = function(O, D){
   var C = anObject(O).constructor, S;
@@ -3512,11 +3574,11 @@ module.exports = function(O, D){
 };
 
 /***/ }),
-/* 92 */
+/* 97 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var toInteger = __webpack_require__(23)
-  , defined   = __webpack_require__(19);
+var toInteger = __webpack_require__(24)
+  , defined   = __webpack_require__(20);
 // true  -> String#at
 // false -> String#codePointAt
 module.exports = function(TO_STRING){
@@ -3534,10 +3596,10 @@ module.exports = function(TO_STRING){
 };
 
 /***/ }),
-/* 93 */
+/* 98 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var toInteger = __webpack_require__(23)
+var toInteger = __webpack_require__(24)
   , max       = Math.max
   , min       = Math.min;
 module.exports = function(index, length){
@@ -3546,17 +3608,17 @@ module.exports = function(index, length){
 };
 
 /***/ }),
-/* 94 */
+/* 99 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // 7.1.13 ToObject(argument)
-var defined = __webpack_require__(19);
+var defined = __webpack_require__(20);
 module.exports = function(it){
   return Object(defined(it));
 };
 
 /***/ }),
-/* 95 */
+/* 100 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // 7.1.1 ToPrimitive(input [, PreferredType])
@@ -3573,10 +3635,10 @@ module.exports = function(it, S){
 };
 
 /***/ }),
-/* 96 */
+/* 101 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var classof   = __webpack_require__(18)
+var classof   = __webpack_require__(19)
   , ITERATOR  = __webpack_require__(0)('iterator')
   , Iterators = __webpack_require__(8);
 module.exports = __webpack_require__(5).getIteratorMethod = function(it){
@@ -3586,21 +3648,21 @@ module.exports = __webpack_require__(5).getIteratorMethod = function(it){
 };
 
 /***/ }),
-/* 97 */
+/* 102 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var addToUnscopables = __webpack_require__(71)
-  , step             = __webpack_require__(82)
+var addToUnscopables = __webpack_require__(76)
+  , step             = __webpack_require__(87)
   , Iterators        = __webpack_require__(8)
-  , toIObject        = __webpack_require__(24);
+  , toIObject        = __webpack_require__(25);
 
 // 22.1.3.4 Array.prototype.entries()
 // 22.1.3.13 Array.prototype.keys()
 // 22.1.3.29 Array.prototype.values()
 // 22.1.3.30 Array.prototype[@@iterator]()
-module.exports = __webpack_require__(37)(Array, 'Array', function(iterated, kind){
+module.exports = __webpack_require__(39)(Array, 'Array', function(iterated, kind){
   this._t = toIObject(iterated); // target
   this._i = 0;                   // next index
   this._k = kind;                // kind
@@ -3626,13 +3688,13 @@ addToUnscopables('values');
 addToUnscopables('entries');
 
 /***/ }),
-/* 98 */
+/* 103 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 // 19.1.3.6 Object.prototype.toString()
-var classof = __webpack_require__(18)
+var classof = __webpack_require__(19)
   , test    = {};
 test[__webpack_require__(0)('toStringTag')] = 'z';
 if(test + '' != '[object z]'){
@@ -3642,23 +3704,23 @@ if(test + '' != '[object z]'){
 }
 
 /***/ }),
-/* 99 */
+/* 104 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var LIBRARY            = __webpack_require__(38)
+var LIBRARY            = __webpack_require__(40)
   , global             = __webpack_require__(1)
   , ctx                = __webpack_require__(12)
-  , classof            = __webpack_require__(18)
-  , $export            = __webpack_require__(34)
+  , classof            = __webpack_require__(19)
+  , $export            = __webpack_require__(36)
   , isObject           = __webpack_require__(13)
-  , aFunction          = __webpack_require__(17)
-  , anInstance         = __webpack_require__(72)
-  , forOf              = __webpack_require__(74)
-  , speciesConstructor = __webpack_require__(91)
-  , task               = __webpack_require__(41).set
-  , microtask          = __webpack_require__(83)()
+  , aFunction          = __webpack_require__(18)
+  , anInstance         = __webpack_require__(77)
+  , forOf              = __webpack_require__(79)
+  , speciesConstructor = __webpack_require__(96)
+  , task               = __webpack_require__(43).set
+  , microtask          = __webpack_require__(88)()
   , PROMISE            = 'Promise'
   , TypeError          = global.TypeError
   , process            = global.process
@@ -3850,7 +3912,7 @@ if(!USE_NATIVE){
     this._h = 0;              // <- rejection state, 0 - default, 1 - handled, 2 - unhandled
     this._n = false;          // <- notify
   };
-  Internal.prototype = __webpack_require__(89)($Promise.prototype, {
+  Internal.prototype = __webpack_require__(94)($Promise.prototype, {
     // 25.4.5.3 Promise.prototype.then(onFulfilled, onRejected)
     then: function then(onFulfilled, onRejected){
       var reaction    = newPromiseCapability(speciesConstructor(this, $Promise));
@@ -3876,8 +3938,8 @@ if(!USE_NATIVE){
 }
 
 $export($export.G + $export.W + $export.F * !USE_NATIVE, {Promise: $Promise});
-__webpack_require__(21)($Promise, PROMISE);
-__webpack_require__(90)(PROMISE);
+__webpack_require__(22)($Promise, PROMISE);
+__webpack_require__(95)(PROMISE);
 Wrapper = __webpack_require__(5)[PROMISE];
 
 // statics
@@ -3901,7 +3963,7 @@ $export($export.S + $export.F * (LIBRARY || !USE_NATIVE), PROMISE, {
     return capability.promise;
   }
 });
-$export($export.S + $export.F * !(USE_NATIVE && __webpack_require__(81)(function(iter){
+$export($export.S + $export.F * !(USE_NATIVE && __webpack_require__(86)(function(iter){
   $Promise.all(iter)['catch'](empty);
 })), PROMISE, {
   // 25.4.4.1 Promise.all(iterable)
@@ -3947,15 +4009,15 @@ $export($export.S + $export.F * !(USE_NATIVE && __webpack_require__(81)(function
 });
 
 /***/ }),
-/* 100 */
+/* 105 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var $at  = __webpack_require__(92)(true);
+var $at  = __webpack_require__(97)(true);
 
 // 21.1.3.27 String.prototype[@@iterator]()
-__webpack_require__(37)(String, 'String', function(iterated){
+__webpack_require__(39)(String, 'String', function(iterated){
   this._t = String(iterated); // target
   this._i = 0;                // next index
 // 21.1.5.2.1 %StringIteratorPrototype%.next()
@@ -3970,10 +4032,10 @@ __webpack_require__(37)(String, 'String', function(iterated){
 });
 
 /***/ }),
-/* 101 */
+/* 106 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var $iterators    = __webpack_require__(97)
+var $iterators    = __webpack_require__(102)
   , redefine      = __webpack_require__(9)
   , global        = __webpack_require__(1)
   , hide          = __webpack_require__(3)
@@ -3997,14 +4059,14 @@ for(var collections = ['NodeList', 'DOMTokenList', 'MediaList', 'StyleSheetList'
 }
 
 /***/ }),
-/* 102 */
+/* 107 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_babel_runtime_core_js_object_define_property__ = __webpack_require__(52);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_babel_runtime_core_js_object_define_property__ = __webpack_require__(54);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_babel_runtime_core_js_object_define_property___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_babel_runtime_core_js_object_define_property__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_babel_runtime_core_js_object_get_own_property_descriptor__ = __webpack_require__(53);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_babel_runtime_core_js_object_get_own_property_descriptor__ = __webpack_require__(55);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_babel_runtime_core_js_object_get_own_property_descriptor___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_babel_runtime_core_js_object_get_own_property_descriptor__);
 
 //
@@ -4080,7 +4142,7 @@ function elementDatasetPolyfill() {
 
 
 /***/ }),
-/* 103 */
+/* 108 */
 /***/ (function(module, exports) {
 
 // Copyright Joyent, Inc. and other Node contributors.
@@ -4388,515 +4450,7 @@ function isUndefined(arg) {
 
 
 /***/ }),
-/* 104 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var __WEBPACK_AMD_DEFINE_RESULT__;// Copyright (c) 2013 Pieroxy <pieroxy@pieroxy.net>
-// This work is free. You can redistribute it and/or modify it
-// under the terms of the WTFPL, Version 2
-// For more information see LICENSE.txt or http://www.wtfpl.net/
-//
-// For more information, the home page:
-// http://pieroxy.net/blog/pages/lz-string/testing.html
-//
-// LZ-based compression algorithm, version 1.4.4
-var LZString = (function() {
-
-// private property
-var f = String.fromCharCode;
-var keyStrBase64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-var keyStrUriSafe = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-$";
-var baseReverseDic = {};
-
-function getBaseValue(alphabet, character) {
-  if (!baseReverseDic[alphabet]) {
-    baseReverseDic[alphabet] = {};
-    for (var i=0 ; i<alphabet.length ; i++) {
-      baseReverseDic[alphabet][alphabet.charAt(i)] = i;
-    }
-  }
-  return baseReverseDic[alphabet][character];
-}
-
-var LZString = {
-  compressToBase64 : function (input) {
-    if (input == null) return "";
-    var res = LZString._compress(input, 6, function(a){return keyStrBase64.charAt(a);});
-    switch (res.length % 4) { // To produce valid Base64
-    default: // When could this happen ?
-    case 0 : return res;
-    case 1 : return res+"===";
-    case 2 : return res+"==";
-    case 3 : return res+"=";
-    }
-  },
-
-  decompressFromBase64 : function (input) {
-    if (input == null) return "";
-    if (input == "") return null;
-    return LZString._decompress(input.length, 32, function(index) { return getBaseValue(keyStrBase64, input.charAt(index)); });
-  },
-
-  compressToUTF16 : function (input) {
-    if (input == null) return "";
-    return LZString._compress(input, 15, function(a){return f(a+32);}) + " ";
-  },
-
-  decompressFromUTF16: function (compressed) {
-    if (compressed == null) return "";
-    if (compressed == "") return null;
-    return LZString._decompress(compressed.length, 16384, function(index) { return compressed.charCodeAt(index) - 32; });
-  },
-
-  //compress into uint8array (UCS-2 big endian format)
-  compressToUint8Array: function (uncompressed) {
-    var compressed = LZString.compress(uncompressed);
-    var buf=new Uint8Array(compressed.length*2); // 2 bytes per character
-
-    for (var i=0, TotalLen=compressed.length; i<TotalLen; i++) {
-      var current_value = compressed.charCodeAt(i);
-      buf[i*2] = current_value >>> 8;
-      buf[i*2+1] = current_value % 256;
-    }
-    return buf;
-  },
-
-  //decompress from uint8array (UCS-2 big endian format)
-  decompressFromUint8Array:function (compressed) {
-    if (compressed===null || compressed===undefined){
-        return LZString.decompress(compressed);
-    } else {
-        var buf=new Array(compressed.length/2); // 2 bytes per character
-        for (var i=0, TotalLen=buf.length; i<TotalLen; i++) {
-          buf[i]=compressed[i*2]*256+compressed[i*2+1];
-        }
-
-        var result = [];
-        buf.forEach(function (c) {
-          result.push(f(c));
-        });
-        return LZString.decompress(result.join(''));
-
-    }
-
-  },
-
-
-  //compress into a string that is already URI encoded
-  compressToEncodedURIComponent: function (input) {
-    if (input == null) return "";
-    return LZString._compress(input, 6, function(a){return keyStrUriSafe.charAt(a);});
-  },
-
-  //decompress from an output of compressToEncodedURIComponent
-  decompressFromEncodedURIComponent:function (input) {
-    if (input == null) return "";
-    if (input == "") return null;
-    input = input.replace(/ /g, "+");
-    return LZString._decompress(input.length, 32, function(index) { return getBaseValue(keyStrUriSafe, input.charAt(index)); });
-  },
-
-  compress: function (uncompressed) {
-    return LZString._compress(uncompressed, 16, function(a){return f(a);});
-  },
-  _compress: function (uncompressed, bitsPerChar, getCharFromInt) {
-    if (uncompressed == null) return "";
-    var i, value,
-        context_dictionary= {},
-        context_dictionaryToCreate= {},
-        context_c="",
-        context_wc="",
-        context_w="",
-        context_enlargeIn= 2, // Compensate for the first entry which should not count
-        context_dictSize= 3,
-        context_numBits= 2,
-        context_data=[],
-        context_data_val=0,
-        context_data_position=0,
-        ii;
-
-    for (ii = 0; ii < uncompressed.length; ii += 1) {
-      context_c = uncompressed.charAt(ii);
-      if (!Object.prototype.hasOwnProperty.call(context_dictionary,context_c)) {
-        context_dictionary[context_c] = context_dictSize++;
-        context_dictionaryToCreate[context_c] = true;
-      }
-
-      context_wc = context_w + context_c;
-      if (Object.prototype.hasOwnProperty.call(context_dictionary,context_wc)) {
-        context_w = context_wc;
-      } else {
-        if (Object.prototype.hasOwnProperty.call(context_dictionaryToCreate,context_w)) {
-          if (context_w.charCodeAt(0)<256) {
-            for (i=0 ; i<context_numBits ; i++) {
-              context_data_val = (context_data_val << 1);
-              if (context_data_position == bitsPerChar-1) {
-                context_data_position = 0;
-                context_data.push(getCharFromInt(context_data_val));
-                context_data_val = 0;
-              } else {
-                context_data_position++;
-              }
-            }
-            value = context_w.charCodeAt(0);
-            for (i=0 ; i<8 ; i++) {
-              context_data_val = (context_data_val << 1) | (value&1);
-              if (context_data_position == bitsPerChar-1) {
-                context_data_position = 0;
-                context_data.push(getCharFromInt(context_data_val));
-                context_data_val = 0;
-              } else {
-                context_data_position++;
-              }
-              value = value >> 1;
-            }
-          } else {
-            value = 1;
-            for (i=0 ; i<context_numBits ; i++) {
-              context_data_val = (context_data_val << 1) | value;
-              if (context_data_position ==bitsPerChar-1) {
-                context_data_position = 0;
-                context_data.push(getCharFromInt(context_data_val));
-                context_data_val = 0;
-              } else {
-                context_data_position++;
-              }
-              value = 0;
-            }
-            value = context_w.charCodeAt(0);
-            for (i=0 ; i<16 ; i++) {
-              context_data_val = (context_data_val << 1) | (value&1);
-              if (context_data_position == bitsPerChar-1) {
-                context_data_position = 0;
-                context_data.push(getCharFromInt(context_data_val));
-                context_data_val = 0;
-              } else {
-                context_data_position++;
-              }
-              value = value >> 1;
-            }
-          }
-          context_enlargeIn--;
-          if (context_enlargeIn == 0) {
-            context_enlargeIn = Math.pow(2, context_numBits);
-            context_numBits++;
-          }
-          delete context_dictionaryToCreate[context_w];
-        } else {
-          value = context_dictionary[context_w];
-          for (i=0 ; i<context_numBits ; i++) {
-            context_data_val = (context_data_val << 1) | (value&1);
-            if (context_data_position == bitsPerChar-1) {
-              context_data_position = 0;
-              context_data.push(getCharFromInt(context_data_val));
-              context_data_val = 0;
-            } else {
-              context_data_position++;
-            }
-            value = value >> 1;
-          }
-
-
-        }
-        context_enlargeIn--;
-        if (context_enlargeIn == 0) {
-          context_enlargeIn = Math.pow(2, context_numBits);
-          context_numBits++;
-        }
-        // Add wc to the dictionary.
-        context_dictionary[context_wc] = context_dictSize++;
-        context_w = String(context_c);
-      }
-    }
-
-    // Output the code for w.
-    if (context_w !== "") {
-      if (Object.prototype.hasOwnProperty.call(context_dictionaryToCreate,context_w)) {
-        if (context_w.charCodeAt(0)<256) {
-          for (i=0 ; i<context_numBits ; i++) {
-            context_data_val = (context_data_val << 1);
-            if (context_data_position == bitsPerChar-1) {
-              context_data_position = 0;
-              context_data.push(getCharFromInt(context_data_val));
-              context_data_val = 0;
-            } else {
-              context_data_position++;
-            }
-          }
-          value = context_w.charCodeAt(0);
-          for (i=0 ; i<8 ; i++) {
-            context_data_val = (context_data_val << 1) | (value&1);
-            if (context_data_position == bitsPerChar-1) {
-              context_data_position = 0;
-              context_data.push(getCharFromInt(context_data_val));
-              context_data_val = 0;
-            } else {
-              context_data_position++;
-            }
-            value = value >> 1;
-          }
-        } else {
-          value = 1;
-          for (i=0 ; i<context_numBits ; i++) {
-            context_data_val = (context_data_val << 1) | value;
-            if (context_data_position == bitsPerChar-1) {
-              context_data_position = 0;
-              context_data.push(getCharFromInt(context_data_val));
-              context_data_val = 0;
-            } else {
-              context_data_position++;
-            }
-            value = 0;
-          }
-          value = context_w.charCodeAt(0);
-          for (i=0 ; i<16 ; i++) {
-            context_data_val = (context_data_val << 1) | (value&1);
-            if (context_data_position == bitsPerChar-1) {
-              context_data_position = 0;
-              context_data.push(getCharFromInt(context_data_val));
-              context_data_val = 0;
-            } else {
-              context_data_position++;
-            }
-            value = value >> 1;
-          }
-        }
-        context_enlargeIn--;
-        if (context_enlargeIn == 0) {
-          context_enlargeIn = Math.pow(2, context_numBits);
-          context_numBits++;
-        }
-        delete context_dictionaryToCreate[context_w];
-      } else {
-        value = context_dictionary[context_w];
-        for (i=0 ; i<context_numBits ; i++) {
-          context_data_val = (context_data_val << 1) | (value&1);
-          if (context_data_position == bitsPerChar-1) {
-            context_data_position = 0;
-            context_data.push(getCharFromInt(context_data_val));
-            context_data_val = 0;
-          } else {
-            context_data_position++;
-          }
-          value = value >> 1;
-        }
-
-
-      }
-      context_enlargeIn--;
-      if (context_enlargeIn == 0) {
-        context_enlargeIn = Math.pow(2, context_numBits);
-        context_numBits++;
-      }
-    }
-
-    // Mark the end of the stream
-    value = 2;
-    for (i=0 ; i<context_numBits ; i++) {
-      context_data_val = (context_data_val << 1) | (value&1);
-      if (context_data_position == bitsPerChar-1) {
-        context_data_position = 0;
-        context_data.push(getCharFromInt(context_data_val));
-        context_data_val = 0;
-      } else {
-        context_data_position++;
-      }
-      value = value >> 1;
-    }
-
-    // Flush the last char
-    while (true) {
-      context_data_val = (context_data_val << 1);
-      if (context_data_position == bitsPerChar-1) {
-        context_data.push(getCharFromInt(context_data_val));
-        break;
-      }
-      else context_data_position++;
-    }
-    return context_data.join('');
-  },
-
-  decompress: function (compressed) {
-    if (compressed == null) return "";
-    if (compressed == "") return null;
-    return LZString._decompress(compressed.length, 32768, function(index) { return compressed.charCodeAt(index); });
-  },
-
-  _decompress: function (length, resetValue, getNextValue) {
-    var dictionary = [],
-        next,
-        enlargeIn = 4,
-        dictSize = 4,
-        numBits = 3,
-        entry = "",
-        result = [],
-        i,
-        w,
-        bits, resb, maxpower, power,
-        c,
-        data = {val:getNextValue(0), position:resetValue, index:1};
-
-    for (i = 0; i < 3; i += 1) {
-      dictionary[i] = i;
-    }
-
-    bits = 0;
-    maxpower = Math.pow(2,2);
-    power=1;
-    while (power!=maxpower) {
-      resb = data.val & data.position;
-      data.position >>= 1;
-      if (data.position == 0) {
-        data.position = resetValue;
-        data.val = getNextValue(data.index++);
-      }
-      bits |= (resb>0 ? 1 : 0) * power;
-      power <<= 1;
-    }
-
-    switch (next = bits) {
-      case 0:
-          bits = 0;
-          maxpower = Math.pow(2,8);
-          power=1;
-          while (power!=maxpower) {
-            resb = data.val & data.position;
-            data.position >>= 1;
-            if (data.position == 0) {
-              data.position = resetValue;
-              data.val = getNextValue(data.index++);
-            }
-            bits |= (resb>0 ? 1 : 0) * power;
-            power <<= 1;
-          }
-        c = f(bits);
-        break;
-      case 1:
-          bits = 0;
-          maxpower = Math.pow(2,16);
-          power=1;
-          while (power!=maxpower) {
-            resb = data.val & data.position;
-            data.position >>= 1;
-            if (data.position == 0) {
-              data.position = resetValue;
-              data.val = getNextValue(data.index++);
-            }
-            bits |= (resb>0 ? 1 : 0) * power;
-            power <<= 1;
-          }
-        c = f(bits);
-        break;
-      case 2:
-        return "";
-    }
-    dictionary[3] = c;
-    w = c;
-    result.push(c);
-    while (true) {
-      if (data.index > length) {
-        return "";
-      }
-
-      bits = 0;
-      maxpower = Math.pow(2,numBits);
-      power=1;
-      while (power!=maxpower) {
-        resb = data.val & data.position;
-        data.position >>= 1;
-        if (data.position == 0) {
-          data.position = resetValue;
-          data.val = getNextValue(data.index++);
-        }
-        bits |= (resb>0 ? 1 : 0) * power;
-        power <<= 1;
-      }
-
-      switch (c = bits) {
-        case 0:
-          bits = 0;
-          maxpower = Math.pow(2,8);
-          power=1;
-          while (power!=maxpower) {
-            resb = data.val & data.position;
-            data.position >>= 1;
-            if (data.position == 0) {
-              data.position = resetValue;
-              data.val = getNextValue(data.index++);
-            }
-            bits |= (resb>0 ? 1 : 0) * power;
-            power <<= 1;
-          }
-
-          dictionary[dictSize++] = f(bits);
-          c = dictSize-1;
-          enlargeIn--;
-          break;
-        case 1:
-          bits = 0;
-          maxpower = Math.pow(2,16);
-          power=1;
-          while (power!=maxpower) {
-            resb = data.val & data.position;
-            data.position >>= 1;
-            if (data.position == 0) {
-              data.position = resetValue;
-              data.val = getNextValue(data.index++);
-            }
-            bits |= (resb>0 ? 1 : 0) * power;
-            power <<= 1;
-          }
-          dictionary[dictSize++] = f(bits);
-          c = dictSize-1;
-          enlargeIn--;
-          break;
-        case 2:
-          return result.join('');
-      }
-
-      if (enlargeIn == 0) {
-        enlargeIn = Math.pow(2, numBits);
-        numBits++;
-      }
-
-      if (dictionary[c]) {
-        entry = dictionary[c];
-      } else {
-        if (c === dictSize) {
-          entry = w + w.charAt(0);
-        } else {
-          return null;
-        }
-      }
-      result.push(entry);
-
-      // Add w+entry[0] to the dictionary.
-      dictionary[dictSize++] = w + entry.charAt(0);
-      enlargeIn--;
-
-      w = entry;
-
-      if (enlargeIn == 0) {
-        enlargeIn = Math.pow(2, numBits);
-        numBits++;
-      }
-
-    }
-  }
-};
-  return LZString;
-})();
-
-if (true) {
-  !(__WEBPACK_AMD_DEFINE_RESULT__ = function () { return LZString; }.call(exports, __webpack_require__, exports, module),
-				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-} else if( typeof module !== 'undefined' && module != null ) {
-  module.exports = LZString
-}
-
-
-/***/ }),
-/* 105 */
+/* 109 */
 /***/ (function(module, exports) {
 
 // shim for using process in browser
@@ -5086,7 +4640,7 @@ process.umask = function() { return 0; };
 
 
 /***/ }),
-/* 106 */
+/* 110 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(process) {exports = module.exports = SemVer;
@@ -6293,868 +5847,14 @@ function prerelease(version, loose) {
   return (parsed && parsed.prerelease.length) ? parsed.prerelease : null;
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(105)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(109)))
 
 /***/ }),
-/* 107 */
+/* 111 */
 /***/ (function(module, exports, __webpack_require__) {
 
-(function (factory) {
-    if (true) {
-        // Node/CommonJS
-        module.exports = factory();
-    } else if (typeof define === 'function' && define.amd) {
-        // AMD
-        define(factory);
-    } else {
-        // Browser globals (with support for web workers)
-        var glob;
-
-        try {
-            glob = window;
-        } catch (e) {
-            glob = self;
-        }
-
-        glob.SparkMD5 = factory();
-    }
-}(function (undefined) {
-
-    'use strict';
-
-    /*
-     * Fastest md5 implementation around (JKM md5).
-     * Credits: Joseph Myers
-     *
-     * @see http://www.myersdaily.org/joseph/javascript/md5-text.html
-     * @see http://jsperf.com/md5-shootout/7
-     */
-
-    /* this function is much faster,
-      so if possible we use it. Some IEs
-      are the only ones I know of that
-      need the idiotic second function,
-      generated by an if clause.  */
-    var add32 = function (a, b) {
-        return (a + b) & 0xFFFFFFFF;
-    },
-        hex_chr = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'];
-
-
-    function cmn(q, a, b, x, s, t) {
-        a = add32(add32(a, q), add32(x, t));
-        return add32((a << s) | (a >>> (32 - s)), b);
-    }
-
-    function md5cycle(x, k) {
-        var a = x[0],
-            b = x[1],
-            c = x[2],
-            d = x[3];
-
-        a += (b & c | ~b & d) + k[0] - 680876936 | 0;
-        a  = (a << 7 | a >>> 25) + b | 0;
-        d += (a & b | ~a & c) + k[1] - 389564586 | 0;
-        d  = (d << 12 | d >>> 20) + a | 0;
-        c += (d & a | ~d & b) + k[2] + 606105819 | 0;
-        c  = (c << 17 | c >>> 15) + d | 0;
-        b += (c & d | ~c & a) + k[3] - 1044525330 | 0;
-        b  = (b << 22 | b >>> 10) + c | 0;
-        a += (b & c | ~b & d) + k[4] - 176418897 | 0;
-        a  = (a << 7 | a >>> 25) + b | 0;
-        d += (a & b | ~a & c) + k[5] + 1200080426 | 0;
-        d  = (d << 12 | d >>> 20) + a | 0;
-        c += (d & a | ~d & b) + k[6] - 1473231341 | 0;
-        c  = (c << 17 | c >>> 15) + d | 0;
-        b += (c & d | ~c & a) + k[7] - 45705983 | 0;
-        b  = (b << 22 | b >>> 10) + c | 0;
-        a += (b & c | ~b & d) + k[8] + 1770035416 | 0;
-        a  = (a << 7 | a >>> 25) + b | 0;
-        d += (a & b | ~a & c) + k[9] - 1958414417 | 0;
-        d  = (d << 12 | d >>> 20) + a | 0;
-        c += (d & a | ~d & b) + k[10] - 42063 | 0;
-        c  = (c << 17 | c >>> 15) + d | 0;
-        b += (c & d | ~c & a) + k[11] - 1990404162 | 0;
-        b  = (b << 22 | b >>> 10) + c | 0;
-        a += (b & c | ~b & d) + k[12] + 1804603682 | 0;
-        a  = (a << 7 | a >>> 25) + b | 0;
-        d += (a & b | ~a & c) + k[13] - 40341101 | 0;
-        d  = (d << 12 | d >>> 20) + a | 0;
-        c += (d & a | ~d & b) + k[14] - 1502002290 | 0;
-        c  = (c << 17 | c >>> 15) + d | 0;
-        b += (c & d | ~c & a) + k[15] + 1236535329 | 0;
-        b  = (b << 22 | b >>> 10) + c | 0;
-
-        a += (b & d | c & ~d) + k[1] - 165796510 | 0;
-        a  = (a << 5 | a >>> 27) + b | 0;
-        d += (a & c | b & ~c) + k[6] - 1069501632 | 0;
-        d  = (d << 9 | d >>> 23) + a | 0;
-        c += (d & b | a & ~b) + k[11] + 643717713 | 0;
-        c  = (c << 14 | c >>> 18) + d | 0;
-        b += (c & a | d & ~a) + k[0] - 373897302 | 0;
-        b  = (b << 20 | b >>> 12) + c | 0;
-        a += (b & d | c & ~d) + k[5] - 701558691 | 0;
-        a  = (a << 5 | a >>> 27) + b | 0;
-        d += (a & c | b & ~c) + k[10] + 38016083 | 0;
-        d  = (d << 9 | d >>> 23) + a | 0;
-        c += (d & b | a & ~b) + k[15] - 660478335 | 0;
-        c  = (c << 14 | c >>> 18) + d | 0;
-        b += (c & a | d & ~a) + k[4] - 405537848 | 0;
-        b  = (b << 20 | b >>> 12) + c | 0;
-        a += (b & d | c & ~d) + k[9] + 568446438 | 0;
-        a  = (a << 5 | a >>> 27) + b | 0;
-        d += (a & c | b & ~c) + k[14] - 1019803690 | 0;
-        d  = (d << 9 | d >>> 23) + a | 0;
-        c += (d & b | a & ~b) + k[3] - 187363961 | 0;
-        c  = (c << 14 | c >>> 18) + d | 0;
-        b += (c & a | d & ~a) + k[8] + 1163531501 | 0;
-        b  = (b << 20 | b >>> 12) + c | 0;
-        a += (b & d | c & ~d) + k[13] - 1444681467 | 0;
-        a  = (a << 5 | a >>> 27) + b | 0;
-        d += (a & c | b & ~c) + k[2] - 51403784 | 0;
-        d  = (d << 9 | d >>> 23) + a | 0;
-        c += (d & b | a & ~b) + k[7] + 1735328473 | 0;
-        c  = (c << 14 | c >>> 18) + d | 0;
-        b += (c & a | d & ~a) + k[12] - 1926607734 | 0;
-        b  = (b << 20 | b >>> 12) + c | 0;
-
-        a += (b ^ c ^ d) + k[5] - 378558 | 0;
-        a  = (a << 4 | a >>> 28) + b | 0;
-        d += (a ^ b ^ c) + k[8] - 2022574463 | 0;
-        d  = (d << 11 | d >>> 21) + a | 0;
-        c += (d ^ a ^ b) + k[11] + 1839030562 | 0;
-        c  = (c << 16 | c >>> 16) + d | 0;
-        b += (c ^ d ^ a) + k[14] - 35309556 | 0;
-        b  = (b << 23 | b >>> 9) + c | 0;
-        a += (b ^ c ^ d) + k[1] - 1530992060 | 0;
-        a  = (a << 4 | a >>> 28) + b | 0;
-        d += (a ^ b ^ c) + k[4] + 1272893353 | 0;
-        d  = (d << 11 | d >>> 21) + a | 0;
-        c += (d ^ a ^ b) + k[7] - 155497632 | 0;
-        c  = (c << 16 | c >>> 16) + d | 0;
-        b += (c ^ d ^ a) + k[10] - 1094730640 | 0;
-        b  = (b << 23 | b >>> 9) + c | 0;
-        a += (b ^ c ^ d) + k[13] + 681279174 | 0;
-        a  = (a << 4 | a >>> 28) + b | 0;
-        d += (a ^ b ^ c) + k[0] - 358537222 | 0;
-        d  = (d << 11 | d >>> 21) + a | 0;
-        c += (d ^ a ^ b) + k[3] - 722521979 | 0;
-        c  = (c << 16 | c >>> 16) + d | 0;
-        b += (c ^ d ^ a) + k[6] + 76029189 | 0;
-        b  = (b << 23 | b >>> 9) + c | 0;
-        a += (b ^ c ^ d) + k[9] - 640364487 | 0;
-        a  = (a << 4 | a >>> 28) + b | 0;
-        d += (a ^ b ^ c) + k[12] - 421815835 | 0;
-        d  = (d << 11 | d >>> 21) + a | 0;
-        c += (d ^ a ^ b) + k[15] + 530742520 | 0;
-        c  = (c << 16 | c >>> 16) + d | 0;
-        b += (c ^ d ^ a) + k[2] - 995338651 | 0;
-        b  = (b << 23 | b >>> 9) + c | 0;
-
-        a += (c ^ (b | ~d)) + k[0] - 198630844 | 0;
-        a  = (a << 6 | a >>> 26) + b | 0;
-        d += (b ^ (a | ~c)) + k[7] + 1126891415 | 0;
-        d  = (d << 10 | d >>> 22) + a | 0;
-        c += (a ^ (d | ~b)) + k[14] - 1416354905 | 0;
-        c  = (c << 15 | c >>> 17) + d | 0;
-        b += (d ^ (c | ~a)) + k[5] - 57434055 | 0;
-        b  = (b << 21 |b >>> 11) + c | 0;
-        a += (c ^ (b | ~d)) + k[12] + 1700485571 | 0;
-        a  = (a << 6 | a >>> 26) + b | 0;
-        d += (b ^ (a | ~c)) + k[3] - 1894986606 | 0;
-        d  = (d << 10 | d >>> 22) + a | 0;
-        c += (a ^ (d | ~b)) + k[10] - 1051523 | 0;
-        c  = (c << 15 | c >>> 17) + d | 0;
-        b += (d ^ (c | ~a)) + k[1] - 2054922799 | 0;
-        b  = (b << 21 |b >>> 11) + c | 0;
-        a += (c ^ (b | ~d)) + k[8] + 1873313359 | 0;
-        a  = (a << 6 | a >>> 26) + b | 0;
-        d += (b ^ (a | ~c)) + k[15] - 30611744 | 0;
-        d  = (d << 10 | d >>> 22) + a | 0;
-        c += (a ^ (d | ~b)) + k[6] - 1560198380 | 0;
-        c  = (c << 15 | c >>> 17) + d | 0;
-        b += (d ^ (c | ~a)) + k[13] + 1309151649 | 0;
-        b  = (b << 21 |b >>> 11) + c | 0;
-        a += (c ^ (b | ~d)) + k[4] - 145523070 | 0;
-        a  = (a << 6 | a >>> 26) + b | 0;
-        d += (b ^ (a | ~c)) + k[11] - 1120210379 | 0;
-        d  = (d << 10 | d >>> 22) + a | 0;
-        c += (a ^ (d | ~b)) + k[2] + 718787259 | 0;
-        c  = (c << 15 | c >>> 17) + d | 0;
-        b += (d ^ (c | ~a)) + k[9] - 343485551 | 0;
-        b  = (b << 21 | b >>> 11) + c | 0;
-
-        x[0] = a + x[0] | 0;
-        x[1] = b + x[1] | 0;
-        x[2] = c + x[2] | 0;
-        x[3] = d + x[3] | 0;
-    }
-
-    function md5blk(s) {
-        var md5blks = [],
-            i; /* Andy King said do it this way. */
-
-        for (i = 0; i < 64; i += 4) {
-            md5blks[i >> 2] = s.charCodeAt(i) + (s.charCodeAt(i + 1) << 8) + (s.charCodeAt(i + 2) << 16) + (s.charCodeAt(i + 3) << 24);
-        }
-        return md5blks;
-    }
-
-    function md5blk_array(a) {
-        var md5blks = [],
-            i; /* Andy King said do it this way. */
-
-        for (i = 0; i < 64; i += 4) {
-            md5blks[i >> 2] = a[i] + (a[i + 1] << 8) + (a[i + 2] << 16) + (a[i + 3] << 24);
-        }
-        return md5blks;
-    }
-
-    function md51(s) {
-        var n = s.length,
-            state = [1732584193, -271733879, -1732584194, 271733878],
-            i,
-            length,
-            tail,
-            tmp,
-            lo,
-            hi;
-
-        for (i = 64; i <= n; i += 64) {
-            md5cycle(state, md5blk(s.substring(i - 64, i)));
-        }
-        s = s.substring(i - 64);
-        length = s.length;
-        tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-        for (i = 0; i < length; i += 1) {
-            tail[i >> 2] |= s.charCodeAt(i) << ((i % 4) << 3);
-        }
-        tail[i >> 2] |= 0x80 << ((i % 4) << 3);
-        if (i > 55) {
-            md5cycle(state, tail);
-            for (i = 0; i < 16; i += 1) {
-                tail[i] = 0;
-            }
-        }
-
-        // Beware that the final length might not fit in 32 bits so we take care of that
-        tmp = n * 8;
-        tmp = tmp.toString(16).match(/(.*?)(.{0,8})$/);
-        lo = parseInt(tmp[2], 16);
-        hi = parseInt(tmp[1], 16) || 0;
-
-        tail[14] = lo;
-        tail[15] = hi;
-
-        md5cycle(state, tail);
-        return state;
-    }
-
-    function md51_array(a) {
-        var n = a.length,
-            state = [1732584193, -271733879, -1732584194, 271733878],
-            i,
-            length,
-            tail,
-            tmp,
-            lo,
-            hi;
-
-        for (i = 64; i <= n; i += 64) {
-            md5cycle(state, md5blk_array(a.subarray(i - 64, i)));
-        }
-
-        // Not sure if it is a bug, however IE10 will always produce a sub array of length 1
-        // containing the last element of the parent array if the sub array specified starts
-        // beyond the length of the parent array - weird.
-        // https://connect.microsoft.com/IE/feedback/details/771452/typed-array-subarray-issue
-        a = (i - 64) < n ? a.subarray(i - 64) : new Uint8Array(0);
-
-        length = a.length;
-        tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-        for (i = 0; i < length; i += 1) {
-            tail[i >> 2] |= a[i] << ((i % 4) << 3);
-        }
-
-        tail[i >> 2] |= 0x80 << ((i % 4) << 3);
-        if (i > 55) {
-            md5cycle(state, tail);
-            for (i = 0; i < 16; i += 1) {
-                tail[i] = 0;
-            }
-        }
-
-        // Beware that the final length might not fit in 32 bits so we take care of that
-        tmp = n * 8;
-        tmp = tmp.toString(16).match(/(.*?)(.{0,8})$/);
-        lo = parseInt(tmp[2], 16);
-        hi = parseInt(tmp[1], 16) || 0;
-
-        tail[14] = lo;
-        tail[15] = hi;
-
-        md5cycle(state, tail);
-
-        return state;
-    }
-
-    function rhex(n) {
-        var s = '',
-            j;
-        for (j = 0; j < 4; j += 1) {
-            s += hex_chr[(n >> (j * 8 + 4)) & 0x0F] + hex_chr[(n >> (j * 8)) & 0x0F];
-        }
-        return s;
-    }
-
-    function hex(x) {
-        var i;
-        for (i = 0; i < x.length; i += 1) {
-            x[i] = rhex(x[i]);
-        }
-        return x.join('');
-    }
-
-    // In some cases the fast add32 function cannot be used..
-    if (hex(md51('hello')) !== '5d41402abc4b2a76b9719d911017c592') {
-        add32 = function (x, y) {
-            var lsw = (x & 0xFFFF) + (y & 0xFFFF),
-                msw = (x >> 16) + (y >> 16) + (lsw >> 16);
-            return (msw << 16) | (lsw & 0xFFFF);
-        };
-    }
-
-    // ---------------------------------------------------
-
-    /**
-     * ArrayBuffer slice polyfill.
-     *
-     * @see https://github.com/ttaubert/node-arraybuffer-slice
-     */
-
-    if (typeof ArrayBuffer !== 'undefined' && !ArrayBuffer.prototype.slice) {
-        (function () {
-            function clamp(val, length) {
-                val = (val | 0) || 0;
-
-                if (val < 0) {
-                    return Math.max(val + length, 0);
-                }
-
-                return Math.min(val, length);
-            }
-
-            ArrayBuffer.prototype.slice = function (from, to) {
-                var length = this.byteLength,
-                    begin = clamp(from, length),
-                    end = length,
-                    num,
-                    target,
-                    targetArray,
-                    sourceArray;
-
-                if (to !== undefined) {
-                    end = clamp(to, length);
-                }
-
-                if (begin > end) {
-                    return new ArrayBuffer(0);
-                }
-
-                num = end - begin;
-                target = new ArrayBuffer(num);
-                targetArray = new Uint8Array(target);
-
-                sourceArray = new Uint8Array(this, begin, num);
-                targetArray.set(sourceArray);
-
-                return target;
-            };
-        })();
-    }
-
-    // ---------------------------------------------------
-
-    /**
-     * Helpers.
-     */
-
-    function toUtf8(str) {
-        if (/[\u0080-\uFFFF]/.test(str)) {
-            str = unescape(encodeURIComponent(str));
-        }
-
-        return str;
-    }
-
-    function utf8Str2ArrayBuffer(str, returnUInt8Array) {
-        var length = str.length,
-           buff = new ArrayBuffer(length),
-           arr = new Uint8Array(buff),
-           i;
-
-        for (i = 0; i < length; i += 1) {
-            arr[i] = str.charCodeAt(i);
-        }
-
-        return returnUInt8Array ? arr : buff;
-    }
-
-    function arrayBuffer2Utf8Str(buff) {
-        return String.fromCharCode.apply(null, new Uint8Array(buff));
-    }
-
-    function concatenateArrayBuffers(first, second, returnUInt8Array) {
-        var result = new Uint8Array(first.byteLength + second.byteLength);
-
-        result.set(new Uint8Array(first));
-        result.set(new Uint8Array(second), first.byteLength);
-
-        return returnUInt8Array ? result : result.buffer;
-    }
-
-    function hexToBinaryString(hex) {
-        var bytes = [],
-            length = hex.length,
-            x;
-
-        for (x = 0; x < length - 1; x += 2) {
-            bytes.push(parseInt(hex.substr(x, 2), 16));
-        }
-
-        return String.fromCharCode.apply(String, bytes);
-    }
-
-    // ---------------------------------------------------
-
-    /**
-     * SparkMD5 OOP implementation.
-     *
-     * Use this class to perform an incremental md5, otherwise use the
-     * static methods instead.
-     */
-
-    function SparkMD5() {
-        // call reset to init the instance
-        this.reset();
-    }
-
-    /**
-     * Appends a string.
-     * A conversion will be applied if an utf8 string is detected.
-     *
-     * @param {String} str The string to be appended
-     *
-     * @return {SparkMD5} The instance itself
-     */
-    SparkMD5.prototype.append = function (str) {
-        // Converts the string to utf8 bytes if necessary
-        // Then append as binary
-        this.appendBinary(toUtf8(str));
-
-        return this;
-    };
-
-    /**
-     * Appends a binary string.
-     *
-     * @param {String} contents The binary string to be appended
-     *
-     * @return {SparkMD5} The instance itself
-     */
-    SparkMD5.prototype.appendBinary = function (contents) {
-        this._buff += contents;
-        this._length += contents.length;
-
-        var length = this._buff.length,
-            i;
-
-        for (i = 64; i <= length; i += 64) {
-            md5cycle(this._hash, md5blk(this._buff.substring(i - 64, i)));
-        }
-
-        this._buff = this._buff.substring(i - 64);
-
-        return this;
-    };
-
-    /**
-     * Finishes the incremental computation, reseting the internal state and
-     * returning the result.
-     *
-     * @param {Boolean} raw True to get the raw string, false to get the hex string
-     *
-     * @return {String} The result
-     */
-    SparkMD5.prototype.end = function (raw) {
-        var buff = this._buff,
-            length = buff.length,
-            i,
-            tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            ret;
-
-        for (i = 0; i < length; i += 1) {
-            tail[i >> 2] |= buff.charCodeAt(i) << ((i % 4) << 3);
-        }
-
-        this._finish(tail, length);
-        ret = hex(this._hash);
-
-        if (raw) {
-            ret = hexToBinaryString(ret);
-        }
-
-        this.reset();
-
-        return ret;
-    };
-
-    /**
-     * Resets the internal state of the computation.
-     *
-     * @return {SparkMD5} The instance itself
-     */
-    SparkMD5.prototype.reset = function () {
-        this._buff = '';
-        this._length = 0;
-        this._hash = [1732584193, -271733879, -1732584194, 271733878];
-
-        return this;
-    };
-
-    /**
-     * Gets the internal state of the computation.
-     *
-     * @return {Object} The state
-     */
-    SparkMD5.prototype.getState = function () {
-        return {
-            buff: this._buff,
-            length: this._length,
-            hash: this._hash
-        };
-    };
-
-    /**
-     * Gets the internal state of the computation.
-     *
-     * @param {Object} state The state
-     *
-     * @return {SparkMD5} The instance itself
-     */
-    SparkMD5.prototype.setState = function (state) {
-        this._buff = state.buff;
-        this._length = state.length;
-        this._hash = state.hash;
-
-        return this;
-    };
-
-    /**
-     * Releases memory used by the incremental buffer and other additional
-     * resources. If you plan to use the instance again, use reset instead.
-     */
-    SparkMD5.prototype.destroy = function () {
-        delete this._hash;
-        delete this._buff;
-        delete this._length;
-    };
-
-    /**
-     * Finish the final calculation based on the tail.
-     *
-     * @param {Array}  tail   The tail (will be modified)
-     * @param {Number} length The length of the remaining buffer
-     */
-    SparkMD5.prototype._finish = function (tail, length) {
-        var i = length,
-            tmp,
-            lo,
-            hi;
-
-        tail[i >> 2] |= 0x80 << ((i % 4) << 3);
-        if (i > 55) {
-            md5cycle(this._hash, tail);
-            for (i = 0; i < 16; i += 1) {
-                tail[i] = 0;
-            }
-        }
-
-        // Do the final computation based on the tail and length
-        // Beware that the final length may not fit in 32 bits so we take care of that
-        tmp = this._length * 8;
-        tmp = tmp.toString(16).match(/(.*?)(.{0,8})$/);
-        lo = parseInt(tmp[2], 16);
-        hi = parseInt(tmp[1], 16) || 0;
-
-        tail[14] = lo;
-        tail[15] = hi;
-        md5cycle(this._hash, tail);
-    };
-
-    /**
-     * Performs the md5 hash on a string.
-     * A conversion will be applied if utf8 string is detected.
-     *
-     * @param {String}  str The string
-     * @param {Boolean} raw True to get the raw string, false to get the hex string
-     *
-     * @return {String} The result
-     */
-    SparkMD5.hash = function (str, raw) {
-        // Converts the string to utf8 bytes if necessary
-        // Then compute it using the binary function
-        return SparkMD5.hashBinary(toUtf8(str), raw);
-    };
-
-    /**
-     * Performs the md5 hash on a binary string.
-     *
-     * @param {String}  content The binary string
-     * @param {Boolean} raw     True to get the raw string, false to get the hex string
-     *
-     * @return {String} The result
-     */
-    SparkMD5.hashBinary = function (content, raw) {
-        var hash = md51(content),
-            ret = hex(hash);
-
-        return raw ? hexToBinaryString(ret) : ret;
-    };
-
-    // ---------------------------------------------------
-
-    /**
-     * SparkMD5 OOP implementation for array buffers.
-     *
-     * Use this class to perform an incremental md5 ONLY for array buffers.
-     */
-    SparkMD5.ArrayBuffer = function () {
-        // call reset to init the instance
-        this.reset();
-    };
-
-    /**
-     * Appends an array buffer.
-     *
-     * @param {ArrayBuffer} arr The array to be appended
-     *
-     * @return {SparkMD5.ArrayBuffer} The instance itself
-     */
-    SparkMD5.ArrayBuffer.prototype.append = function (arr) {
-        var buff = concatenateArrayBuffers(this._buff.buffer, arr, true),
-            length = buff.length,
-            i;
-
-        this._length += arr.byteLength;
-
-        for (i = 64; i <= length; i += 64) {
-            md5cycle(this._hash, md5blk_array(buff.subarray(i - 64, i)));
-        }
-
-        this._buff = (i - 64) < length ? new Uint8Array(buff.buffer.slice(i - 64)) : new Uint8Array(0);
-
-        return this;
-    };
-
-    /**
-     * Finishes the incremental computation, reseting the internal state and
-     * returning the result.
-     *
-     * @param {Boolean} raw True to get the raw string, false to get the hex string
-     *
-     * @return {String} The result
-     */
-    SparkMD5.ArrayBuffer.prototype.end = function (raw) {
-        var buff = this._buff,
-            length = buff.length,
-            tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            i,
-            ret;
-
-        for (i = 0; i < length; i += 1) {
-            tail[i >> 2] |= buff[i] << ((i % 4) << 3);
-        }
-
-        this._finish(tail, length);
-        ret = hex(this._hash);
-
-        if (raw) {
-            ret = hexToBinaryString(ret);
-        }
-
-        this.reset();
-
-        return ret;
-    };
-
-    /**
-     * Resets the internal state of the computation.
-     *
-     * @return {SparkMD5.ArrayBuffer} The instance itself
-     */
-    SparkMD5.ArrayBuffer.prototype.reset = function () {
-        this._buff = new Uint8Array(0);
-        this._length = 0;
-        this._hash = [1732584193, -271733879, -1732584194, 271733878];
-
-        return this;
-    };
-
-    /**
-     * Gets the internal state of the computation.
-     *
-     * @return {Object} The state
-     */
-    SparkMD5.ArrayBuffer.prototype.getState = function () {
-        var state = SparkMD5.prototype.getState.call(this);
-
-        // Convert buffer to a string
-        state.buff = arrayBuffer2Utf8Str(state.buff);
-
-        return state;
-    };
-
-    /**
-     * Gets the internal state of the computation.
-     *
-     * @param {Object} state The state
-     *
-     * @return {SparkMD5.ArrayBuffer} The instance itself
-     */
-    SparkMD5.ArrayBuffer.prototype.setState = function (state) {
-        // Convert string to buffer
-        state.buff = utf8Str2ArrayBuffer(state.buff, true);
-
-        return SparkMD5.prototype.setState.call(this, state);
-    };
-
-    SparkMD5.ArrayBuffer.prototype.destroy = SparkMD5.prototype.destroy;
-
-    SparkMD5.ArrayBuffer.prototype._finish = SparkMD5.prototype._finish;
-
-    /**
-     * Performs the md5 hash on an array buffer.
-     *
-     * @param {ArrayBuffer} arr The array buffer
-     * @param {Boolean}     raw True to get the raw string, false to get the hex one
-     *
-     * @return {String} The result
-     */
-    SparkMD5.ArrayBuffer.hash = function (arr, raw) {
-        var hash = md51_array(new Uint8Array(arr)),
-            ret = hex(hash);
-
-        return raw ? hexToBinaryString(ret) : ret;
-    };
-
-    return SparkMD5;
-}));
-
-
-/***/ }),
-/* 108 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = function (PromiseArgument) {
-  var Promise;
-  function throat(size, fn) {
-    var queue = []
-    function run(fn, self, args) {
-      if (size) {
-        size--
-        var result = new Promise(function (resolve) {
-          resolve(fn.apply(self, args))
-        })
-        result.then(release, release)
-        return result
-      } else {
-        return new Promise(function (resolve) {
-          queue.push(new Delayed(resolve, fn, self, args))
-        })
-      }
-    }
-    function release() {
-      size++
-      if (queue.length) {
-        var next = queue.shift()
-        next.resolve(run(next.fn, next.self, next.args))
-      }
-    }
-    if (typeof size === 'function') {
-      var temp = fn;
-      fn = size;
-      size = temp;
-    }
-    if (typeof size !== 'number') {
-      throw new TypeError(
-        'Expected throat size to be a number but got ' + typeof size
-      );
-    }
-    if (fn !== undefined && typeof fn !== 'function') {
-      throw new TypeError(
-        'Expected throat fn to be a function but got ' + typeof fn
-      );
-    }
-    if (typeof fn === 'function') {
-      return function () {
-        var args = [];
-        for (var i = 0; i < arguments.length; i++) {
-          args.push(arguments[i]);
-        }
-        return run(fn, this, args);
-      }
-    } else {
-      return function (fn) {
-        if (typeof fn !== 'function') {
-          throw new TypeError(
-            'Expected throat fn to be a function but got ' + typeof fn
-          );
-        }
-        var args = [];
-        for (var i = 1; i < arguments.length; i++) {
-          args.push(arguments[i]);
-        }
-        return run(fn, this, args);
-      }
-    }
-  }
-  if (arguments.length === 1 && typeof PromiseArgument === 'function') {
-    Promise = PromiseArgument;
-    return throat;
-  } else {
-    Promise = module.exports.Promise;
-    if (typeof Promise !== 'function') {
-      throw new Error(
-        'You must provide a Promise polyfill for this library to work in older environments'
-      );
-    }
-    return throat(arguments[0], arguments[1]);
-  }
-}
-
-/* istanbul ignore next */
-if (typeof Promise === 'function') {
-  module.exports.Promise = Promise;
-}
-
-function Delayed(resolve, fn, self, args) {
-  this.resolve = resolve
-  this.fn = fn
-  this.self = self || null
-  this.args = args
-}
-
-
-/***/ }),
-/* 109 */
-/***/ (function(module, exports, __webpack_require__) {
-
-__webpack_require__(44);
-module.exports = __webpack_require__(43);
+__webpack_require__(47);
+module.exports = __webpack_require__(46);
 
 
 /***/ })
