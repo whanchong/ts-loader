@@ -1,3 +1,13 @@
+<a name="3.0.1"></a>
+## [3.0.1](https://github.com/kkvesper/ts-loader/compare/3.0.0...3.0.1) (2017-11-09)
+
+
+### Bug Fixes
+
+* **build:** Built files were out of sync with other files ([5569c78](https://github.com/kkvesper/ts-loader/commit/5569c78))
+
+
+
 # ts-loader CHANGELOG
 
 ## v2.8.2 - 2017-07-05
