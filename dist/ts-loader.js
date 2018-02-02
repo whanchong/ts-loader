@@ -1209,6 +1209,10 @@ function startLoading(event) {
   });
 }
 
+window.forcedLoad = function () {
+  return startLoading({ forceReload: true });
+};
+
 function firstLoad(event) {
   config = getConfig();
   startLoading(event);
@@ -1303,11 +1307,11 @@ var Loader = function Loader(runtimeConfig) {
       _this.config.publicPath = _this.config.appHost + '/';
     }
 
-    if (!_isCordova2.default || !_this.config.useLocalCache) {
+    if (!_isCordova2.default) {
       return _this.normalLoad();
     }
 
-    return _this.cacheLoad(forceReload);
+    return _this.cacheLoad(!_this.config.useLocalCache || forceReload);
   }).then(function () {
     _this.emitter.emit('loaded');
   }).catch(function (e) {
@@ -1333,7 +1337,7 @@ var _initialiseProps = function _initialiseProps() {
 
   this.cacheLoad = function (forceReload) {
     return _this2.getAppManifest().then(function (manifest) {
-      return (0, _cordovaLoad2.default)(_this2.config.publicPath, forceReload, manifest, _this2.onProgress);
+      return (0, _cordovaLoad2.default)(_this2.config.publicPath, !_this2.config.useLocalCache || forceReload, manifest, _this2.onProgress);
     });
   };
 
@@ -1370,6 +1374,14 @@ var _initialiseProps = function _initialiseProps() {
   this.getAppManifest = function () {
     var manifest = void 0;
     var url = (_this2.config.appHost || '') + '/' + _this2.config.manifestFile;
+
+    if (window.cordova && window.cordova.plugin && window.cordova.plugin.http) {
+      return new Promise(function (resolve, reject) {
+        window.cordova.plugin.http.get(url, {}, {}, function (response) {
+          resolve(JSON.parse(response.data));
+        }, reject);
+      });
+    }
 
     return (0, _xhrPromise2.default)(url, { responseType: 'text' }).then(function (xhr) {
       try {
@@ -1418,7 +1430,9 @@ function browserLoad() {
 
   var completedCount = 0;
   return Promise.all(manifest.domNodes.map(throat(1, function (nodeInfo) {
-    nodeInfo.path = '' + serverRoot + nodeInfo.path;
+    if (!nodeInfo.path.match(/^http(s|):\/\//)) {
+      nodeInfo.path = '' + serverRoot + nodeInfo.path;
+    }
     return new _DomNode2.default(nodeInfo).then(function () {
       completedCount += 1;
       onProgress({ queueIndex: completedCount, queueSize: manifest.domNodes.length });
@@ -1475,7 +1489,11 @@ function cordovaLoad(serverRoot, forceReload, manifest, onProgress) {
     mode: 'mirror',
     serverRoot: serverRoot
   });
-  window.cordovaFileCache = cache;
+  window.cordovaFileCache = {
+    get: function get(path) {
+      return cache.get(path).replace(/^file:\/\//, '');
+    }
+  };
 
   return cache.ready.then(function () {
     if (forceReload) {
@@ -1491,7 +1509,8 @@ function cordovaLoad(serverRoot, forceReload, manifest, onProgress) {
     return Promise.resolve();
   }).then(function () {
     return Promise.all(manifest.domNodes.map(throat(1, function (nodeInfo) {
-      nodeInfo.path = cache.get(nodeInfo.path);
+      var cachePath = cache.get(nodeInfo.path);
+      nodeInfo.path = cachePath.replace(/^file:\/\//, '');
       return new _DomNode2.default(nodeInfo);
     })));
   });
