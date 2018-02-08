@@ -1,3 +1,13 @@
+<a name="3.1.0"></a>
+# [3.1.0](https://github.com/kkvesper/ts-loader/compare/3.0.1...3.1.0) (2018-02-08)
+
+
+### Features
+
+* **wkwebview:** upgrade to work with wkwebview plugins ([0ed5a7f](https://github.com/kkvesper/ts-loader/commit/0ed5a7f))
+
+
+
 <a name="3.0.1"></a>
 ## [3.0.1](https://github.com/kkvesper/ts-loader/compare/3.0.0...3.0.1) (2017-11-09)
 
