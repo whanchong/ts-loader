@@ -1,3 +1,13 @@
+<a name="3.1.1"></a>
+## [3.1.1](https://github.com/kkvesper/ts-loader/compare/3.1.0...3.1.1) (2018-03-05)
+
+
+### Features
+
+* **isTablet:** support separate tablet app host ([872df43](https://github.com/kkvesper/ts-loader/commit/872df43))
+
+
+
 <a name="3.1.0"></a>
 # [3.1.0](https://github.com/kkvesper/ts-loader/compare/3.0.1...3.1.0) (2018-02-08)
 
