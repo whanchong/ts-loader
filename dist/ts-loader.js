@@ -1300,19 +1300,22 @@ var Loader = function Loader(runtimeConfig) {
 
   window.cordovaFileCache = undefined;
 
-  this.getAppHost(this.config).then(function (returnedAppConfig) {
-    _this.config.appHost = returnedAppConfig.appHost || _this.config.appHost || '';
+  this.config.appHost = this.config.appHost || '';
+  this.config.appHostTablet = this.config.appHostTablet || '';
 
-    if (!_this.config.publicPath && _this.config.appHost) {
-      _this.config.publicPath = _this.config.appHost + '/';
+  if (!this.config.publicPath && this.config.appHost) {
+    this.config.publicPath = this.config.appHost + '/';
+    // in cordova this is set via uk.co.workingedge.phonegap.plugin.istablet cordova plugin
+    if (window.isTablet) {
+      this.config.publicPath = this.config.appHostTablet + '/';
     }
+  }
 
-    if (!_isCordova2.default) {
-      return _this.normalLoad();
-    }
+  if (!_isCordova2.default) {
+    return this.normalLoad();
+  }
 
-    return _this.cacheLoad(!_this.config.useLocalCache || forceReload);
-  }).then(function () {
+  this.cacheLoad(!this.config.useLocalCache || forceReload).then(function () {
     _this.emitter.emit('loaded');
   }).catch(function (e) {
     console.error('loader error', e);
@@ -1347,13 +1350,6 @@ var _initialiseProps = function _initialiseProps() {
     });
   };
 
-  this.getAppHost = function (config) {
-    if (!_isCordova2.default || config.ignoreAppSettings || typeof window.plugins === 'undefined' || !window.plugins.appPreferences) {
-      return Promise.resolve('');
-    }
-    return Promise.resolve(window.plugins.appPreferences.fetch('appHost'));
-  };
-
   this.validateAppManifest = function (manifest) {
     if (!manifest) {
       throw new Error('Could not load manifest. Please check your connection and try again.');
@@ -1373,7 +1369,7 @@ var _initialiseProps = function _initialiseProps() {
 
   this.getAppManifest = function () {
     var manifest = void 0;
-    var url = (_this2.config.appHost || '') + '/' + _this2.config.manifestFile;
+    var url = '' + (_this2.config.publicPath || '') + _this2.config.manifestFile;
 
     if (window.cordova && window.cordova.plugin && window.cordova.plugin.http) {
       return new Promise(function (resolve, reject) {
